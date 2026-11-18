@@ -87,3 +87,27 @@ def test_checkout_discards_untrusted_extras(examples):
 def test_login_password_not_in_repr(examples):
     model = auth.LoginRequest.model_validate(examples["LoginRequest"])
     assert examples["LoginRequest"]["password"] not in repr(model)
+
+
+@pytest.mark.parametrize(
+    "url", ["javascript:alert(1)", "https://evil.invalid/", "https://wa.me/1?text=x"]
+)
+def test_checkout_response_rejects_invalid_destinations(url):
+    with pytest.raises(ValidationError):
+        checkout.CheckoutResponse.model_validate(
+            {
+                "items": [
+                    {
+                        "productId": "64aabbccddeeff0011223344",
+                        "name": "Demonstração",
+                        "sizeBR": 40,
+                        "quantity": 1,
+                        "unitPriceCents": 100,
+                        "lineTotalCents": 100,
+                    }
+                ],
+                "totalCents": 100,
+                "currency": "BRL",
+                "waUrl": url,
+            }
+        )

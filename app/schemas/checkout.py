@@ -38,4 +38,10 @@ class CheckoutResponse(WireModel):
     items: Annotated[list[CheckoutLine], Field(min_length=1, max_length=50)]
     totalCents: Cents
     currency: Literal["BRL"]
-    waUrl: StrictStr
+    waUrl: Annotated[
+        StrictStr,
+        Field(
+            pattern=r"^https://wa\.me/[1-9][0-9]{7,14}\?text=.+$",
+            json_schema_extra={"format": "uri"},
+        ),
+    ]

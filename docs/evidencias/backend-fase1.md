@@ -38,3 +38,9 @@ reproduziu falha e passou após aplicar asyncio.timeout no adaptador (não só n
 Diagnóstico: uv run python -m scripts.check_connections retornou código 2 por falta de opt-in,
 como esperado. Os probes futuros são somente leitura (Auth health/SELECT id, Mongo ping, Redis ping).
 Não comprovam RLS, escrita, índices, autenticação de usuário ou persistência real.
+
+Revisão independente da fundação (Superpowers requesting-code-review, somente leitura):
+dois achados P2, ambos corrigidos com teste RED→GREEN. CheckoutResponse.waUrl aceitava string
+arbitrária; agora aplica o padrão wa.me do contrato (três negativos). CSRF não ASCII gerava
+TypeError/500 em compare_digest; agora rejeita com 403 antes da comparação. Nenhum outro
+problema material apontado; a revisão não alegou testes reais de bancos.
