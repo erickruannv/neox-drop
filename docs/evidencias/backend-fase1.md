@@ -12,3 +12,11 @@ Contrato, fixtures canônicas, referência e arquivos UI permanecem intactos.
 T001: uv lock --check e imports FastAPI/Jinja2/Supabase/PyMongo/Upstash passaram em
 Python 3.13.18; dependências diretas exatas e transitivas em uv.lock.
 A tentativa inicial uv add --pin falhou (opção inexistente); corrigida para --bounds exact.
+
+T005/T007: modelos wire públicos/admin separados, tipos monetários/inteiros estritos,
+PATCH parcial com remoção explícita de model3dUrl, extras monetários descartados no checkout.
+Serializar campos opcionais com model_dump(mode='json', exclude_unset=True).
+24 testes de contrato passaram; antes da implementação falharam pela ausência de app.schemas.
+Os 15 exemplos canônicos passam por JSON Schema e Pydantic sem alterar payloads/contrato.
+Negativos incluem campos extras/segredos, estoque público, null, IDs/operadores e valores inválidos.
+Pydantic/httpx promovidos a dependências diretas porque a aplicação os importa.
