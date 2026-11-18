@@ -1,0 +1,6 @@
+flowchart LR
+  S[("Supabase Auth + PostgreSQL<br/>identidade, perfil, contato")] --> API["FastAPI"]
+  M[("MongoDB<br/>preco, estoque, produto ativo")] -->|"fonte da verdade"| API
+  R[("Redis<br/>cache / recente descartavel")] -.-> API
+  B["Carrinho no navegador<br/>IDs / tamanho / quantidade"] --> API
+  API --> W["WhatsApp<br/>solicitacao"]

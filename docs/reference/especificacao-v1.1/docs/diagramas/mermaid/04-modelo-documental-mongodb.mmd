@@ -1,0 +1,7 @@
+flowchart TB
+  P[("products<br/>ObjectId | sku | slug | name | priceCents | active")] 
+  P -->|"1..N embutidos"| S["sizes[]<br/>sizeBR | stock"]
+  P -->|"1..N embutidas"| G["galleryUrls[]"]
+  P -->|"0..1 embutido"| F["featured<br/>enabled | order | backgroundHex | accentHex"]
+  P -->|"0..1 flexivel"| A["attributes {}"]
+  P -.->|"referencia opcional"| M["model3dUrl (.glb externo)"]

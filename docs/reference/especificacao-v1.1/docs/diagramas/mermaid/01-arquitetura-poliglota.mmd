@@ -1,0 +1,7 @@
+flowchart LR
+  B["Navegador<br/>Visitante / Administrador"] -->|HTTPS| API["FastAPI + Jinja2 + JS"]
+  API -->|Identidade| AUTH["Supabase Auth"]
+  API -->|Perfis e contato| PG[("PostgreSQL / Supabase")]
+  API -->|Catalogo| MG[("MongoDB products")]
+  API -->|Recentes e cache| RE[("Redis Upstash")]
+  API -.->|Gera URL| W["WhatsApp wa.me"]

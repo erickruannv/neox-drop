@@ -1,0 +1,33 @@
+digraph conceptual {
+	bgcolor="#F8F6F1" fontcolor="#192326" fontname="DejaVu Sans" fontsize=22 label="02  |  Modelo conceitual — Dominios e responsabilidades" labelloc=t nodesep=0.44 pad=0.32 rankdir=LR ranksep=0.83 splines=spline
+	node [color="#D2D0CA" fillcolor=white fontcolor="#161719" fontname="DejaVu Sans" fontsize=11 margin="0.18,0.13" penwidth=1.2 shape=box style="rounded,filled"]
+	edge [arrowsize=0.7 color="#81868A" fontcolor="#63676C" fontname="DejaVu Sans" fontsize=10 penwidth=1.4]
+	admin [label="ADMINISTRADOR
+Usuario com permissao" color="#D2D0CA" fillcolor="#DCECF3" fontcolor="#161719"]
+	identity [label="IDENTIDADE
+Conta autenticada" color="#D2D0CA" fillcolor="#EAF1F6" fontcolor="#161719"]
+	store [label="CONFIGURACAO DA LOJA
+Contato de pedidos" color="#D2D0CA" fillcolor="#EAF1F6" fontcolor="#161719"]
+	product [label="PRODUTO
+Tenis + preco + fotos" color="#D2D0CA" fillcolor="#E7F2EA" fontcolor="#161719"]
+	size [label="NUMERACAO
+Tamanho e estoque" color="#D2D0CA" fillcolor="#E7F2EA" fontcolor="#161719"]
+	featured [label="DESTAQUE
+Ordem, fundo e 3D" color="#D2D0CA" fillcolor="#E7F2EA" fontcolor="#161719"]
+	visitor [label="VISITANTE ANONIMO
+Cookie aleatorio" color="#D2D0CA" fillcolor="#FFE0E5" fontcolor="#161719"]
+	recent [label="HISTORICO RECENTE
+Ate 5 referencias temporarias" color="#D2D0CA" fillcolor="#FFE0E5" fontcolor="#161719"]
+	identity -> admin [label="1 : 0..1
+perfil autorizado"]
+	product -> size [label="1 : 1..N
+embutido"]
+	product -> featured [label="1 : 0..1
+embutido"]
+	visitor -> recent [label="1 : 0..1
+temporario"]
+	recent -> product [label="0..5 refs por ID
+sem FK" color="#F43F5E" style=dashed]
+	admin -> product [label="gerencia via API" style=dashed]
+	admin -> store [label="configura via API" style=dashed]
+}

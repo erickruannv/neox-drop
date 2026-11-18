@@ -1,0 +1,2225 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "NEOX drop — contratos compartilhados",
+    "version": "1.1.0",
+    "description": "Derivado da referência V1.1 intacta. Especificação de planejamento, não API implementada. Complementos operacionais rastreados em docs/VALIDACAO-V1.1.md. Exemplos são fictícios."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Mesma origem da aplicação Jinja2; sem destino externo fixado."
+    }
+  ],
+  "tags": [
+    {
+      "name": "Público"
+    },
+    {
+      "name": "Admin"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Saúde mínima sem segredos",
+        "description": "Status ok/degraded/unavailable. Redis fora: degraded com 200; dependência primária indisponível: unavailable com 503. Não listar credenciais, hosts ou URIs.",
+        "tags": [
+          "Público"
+        ],
+        "security": [],
+        "x-requirements": [
+          "RNF-04"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Serviço indisponível",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products": {
+      "get": {
+        "operationId": "listProducts",
+        "summary": "Catálogo público paginado",
+        "description": "Somente active=true. sizeBR e stock>0 no mesmo subdocumento ($elemMatch). Sort estável com id como desempate; recent=createdAt decrescente. Sem cache de listagem persistente.",
+        "tags": [
+          "Público"
+        ],
+        "security": [],
+        "x-requirements": [
+          "RF-05",
+          "RF-14"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/q"
+          },
+          {
+            "$ref": "#/components/parameters/brand"
+          },
+          {
+            "$ref": "#/components/parameters/category"
+          },
+          {
+            "$ref": "#/components/parameters/sizeBR"
+          },
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products/{slug}": {
+      "get": {
+        "operationId": "getProduct",
+        "summary": "Detalhe público ativo",
+        "description": "Não registra recente automaticamente; frontend emite POST /api/recent uma vez por visita. Projeção pública, sem estoque bruto nem BSON.",
+        "tags": [
+          "Público"
+        ],
+        "security": [],
+        "x-requirements": [
+          "RF-06",
+          "RF-10"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Slug"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/featured": {
+      "get": {
+        "operationId": "listFeatured",
+        "summary": "Destaques ativos ordenados",
+        "description": "Somente active=true e featured.enabled=true, featured.order ascendente e id como desempate. ProductDetail garante texto, slug, imagem e fallback junto do modelo/cores. Usar identidade padrão se featured opcional ausente fora desta rota.",
+        "tags": [
+          "Público"
+        ],
+        "security": [],
+        "x-requirements": [
+          "RF-12",
+          "RF-16"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeaturedList"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recent": {
+      "get": {
+        "operationId": "listRecent",
+        "summary": "Últimos cinco produtos únicos",
+        "description": "Sem cookie ou Redis indisponível: 200 {items:[]}. Preservar ordem e revalidar active no MongoDB; MongoDB indisponível não pode ser mascarado como dado válido.",
+        "tags": [
+          "Público"
+        ],
+        "security": [],
+        "x-requirements": [
+          "RF-09"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecentList"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "registerRecent",
+        "summary": "Registrar uma visita",
+        "description": "Validar ObjectId e produto ativo antes de LREM/LPUSH/LTRIM/EXPIRE. Cookie opaco HttpOnly/SameSite=Lax/Secure em HTTPS. Redis fora: 204 best-effort, sem afirmar persistência.",
+        "tags": [
+          "Público"
+        ],
+        "security": [],
+        "x-requirements": [
+          "RF-09"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Csrf"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Sem corpo; cookie neox_visitor quando necessário."
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecentRequest"
+              },
+              "example": {
+                "productId": "64aabbccddeeff0011223344"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/checkout": {
+      "post": {
+        "operationId": "checkout",
+        "summary": "Revalidar carrinho e gerar link WhatsApp",
+        "description": "Reconsulta MongoDB sem cache; não reserva/decrementa estoque nem persiste pedido. Agrupar produto+tamanho antes de verificar máximo 10/estoque. 422 CART_ITEM_UNAVAILABLE para item inválido; 503 STORE_WHATSAPP_NOT_CONFIGURED para contato ausente. Limite operacional: 50 linhas e 8000 caracteres na mensagem; excedido: 422 CHECKOUT_LIMIT_EXCEEDED. Preços extras do cliente são ignorados, jamais espalhados em queries/modelos. UI compara resumo do servidor e exige novo clique se preço mudou; não há PRICE_CHANGED confiável sem enviar preço antigo.",
+        "tags": [
+          "Público"
+        ],
+        "security": [],
+        "x-requirements": [
+          "RF-07",
+          "RF-08"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Csrf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutRequest"
+              },
+              "example": {
+                "items": [
+                  {
+                    "productId": "64aabbccddeeff0011223344",
+                    "sizeBR": 40,
+                    "quantity": 2
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/auth/login": {
+      "post": {
+        "operationId": "login",
+        "summary": "Estabelecer sessão somente de admin ativo",
+        "description": "Credenciais inválidas: 401 AUTHENTICATION_FAILED genérico; autenticado sem perfil admin ativo: 403 FORBIDDEN. Cookies HttpOnly; não retornar access/refresh token no JSON. CSRF e Origin também no login.",
+        "tags": [
+          "Admin"
+        ],
+        "security": [],
+        "x-requirements": [
+          "RF-01",
+          "RF-02"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Csrf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProfile"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              },
+              "example": {
+                "email": "admin@example.invalid",
+                "password": "EXEMPLO_NAO_UTILIZAR"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "summary": "Encerrar sessão admin",
+        "description": "Encerrar sessão admin",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "AdminSession": []
+          }
+        ],
+        "x-requirements": [
+          "RF-01"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Csrf"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Limpar cookies e invalidar sessão/refresh; sem corpo."
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/me": {
+      "get": {
+        "operationId": "getAdminProfile",
+        "summary": "Perfil mínimo do administrador ativo",
+        "description": "Perfil mínimo do administrador ativo",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "AdminSession": []
+          }
+        ],
+        "x-requirements": [
+          "RF-02"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProfile"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/products": {
+      "get": {
+        "operationId": "listAdminProducts",
+        "summary": "Produtos ativos e inativos",
+        "description": "O filtro active é opcional; omitir inclui ambos. Retorna estoque somente nesta projeção administrativa; validar perfil ativo em cada request.",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "AdminSession": []
+          }
+        ],
+        "x-requirements": [
+          "RF-03",
+          "RF-04"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/q"
+          },
+          {
+            "$ref": "#/components/parameters/brand"
+          },
+          {
+            "$ref": "#/components/parameters/category"
+          },
+          {
+            "$ref": "#/components/parameters/sizeBR"
+          },
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/active"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProductList"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createProduct",
+        "summary": "Criar produto no MongoDB",
+        "description": "id/datas/operadores não são campos graváveis; preço é permitido somente após autorização admin. Retorno completo inclui id, como diagrama 06; catálogo atualiza na próxima consulta.",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "AdminSession": []
+          }
+        ],
+        "x-requirements": [
+          "RF-03",
+          "RF-05"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Csrf"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProduct"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductCreate"
+              },
+              "example": {
+                "sku": "NEOX-DEMO-001",
+                "slug": "runner-demo",
+                "name": "Runner Demonstração",
+                "brand": "Marca Demonstrativa",
+                "category": "Performance",
+                "priceCents": 15990,
+                "mainImageUrl": "/static/images/demo.webp",
+                "active": true,
+                "description": "Produto fictício para contrato",
+                "currency": "BRL",
+                "galleryUrls": [
+                  "/static/images/demo.webp"
+                ],
+                "colorName": "Preto/Lima",
+                "sizes": [
+                  {
+                    "sizeBR": 39,
+                    "stock": 3
+                  },
+                  {
+                    "sizeBR": 40,
+                    "stock": 6
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/products/{id}": {
+      "patch": {
+        "operationId": "updateProduct",
+        "summary": "Atualização parcial e invalidação de cache",
+        "description": "PATCH de objetos featured é merge de campos; sizes/galleryUrls substituem array completo após validação; null remove apenas model3dUrl. id/datas imutáveis. Duplicação sizeBR é 422. Invalidate sempre cache:product:{id}.",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "AdminSession": []
+          }
+        ],
+        "x-requirements": [
+          "RF-04",
+          "RF-10",
+          "RF-16"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProductId"
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProduct"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductPatch"
+              },
+              "example": {
+                "priceCents": 17990
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deactivateProduct",
+        "summary": "Soft-delete, sem apagar documento",
+        "description": "Soft-delete, sem apagar documento",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "AdminSession": []
+          }
+        ],
+        "x-requirements": [
+          "RF-04",
+          "RF-10"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProductId"
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "active=false e invalidação; sem corpo. Produto já inativo continua 204."
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProductId": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{24}$"
+      },
+      "SizeStock": {
+        "type": "object",
+        "properties": {
+          "sizeBR": {
+            "type": "integer",
+            "minimum": 15,
+            "maximum": 60
+          },
+          "stock": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "sizeBR",
+          "stock"
+        ],
+        "additionalProperties": false
+      },
+      "Featured": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "backgroundHex": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "accentHex": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          }
+        },
+        "required": [
+          "enabled",
+          "order",
+          "backgroundHex",
+          "accentHex"
+        ],
+        "additionalProperties": false
+      },
+      "ProductSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ProductId"
+          },
+          "sku": {
+            "type": "string",
+            "minLength": 1
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "brand": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1
+          },
+          "priceCents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mainImageUrl": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$",
+            "description": "Caminho próprio ou HTTPS de origem permitida; validar allowlist no servidor, sem fetch arbitrário."
+          },
+          "sizesAvailable": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 15,
+              "maximum": 60
+            },
+            "uniqueItems": true
+          },
+          "active": {
+            "const": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "sku",
+          "slug",
+          "name",
+          "brand",
+          "category",
+          "priceCents",
+          "mainImageUrl",
+          "sizesAvailable",
+          "active"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "id": "64aabbccddeeff0011223344",
+            "sku": "NEOX-DEMO-001",
+            "slug": "runner-demo",
+            "name": "Runner Demonstração",
+            "brand": "Marca Demonstrativa",
+            "category": "Performance",
+            "priceCents": 15990,
+            "mainImageUrl": "/static/images/demo.webp",
+            "sizesAvailable": [
+              39,
+              40
+            ],
+            "active": true
+          }
+        ]
+      },
+      "ProductDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ProductId"
+          },
+          "sku": {
+            "type": "string",
+            "minLength": 1
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "brand": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1
+          },
+          "priceCents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mainImageUrl": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$",
+            "description": "Caminho próprio ou HTTPS de origem permitida; validar allowlist no servidor, sem fetch arbitrário."
+          },
+          "sizesAvailable": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 15,
+              "maximum": 60
+            },
+            "uniqueItems": true
+          },
+          "active": {
+            "const": true,
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "const": "BRL"
+          },
+          "galleryUrls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$",
+              "description": "Caminho próprio ou HTTPS de origem permitida; validar allowlist no servidor, sem fetch arbitrário."
+            },
+            "minItems": 1
+          },
+          "model3dUrl": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$",
+            "description": "Caminho próprio ou HTTPS de origem permitida; validar allowlist no servidor, sem fetch arbitrário."
+          },
+          "colorName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "featured": {
+            "$ref": "#/components/schemas/Featured"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "id",
+          "sku",
+          "slug",
+          "name",
+          "brand",
+          "category",
+          "priceCents",
+          "mainImageUrl",
+          "sizesAvailable",
+          "active",
+          "description",
+          "currency",
+          "galleryUrls",
+          "colorName"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "id": "64aabbccddeeff0011223344",
+            "sku": "NEOX-DEMO-001",
+            "slug": "runner-demo",
+            "name": "Runner Demonstração",
+            "brand": "Marca Demonstrativa",
+            "category": "Performance",
+            "priceCents": 15990,
+            "mainImageUrl": "/static/images/demo.webp",
+            "sizesAvailable": [
+              39,
+              40
+            ],
+            "active": true,
+            "description": "Produto fictício para contrato",
+            "currency": "BRL",
+            "galleryUrls": [
+              "/static/images/demo.webp"
+            ],
+            "colorName": "Preto/Lima"
+          }
+        ]
+      },
+      "ProductCreate": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "minLength": 1
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "brand": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1
+          },
+          "priceCents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mainImageUrl": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$",
+            "description": "Caminho próprio ou HTTPS de origem permitida; validar allowlist no servidor, sem fetch arbitrário."
+          },
+          "description": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "const": "BRL"
+          },
+          "galleryUrls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$",
+              "description": "Caminho próprio ou HTTPS de origem permitida; validar allowlist no servidor, sem fetch arbitrário."
+            },
+            "minItems": 1
+          },
+          "model3dUrl": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$",
+            "description": "Caminho próprio ou HTTPS de origem permitida; validar allowlist no servidor, sem fetch arbitrário."
+          },
+          "colorName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "featured": {
+            "$ref": "#/components/schemas/Featured"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "sizes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SizeStock"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "sku",
+          "slug",
+          "name",
+          "brand",
+          "category",
+          "priceCents",
+          "mainImageUrl",
+          "description",
+          "currency",
+          "galleryUrls",
+          "colorName",
+          "active",
+          "sizes"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "sku": "NEOX-DEMO-001",
+            "slug": "runner-demo",
+            "name": "Runner Demonstração",
+            "brand": "Marca Demonstrativa",
+            "category": "Performance",
+            "priceCents": 15990,
+            "mainImageUrl": "/static/images/demo.webp",
+            "active": true,
+            "description": "Produto fictício para contrato",
+            "currency": "BRL",
+            "galleryUrls": [
+              "/static/images/demo.webp"
+            ],
+            "colorName": "Preto/Lima",
+            "sizes": [
+              {
+                "sizeBR": 39,
+                "stock": 3
+              },
+              {
+                "sizeBR": 40,
+                "stock": 6
+              }
+            ]
+          }
+        ]
+      },
+      "ProductPatch": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "minLength": 1
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "brand": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1
+          },
+          "priceCents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mainImageUrl": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$",
+            "description": "Caminho próprio ou HTTPS de origem permitida; validar allowlist no servidor, sem fetch arbitrário."
+          },
+          "description": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "const": "BRL"
+          },
+          "galleryUrls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$",
+              "description": "Caminho próprio ou HTTPS de origem permitida; validar allowlist no servidor, sem fetch arbitrário."
+            },
+            "minItems": 1
+          },
+          "model3dUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$",
+                "description": "Caminho próprio ou HTTPS de origem permitida; validar allowlist no servidor, sem fetch arbitrário."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "colorName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "featured": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "order": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "backgroundHex": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              "accentHex": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              }
+            },
+            "additionalProperties": false,
+            "minProperties": 1
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "sizes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SizeStock"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [],
+        "additionalProperties": false,
+        "minProperties": 1,
+        "examples": [
+          {
+            "priceCents": 17990
+          }
+        ]
+      },
+      "AdminProduct": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "minLength": 1
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "brand": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1
+          },
+          "priceCents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mainImageUrl": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$",
+            "description": "Caminho próprio ou HTTPS de origem permitida; validar allowlist no servidor, sem fetch arbitrário."
+          },
+          "description": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "const": "BRL"
+          },
+          "galleryUrls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$",
+              "description": "Caminho próprio ou HTTPS de origem permitida; validar allowlist no servidor, sem fetch arbitrário."
+            },
+            "minItems": 1
+          },
+          "model3dUrl": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$",
+            "description": "Caminho próprio ou HTTPS de origem permitida; validar allowlist no servidor, sem fetch arbitrário."
+          },
+          "colorName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "featured": {
+            "$ref": "#/components/schemas/Featured"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "sizes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SizeStock"
+            },
+            "minItems": 1
+          },
+          "id": {
+            "$ref": "#/components/schemas/ProductId",
+            "readOnly": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "sku",
+          "slug",
+          "name",
+          "brand",
+          "category",
+          "priceCents",
+          "mainImageUrl",
+          "description",
+          "currency",
+          "galleryUrls",
+          "colorName",
+          "active",
+          "sizes",
+          "id",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "sku": "NEOX-DEMO-001",
+            "slug": "runner-demo",
+            "name": "Runner Demonstração",
+            "brand": "Marca Demonstrativa",
+            "category": "Performance",
+            "priceCents": 15990,
+            "mainImageUrl": "/static/images/demo.webp",
+            "active": true,
+            "description": "Produto fictício para contrato",
+            "currency": "BRL",
+            "galleryUrls": [
+              "/static/images/demo.webp"
+            ],
+            "colorName": "Preto/Lima",
+            "sizes": [
+              {
+                "sizeBR": 39,
+                "stock": 3
+              },
+              {
+                "sizeBR": 40,
+                "stock": 6
+              }
+            ],
+            "id": "64aabbccddeeff0011223344",
+            "createdAt": "2026-11-18T00:00:00Z",
+            "updatedAt": "2026-11-18T00:00:00Z"
+          }
+        ]
+      },
+      "AdminProfile": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "const": "admin"
+          },
+          "isActive": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "userId",
+          "displayName",
+          "role",
+          "isActive"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "userId": "00000000-0000-4000-8000-000000000001",
+            "displayName": "Administrador de demonstração",
+            "role": "admin",
+            "isActive": true
+          }
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "email": "admin@example.invalid",
+            "password": "EXEMPLO_NAO_UTILIZAR"
+          }
+        ]
+      },
+      "RecentRequest": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "$ref": "#/components/schemas/ProductId"
+          }
+        },
+        "required": [
+          "productId"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "productId": "64aabbccddeeff0011223344"
+          }
+        ]
+      },
+      "CartItem": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "$ref": "#/components/schemas/ProductId"
+          },
+          "sizeBR": {
+            "type": "integer",
+            "minimum": 15,
+            "maximum": 60
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          }
+        },
+        "required": [
+          "productId",
+          "sizeBR",
+          "quantity"
+        ],
+        "additionalProperties": true
+      },
+      "CheckoutRequest": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartItem"
+            },
+            "minItems": 1,
+            "maxItems": 50
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": true,
+        "examples": [
+          {
+            "items": [
+              {
+                "productId": "64aabbccddeeff0011223344",
+                "sizeBR": 40,
+                "quantity": 2
+              }
+            ]
+          }
+        ]
+      },
+      "CheckoutLine": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "$ref": "#/components/schemas/ProductId"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sizeBR": {
+            "type": "integer",
+            "minimum": 15,
+            "maximum": 60
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "unitPriceCents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lineTotalCents": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "productId",
+          "name",
+          "sizeBR",
+          "quantity",
+          "unitPriceCents",
+          "lineTotalCents"
+        ],
+        "additionalProperties": false
+      },
+      "ErrorDetail": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "minLength": 1
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1
+              },
+              "details": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "details"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "error": {
+              "code": "VALIDATION_ERROR",
+              "message": "Revise os campos informados.",
+              "details": []
+            }
+          }
+        ]
+      },
+      "Health": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded",
+              "unavailable"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "status": "ok"
+          }
+        ]
+      },
+      "CheckoutResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CheckoutLine"
+            },
+            "minItems": 1,
+            "maxItems": 50
+          },
+          "totalCents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "currency": {
+            "type": "string",
+            "const": "BRL"
+          },
+          "waUrl": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://wa\\.me/[1-9][0-9]{7,14}\\?text=.+$"
+          }
+        },
+        "required": [
+          "items",
+          "totalCents",
+          "currency",
+          "waUrl"
+        ],
+        "additionalProperties": false
+      },
+      "ProductList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductSummary"
+            },
+            "maxItems": 24
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 24
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "limit",
+          "total"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "items": [
+              {
+                "id": "64aabbccddeeff0011223344",
+                "sku": "NEOX-DEMO-001",
+                "slug": "runner-demo",
+                "name": "Runner Demonstração",
+                "brand": "Marca Demonstrativa",
+                "category": "Performance",
+                "priceCents": 15990,
+                "mainImageUrl": "/static/images/demo.webp",
+                "sizesAvailable": [
+                  39,
+                  40
+                ],
+                "active": true
+              }
+            ],
+            "page": 1,
+            "limit": 12,
+            "total": 1
+          }
+        ]
+      },
+      "AdminProductList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminProduct"
+            },
+            "maxItems": 24
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 24
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "limit",
+          "total"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "items": [
+              {
+                "sku": "NEOX-DEMO-001",
+                "slug": "runner-demo",
+                "name": "Runner Demonstração",
+                "brand": "Marca Demonstrativa",
+                "category": "Performance",
+                "priceCents": 15990,
+                "mainImageUrl": "/static/images/demo.webp",
+                "active": true,
+                "description": "Produto fictício para contrato",
+                "currency": "BRL",
+                "galleryUrls": [
+                  "/static/images/demo.webp"
+                ],
+                "colorName": "Preto/Lima",
+                "sizes": [
+                  {
+                    "sizeBR": 39,
+                    "stock": 3
+                  },
+                  {
+                    "sizeBR": 40,
+                    "stock": 6
+                  }
+                ],
+                "id": "64aabbccddeeff0011223344",
+                "createdAt": "2026-11-18T00:00:00Z",
+                "updatedAt": "2026-11-18T00:00:00Z"
+              }
+            ],
+            "page": 1,
+            "limit": 12,
+            "total": 1
+          }
+        ]
+      },
+      "FeaturedList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductDetail"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "items": []
+          }
+        ]
+      },
+      "RecentList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductSummary"
+            },
+            "maxItems": 5
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "items": []
+          }
+        ]
+      }
+    },
+    "parameters": {
+      "Slug": {
+        "name": "slug",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "ProductId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/ProductId"
+        }
+      },
+      "Csrf": {
+        "name": "X-CSRF-Token",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Obtido do contexto Jinja2; validar contra cookie/token assinado e sessão. Rotacionar no login/logout."
+      },
+      "q": {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "maxLength": 100
+        }
+      },
+      "brand": {
+        "name": "brand",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "maxLength": 120
+        }
+      },
+      "category": {
+        "name": "category",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "maxLength": 120
+        }
+      },
+      "sizeBR": {
+        "name": "sizeBR",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 15,
+          "maximum": 60
+        }
+      },
+      "sort": {
+        "name": "sort",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "recent",
+            "price_asc",
+            "price_desc"
+          ],
+          "default": "recent"
+        }
+      },
+      "page": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      },
+      "limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 24,
+          "default": 12
+        }
+      },
+      "active": {
+        "name": "active",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        },
+        "description": "Admin: omitir inclui ativos e inativos."
+      }
+    },
+    "responses": {
+      "Error400": {
+        "description": "JSON/formato inválido",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error401": {
+        "description": "Não autenticado / credenciais inválidas",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error403": {
+        "description": "Sem permissão / CSRF / Origin inválido",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error404": {
+        "description": "Produto não encontrado ou inativo",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error409": {
+        "description": "SKU/slug duplicado ou conflito",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error422": {
+        "description": "Validação / indisponibilidade de item",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error429": {
+        "description": "Rate limit",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        },
+        "headers": {
+          "Retry-After": {
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Segundos para nova tentativa."
+          }
+        }
+      },
+      "Error503": {
+        "description": "Dependência primária/configuração indisponível",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "AdminSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "neox_admin_session",
+        "description": "Sessão HttpOnly validada com Supabase get_user e perfil admin ativo. Refresh apenas cookie HttpOnly neox_admin_refresh; nunca localStorage."
+      }
+    }
+  },
+  "x-source": "docs/reference/especificacao-v1.1/docs/04-contratos-api.md",
+  "x-status": "ready-for-contract-review-no-implementation"
+}

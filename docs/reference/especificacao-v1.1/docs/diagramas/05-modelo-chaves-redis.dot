@@ -1,0 +1,27 @@
+digraph redis {
+	bgcolor="#F8F6F1" fontcolor="#192326" fontname="DejaVu Sans" fontsize=22 label="05  |  Redis — Estruturas, chaves e expiracao" labelloc=t nodesep=0.44 pad=0.32 rankdir=LR ranksep=0.83 splines=spline
+	node [color="#D2D0CA" fillcolor=white fontcolor="#161719" fontname="DejaVu Sans" fontsize=11 margin="0.18,0.13" penwidth=1.2 shape=box style="rounded,filled"]
+	edge [arrowsize=0.7 color="#81868A" fontcolor="#63676C" fontname="DejaVu Sans" fontsize=10 penwidth=1.4]
+	visitor [label="Cookie anonimo
+ID aleatorio opaco" color="#D2D0CA" fillcolor="#DCECF3" fontcolor="#161719"]
+	list [label="LIST
+recent:visitor:{id}
+LREM • LPUSH • LTRIM • EXPIRE
+5 IDs unicos • TTL = 7 dias" color="#F43F5E" fillcolor="#FFE0E5" fontcolor="#161719"]
+	ids [label="IDs dos produtos
+Mais recente → mais antigo" color="#D2D0CA" fillcolor=white fontcolor="#161719"]
+	cache [label="STRING / JSON
+cache:product:{id}
+Projecao publica do produto
+TTL = 300 segundos" color="#F43F5E" fillcolor="#FFE0E5" fontcolor="#161719"]
+	mongo [label="MongoDB
+Fonte da verdade do catalogo" color="#D2D0CA" fillcolor="#E7F2EA" fontcolor="#161719"]
+	api [label="FastAPI
+Ler, gravar, invalidar" color="#D2D0CA" fillcolor=white fontcolor="#161719"]
+	visitor -> api [label="consulta de produto"]
+	api -> list [label="atualiza recentes"]
+	list -> ids [label="LRANGE 0 4"]
+	api -> cache [label="GET / SETEX / DEL"]
+	cache -> mongo [label="cache miss → consultar
+edicao → invalidar" color="#F43F5E"]
+}

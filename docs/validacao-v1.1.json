@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-18",
+  "reference_hashes_passed": 75,
+  "consolidated_sections_equal": 23,
+  "svg_xml_valid": 9,
+  "pdf_pages_read": 10,
+  "pdf_rendered_pages": 10,
+  "pdf_pages_visually_reviewed": [
+    4,
+    5,
+    6
+  ],
+  "diagrams_png_visually_reviewed": 9,
+  "visual_references_reviewed": 6,
+  "openapi_operations": 14,
+  "openapi_schemas": 22,
+  "examples_validated": 15,
+  "negative_schema_cases": 11,
+  "tasks": 32,
+  "task_owners": {
+    "Codex": 18,
+    "Claude": 13,
+    "Humano": 1
+  },
+  "task_dependencies_acyclic": true,
+  "authorized_existing_docs_changed": [
+    "README.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "docs/PREPARACAO.md",
+    ".specify/memory/constitution.md",
+    "docs/contracts/README.md"
+  ],
+  "other_baseline_files_unchanged": 471,
+  "no_application_implementation": true,
+  "no_db_scripts_executed": true,
+  "technical_contract_status": "ready-for-parallel-development-after-authorization",
+  "not_proven": [
+    "runtime integrations",
+    "RLS enforcement in a live database",
+    "3D GLB/licensing",
+    "UI behavior/contrast",
+    "deployment"
+  ],
+  "active_document_links_valid": 14,
+  "spec_kit_prerequisites_valid": true
+}

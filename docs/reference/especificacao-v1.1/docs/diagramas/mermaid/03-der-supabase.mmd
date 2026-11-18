@@ -1,0 +1,20 @@
+erDiagram
+  AUTH_USERS ||--o| ADMIN_PROFILES : "user_id PK/FK"
+  AUTH_USERS {
+    uuid id PK
+    string email
+  }
+  ADMIN_PROFILES {
+    uuid user_id PK,FK
+    string display_name
+    string role
+    boolean is_active
+    datetime created_at
+    datetime updated_at
+  }
+  STORE_SETTINGS {
+    int id PK
+    string store_name
+    string whatsapp_e164_digits
+    datetime updated_at
+  }

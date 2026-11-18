@@ -1,0 +1,20 @@
+sequenceDiagram
+  actor Admin
+  participant F as Frontend admin
+  participant API as FastAPI
+  participant S as Supabase Auth + PostgreSQL
+  participant M as MongoDB
+  participant R as Redis
+  participant C as Catalogo publico
+  Admin->>F: Preenche formulario
+  F->>API: POST /api/admin/products
+  API->>S: Verifica sessao e admin ativo
+  S-->>API: Permissao valida
+  API->>M: Insere produto (schema e indice unico)
+  M-->>API: ID do produto
+  API->>R: Invalida cache relacionado (se houver)
+  API-->>F: 201 + ID
+  C->>API: GET /api/products
+  API->>M: Busca produtos ativos
+  M-->>API: Produto novo
+  API-->>C: Catalogo atualizado

@@ -1,0 +1,6 @@
+flowchart LR
+  V["cookie id anonimo"] --> API["FastAPI"]
+  API -->|"LREM / LPUSH / LTRIM / EXPIRE"| L[("LIST recent:visitor:{id}<br/>ate 5 itens, TTL 7 dias")]
+  API -->|"GET / SETEX / DEL"| C[("STRING cache:product:{id}<br/>TTL 300 s")]
+  API -->|"fonte da verdade"| M[("MongoDB")]
+  C -.->|"cache miss / invalidacao"| M

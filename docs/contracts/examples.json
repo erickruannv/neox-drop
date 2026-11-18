@@ -1,0 +1,192 @@
+{
+  "ProductSummary": {
+    "id": "64aabbccddeeff0011223344",
+    "sku": "NEOX-DEMO-001",
+    "slug": "runner-demo",
+    "name": "Runner Demonstração",
+    "brand": "Marca Demonstrativa",
+    "category": "Performance",
+    "priceCents": 15990,
+    "mainImageUrl": "/static/images/demo.webp",
+    "sizesAvailable": [
+      39,
+      40
+    ],
+    "active": true
+  },
+  "ProductDetail": {
+    "id": "64aabbccddeeff0011223344",
+    "sku": "NEOX-DEMO-001",
+    "slug": "runner-demo",
+    "name": "Runner Demonstração",
+    "brand": "Marca Demonstrativa",
+    "category": "Performance",
+    "priceCents": 15990,
+    "mainImageUrl": "/static/images/demo.webp",
+    "sizesAvailable": [
+      39,
+      40
+    ],
+    "active": true,
+    "description": "Produto fictício para contrato",
+    "currency": "BRL",
+    "galleryUrls": [
+      "/static/images/demo.webp"
+    ],
+    "colorName": "Preto/Lima"
+  },
+  "ProductCreate": {
+    "sku": "NEOX-DEMO-001",
+    "slug": "runner-demo",
+    "name": "Runner Demonstração",
+    "brand": "Marca Demonstrativa",
+    "category": "Performance",
+    "priceCents": 15990,
+    "mainImageUrl": "/static/images/demo.webp",
+    "active": true,
+    "description": "Produto fictício para contrato",
+    "currency": "BRL",
+    "galleryUrls": [
+      "/static/images/demo.webp"
+    ],
+    "colorName": "Preto/Lima",
+    "sizes": [
+      {
+        "sizeBR": 39,
+        "stock": 3
+      },
+      {
+        "sizeBR": 40,
+        "stock": 6
+      }
+    ]
+  },
+  "ProductPatch": {
+    "priceCents": 17990
+  },
+  "AdminProduct": {
+    "sku": "NEOX-DEMO-001",
+    "slug": "runner-demo",
+    "name": "Runner Demonstração",
+    "brand": "Marca Demonstrativa",
+    "category": "Performance",
+    "priceCents": 15990,
+    "mainImageUrl": "/static/images/demo.webp",
+    "active": true,
+    "description": "Produto fictício para contrato",
+    "currency": "BRL",
+    "galleryUrls": [
+      "/static/images/demo.webp"
+    ],
+    "colorName": "Preto/Lima",
+    "sizes": [
+      {
+        "sizeBR": 39,
+        "stock": 3
+      },
+      {
+        "sizeBR": 40,
+        "stock": 6
+      }
+    ],
+    "id": "64aabbccddeeff0011223344",
+    "createdAt": "2026-11-18T00:00:00Z",
+    "updatedAt": "2026-11-18T00:00:00Z"
+  },
+  "AdminProfile": {
+    "userId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Administrador de demonstração",
+    "role": "admin",
+    "isActive": true
+  },
+  "LoginRequest": {
+    "email": "admin@example.invalid",
+    "password": "EXEMPLO_NAO_UTILIZAR"
+  },
+  "RecentRequest": {
+    "productId": "64aabbccddeeff0011223344"
+  },
+  "CheckoutRequest": {
+    "items": [
+      {
+        "productId": "64aabbccddeeff0011223344",
+        "sizeBR": 40,
+        "quantity": 2
+      }
+    ]
+  },
+  "ProductList": {
+    "items": [
+      {
+        "id": "64aabbccddeeff0011223344",
+        "sku": "NEOX-DEMO-001",
+        "slug": "runner-demo",
+        "name": "Runner Demonstração",
+        "brand": "Marca Demonstrativa",
+        "category": "Performance",
+        "priceCents": 15990,
+        "mainImageUrl": "/static/images/demo.webp",
+        "sizesAvailable": [
+          39,
+          40
+        ],
+        "active": true
+      }
+    ],
+    "page": 1,
+    "limit": 12,
+    "total": 1
+  },
+  "AdminProductList": {
+    "items": [
+      {
+        "sku": "NEOX-DEMO-001",
+        "slug": "runner-demo",
+        "name": "Runner Demonstração",
+        "brand": "Marca Demonstrativa",
+        "category": "Performance",
+        "priceCents": 15990,
+        "mainImageUrl": "/static/images/demo.webp",
+        "active": true,
+        "description": "Produto fictício para contrato",
+        "currency": "BRL",
+        "galleryUrls": [
+          "/static/images/demo.webp"
+        ],
+        "colorName": "Preto/Lima",
+        "sizes": [
+          {
+            "sizeBR": 39,
+            "stock": 3
+          },
+          {
+            "sizeBR": 40,
+            "stock": 6
+          }
+        ],
+        "id": "64aabbccddeeff0011223344",
+        "createdAt": "2026-11-18T00:00:00Z",
+        "updatedAt": "2026-11-18T00:00:00Z"
+      }
+    ],
+    "page": 1,
+    "limit": 12,
+    "total": 1
+  },
+  "FeaturedList": {
+    "items": []
+  },
+  "RecentList": {
+    "items": []
+  },
+  "Health": {
+    "status": "ok"
+  },
+  "Error": {
+    "error": {
+      "code": "VALIDATION_ERROR",
+      "message": "Revise os campos informados.",
+      "details": []
+    }
+  }
+}
