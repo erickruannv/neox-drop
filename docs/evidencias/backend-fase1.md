@@ -20,3 +20,10 @@ Serializar campos opcionais com model_dump(mode='json', exclude_unset=True).
 Os 15 exemplos canônicos passam por JSON Schema e Pydantic sem alterar payloads/contrato.
 Negativos incluem campos extras/segredos, estoque público, null, IDs/operadores e valores inválidos.
 Pydantic/httpx promovidos a dependências diretas porque a aplicação os importa.
+
+T004 (configuração): .env.example sem credenciais; env local/test, segredos/URIs com repr
+mascarado, opt-in de conexões somente em test, limites/timeouts positivos e TTLs normativos.
+11 testes de configuração passaram, incluindo leitura da .env.example. O teste encontrou
+Literal[int] sem coerção de string para os TTLs; corrigido com inteiro e limites iguais.
+Erros HTTP, JSON malformado, validação e exceções usam envelope seguro, sem input/stacktrace.
+Suite parcial desta etapa: 51 testes passaram; ruff check e format --check passaram.
