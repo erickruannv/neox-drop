@@ -27,3 +27,14 @@ mascarado, opt-in de conexões somente em test, limites/timeouts positivos e TTL
 Literal[int] sem coerção de string para os TTLs; corrigido com inteiro e limites iguais.
 Erros HTTP, JSON malformado, validação e exceções usam envelope seguro, sem input/stacktrace.
 Suite parcial desta etapa: 51 testes passaram; ruff check e format --check passaram.
+
+T006: context managers assíncronos com clientes isolados por uso/request e fechamento garantido.
+Supabase sem sessão persistente/refresh automático e HTTP com timeout; MongoDB async com
+seleção/conexão/operação limitadas; Redis sem telemetria/retry e com deadline do adaptador.
+8 testes de adaptadores passaram: opt-in obrigatório, isolamento Auth, cleanup inclusive erro,
+parametrização, deadline e sanitização. Nenhum servidor externo foi contatado.
+O primeiro teste de deadline Redis ficou esperando, foi interrompido e recebeu watchdog de teste;
+reproduziu falha e passou após aplicar asyncio.timeout no adaptador (não só no health).
+Diagnóstico: uv run python -m scripts.check_connections retornou código 2 por falta de opt-in,
+como esperado. Os probes futuros são somente leitura (Auth health/SELECT id, Mongo ping, Redis ping).
+Não comprovam RLS, escrita, índices, autenticação de usuário ou persistência real.

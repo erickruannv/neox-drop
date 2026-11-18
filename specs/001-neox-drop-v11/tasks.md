@@ -14,7 +14,7 @@
 - [ ] T003 Codex: Criar composição FastAPI e registro de routers/loaders (sem editar templates) em `app/main.py, app/api/pages.py`. Origem: F-01. Depende: T001.
 - [ ] T004 Codex: Configurar env/segredos, erros seguros, timeouts e limites/rate-limit parametrizados em `app/core/config.py, app/core/security.py, app/core/exceptions.py, .env.example`. Origem: F-02,S-01. Depende: T001.
 - [x] T005 Codex: Mapear wire schemas exatamente ao OpenAPI e projeções pública/admin em `app/schemas/product.py, app/schemas/auth.py, app/schemas/checkout.py`. Origem: DB-DIAG-04. Depende: T001.
-- [ ] T006 Codex: Preparar adaptadores por request e checagem de conexões somente teste em `app/db/supabase.py, app/db/mongodb.py, app/db/redis.py, scripts/check_connections.py`. Origem: F-02. Depende: T004.
+- [x] T006 Codex: Preparar adaptadores por request e checagem de conexões somente teste em `app/db/supabase.py, app/db/mongodb.py, app/db/redis.py, scripts/check_connections.py`. Origem: F-02. Depende: T004.
 - [x] T007 Codex: Adicionar testes de contrato com fixtures canônicas e negativos, incluindo sem segredos em `tests/contract/test_openapi.py, tests/conftest.py`. Origem: F-01,DB-DIAG-04. Depende: T005.
 ## Phase 3: US1 — Admin e primeira fatia (P0)
 
