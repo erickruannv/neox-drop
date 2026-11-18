@@ -1,13 +1,13 @@
 # Tasks: NEOX drop V1.1
 
 **Input**: spec.md, plan.md, research.md, data-model.md e contratos canônicos em docs/contracts/.
-**Status**: nenhuma tarefa executada; implementação aguarda nova autorização. Prioridades P0/P1 vêm da V1.1.
+**Status**: implementação local autorizada em 18/11/2026; execução em feature/backend. Prioridades P0/P1 vêm da V1.1.
 **Tests**: solicitados pelo capítulo 07 da V1.1; critérios de cada US em spec.md/quickstart.md.
 **Owners**: Codex backend, Claude UI; cada linha cita arquivos e dependências. [P] permite paralelo apenas após pré-requisitos.
 
 ## Phase 1: Setup
 
-- [ ] T001 Codex: Definir projeto Python 3.13/FastAPI, versões compatíveis e lockfile em `pyproject.toml, uv.lock`. Origem: F-01. Depende: —.
+- [x] T001 Codex: Definir projeto Python 3.13/FastAPI, versões compatíveis e lockfile em `pyproject.toml, uv.lock`. Origem: F-01. Depende: —.
 - [ ] T002 [P] Claude: Definir build Tailwind/JS e runner UI isolados em `package.json, pnpm-lock.yaml`. Origem: F-01,V-01. Depende: —.
 ## Phase 2: Foundational
 
