@@ -1,0 +1,38 @@
+# Credenciais e configurações privadas
+.env
+.env.*
+!.env.example
+!.env.template
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Estado local dos agentes: manter no disco, fora do histórico
+/.claude/settings.local.json
+/.claude.json
+/.codex/config.toml
+/.serena/project.local.yml
+/.serena/cache/
+/.serena/logs/
+/.ua/
+/.understand-anything/
+/.gstack/
+/.taskmaster/state.json
+/.taskmaster/reports/
+/strix_runs/
+
+# Ambientes, caches e saídas geradas
+.DS_Store
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+node_modules/
+/dist/
+*.log
