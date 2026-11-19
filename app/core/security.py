@@ -1,24 +1,63 @@
+import hashlib
+import hmac
 import secrets
-from time import monotonic
+from time import monotonic, time
 
-from fastapi import HTTPException, Request
+from fastapi import Request
 
-from app.core.exceptions import error_response
+from app.core.exceptions import ApiFault, ServiceUnavailable, error_response
+
+
+def _csrf_signature(settings, value: str, session: str) -> str:
+    if not settings.cookie_secret:
+        raise ServiceUnavailable()
+    binding = hashlib.sha256(session.encode()).hexdigest()
+    return hmac.new(
+        settings.cookie_secret.get_secret_value().encode(),
+        f"{value}:{binding}".encode(),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def issue_csrf(settings, response, session: str = "") -> str:
+    value = f"{secrets.token_hex(16)}.{int(time())}"
+    token = f"{value}.{_csrf_signature(settings, value, session)}"
+    response.set_cookie(
+        "neox_csrf",
+        token,
+        max_age=settings.csrf_ttl_seconds,
+        httponly=True,
+        secure=settings.allowed_origin.startswith("https://"),
+        samesite="lax",
+    )
+    return token
 
 
 def require_csrf(request: Request) -> None:
     settings = request.app.state.settings
-    cookie = request.cookies.get("neox_csrf")
-    token = request.headers.get("x-csrf-token")
+    cookie = request.cookies.get("neox_csrf", "")
+    token = request.headers.get("x-csrf-token", "")
+    valid = False
     if (
-        request.headers.get("origin") != settings.allowed_origin
-        or not cookie
-        or not token
-        or not cookie.isascii()
-        or not token.isascii()
-        or not secrets.compare_digest(cookie, token)
+        request.headers.get("origin") == settings.allowed_origin
+        and token
+        and len(token) < 160
+        and token.isascii()
+        and cookie.isascii()
+        and secrets.compare_digest(cookie, token)
     ):
-        raise HTTPException(status_code=403)
+        parts = token.split(".")
+        if len(parts) == 3 and parts[1].isdigit():
+            age = time() - int(parts[1])
+            value = ".".join(parts[:2])
+            signature = _csrf_signature(
+                settings, value, request.cookies.get("neox_admin_session", "")
+            )
+            valid = 0 <= age <= settings.csrf_ttl_seconds and hmac.compare_digest(
+                signature, parts[2]
+            )
+    if not valid:
+        raise ApiFault(403, "FORBIDDEN", "Requisição não autorizada.")
 
 
 class BodyLimitMiddleware:

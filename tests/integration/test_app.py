@@ -21,7 +21,7 @@ async def test_health_without_services_is_unavailable(contract):
         assert (await client.get("/docs")).status_code == 404
         assert (await client.get("/openapi.json")).status_code == 404
         assert (await client.get("/api/products")).status_code == 404
-        assert set(app.openapi()["paths"]) == {"/health"}
+        assert set(app.openapi()["paths"]) <= set(contract["paths"])
         assert app.openapi()["paths"]["/health"]["get"]["operationId"] == "health"
 
 
@@ -97,7 +97,7 @@ async def test_csrf_origin_and_cookie_required():
 
     from app.core.security import require_csrf
 
-    app = create_app(Settings(_env_file=None))
+    app = create_app(Settings(_env_file=None, cookie_secret="test-only" * 8))
 
     @app.post("/test-csrf")
     async def protected(request: Request):
@@ -107,8 +107,13 @@ async def test_csrf_origin_and_cookie_required():
     async with make_client(app) as client:
         response = await client.post("/test-csrf")
         assert response.status_code == 403
-        client.cookies.set("neox_csrf", "test-random-token")
-        headers = {"origin": "https://foreign.invalid", "x-csrf-token": "test-random-token"}
+        from starlette.responses import Response
+
+        from app.core.security import issue_csrf
+
+        token = issue_csrf(app.state.settings, Response())
+        client.cookies.set("neox_csrf", token)
+        headers = {"origin": "https://foreign.invalid", "x-csrf-token": token}
         assert (await client.post("/test-csrf", headers=headers)).status_code == 403
         headers["origin"] = "http://127.0.0.1:8000"
         assert (await client.post("/test-csrf", headers=headers)).status_code == 200
@@ -136,7 +141,14 @@ async def test_rate_limit_window_and_forwarded_ip_ignored(monkeypatch):
 
 
 async def test_login_has_separate_stricter_limit():
-    app = create_app(Settings(_env_file=None, login_rate_limit_requests=1))
+    from fastapi import FastAPI
+
+    from app.core.security import RateLimitMiddleware
+
+    app = FastAPI()
+    app.add_middleware(
+        RateLimitMiddleware, settings=Settings(_env_file=None, login_rate_limit_requests=1)
+    )
 
     @app.post("/api/admin/auth/login")
     async def endpoint():

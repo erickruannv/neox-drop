@@ -27,3 +27,14 @@ session_id em auth.sessions para impedir replay de JWT após logout; SECURITY DE
 restrito e search_path vazio, nunca autorização baseada em user_metadata.
 Teste estático passou; dois testes reais ficam SKIPPED sem opt-in/conta autorizada. Isso não
 prova SQL/RLS executado. Docker info falhou por daemon indisponível; não foi iniciado.
+
+T009 preparado: login/logout/me registrados com schemas aprovados; cliente Supabase isolado,
+get_user(jwt), consulta do próprio perfil via bearer sujeito a RLS em cada request, sem
+service role para autenticação. Cookies HttpOnly/SameSite e Secure conforme origem HTTPS;
+CSRF HMAC com expiração e vínculo ao access token, rotacionado em login/refresh/logout.
+Refresh explícito pelo SDK; logout revoga sessão local no Auth e remove cookies. Sem conta
+pública/admin signup. Helpers prontos para contexto Jinja2, ligação HTML depende de T014.
+65 testes passaram, 2 reais ignorados. HTTP do SDK usa MockTransport; não comprova Auth real.
+Testes negativos incluem perfil inativo/role indevida, senha inválida, CSRF/Origin, assinatura,
+expiração/vínculo, replay negado no dublê de RLS e perfil revalidado após refresh.
+O rate limit continua local por processo; não haverá implantação/multiworker nesta rodada.

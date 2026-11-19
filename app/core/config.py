@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     app_env: Literal["local", "test"] = "local"
     allowed_origin: str = "http://127.0.0.1:8000"
     test_connections_enabled: bool = False
+    cookie_secret: SecretStr | None = Field(default=None, min_length=32)
+    admin_refresh_max_age_seconds: int = Field(default=604800, ge=3600, le=604800)
+    csrf_ttl_seconds: int = Field(default=3600, ge=60, le=86400)
     supabase_url: SecretStr | None = None
     supabase_key: SecretStr | None = None
     mongodb_uri: SecretStr | None = None
