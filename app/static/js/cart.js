@@ -2,6 +2,8 @@
 // Nome/foto/preço para exibição ficam em sessionStorage e não são autoritativos:
 // o checkout (T021/T022) revalida tudo no servidor.
 
+import { initCheckout } from "./checkout.js";
+
 export const CART_KEY = "neox.cart.v1";
 const DISPLAY_KEY = "neox.cart.display.v1";
 const MAX_QTY = 10; // por produto+tamanho (contrato)
@@ -57,9 +59,26 @@ function initDrawer(drawer) {
   let memory = readCart();
   writeCart(memory); // regrava já sem itens malformados
 
+  const checkout = initCheckout(drawer, {
+    getItems: () => memory,
+    getDisplay: readDisplay,
+    setPrices(prices) {
+      // Preço do servidor passa a ser o exibido (ainda não autoritativo para o próximo pedido).
+      const display = readDisplay();
+      for (const [id, cents] of Object.entries(prices)) display[id] = { ...display[id], priceCents: cents };
+      try {
+        sessionStorage.setItem(DISPLAY_KEY, JSON.stringify(display));
+      } catch {
+        /* sem sessionStorage */
+      }
+      render();
+    },
+  });
+
   const save = (items) => {
     memory = normalize(items);
     writeCart(memory);
+    checkout.invalidate();
     render();
   };
 
@@ -166,6 +185,7 @@ function initDrawer(drawer) {
   addEventListener("storage", (e) => {
     if (e.key === CART_KEY) {
       memory = readCart();
+      checkout.invalidate();
       render();
     }
   });

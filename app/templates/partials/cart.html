@@ -20,10 +20,28 @@
         <span class="text-2xl font-extrabold tabular-nums" data-cart-subtotal>R$ 0,00</span>
       </div>
       <p class="mt-1 text-xs text-muted" data-cart-note>Preço e disponibilidade são confirmados ao gerar o pedido.</p>
-      <button type="button" class="btn-lime mt-4 w-full justify-center opacity-50" disabled aria-describedby="cart-checkout-hint">
+      <div class="mt-4 rounded-xl bg-coral-deep/10 p-3 text-sm" role="alert" tabindex="-1" hidden data-checkout-error>
+        <p class="font-bold text-coral-deep" data-checkout-error-message></p>
+        <ul class="mt-1 list-disc pl-5" hidden data-checkout-error-details></ul>
+      </div>
+
+      <div class="mt-4 rounded-xl border border-ink/15 bg-white p-4" hidden data-checkout-summary>
+        <div class="flex items-baseline justify-between">
+          <span class="text-sm font-semibold">Total confirmado pela loja</span>
+          <span class="text-xl font-extrabold tabular-nums" data-checkout-total></span>
+        </div>
+        <div class="mt-2 text-sm" hidden data-checkout-changed>
+          <p class="font-bold text-coral-deep">O preço mudou desde que você adicionou:</p>
+          <ul class="mt-1 list-disc pl-5" data-checkout-changes></ul>
+        </div>
+        <a class="btn-lime mt-3 w-full justify-center" target="_blank" rel="noopener noreferrer" data-checkout-link>Abrir WhatsApp com o pedido</a>
+        <p class="mt-2 text-center text-xs text-muted">Abre o WhatsApp com a mensagem pronta. Nada é enviado sem você tocar em enviar.</p>
+      </div>
+
+      <button type="button" class="btn-lime mt-4 w-full justify-center aria-busy:opacity-60" aria-describedby="cart-checkout-hint" data-checkout>
         {{ icon("chat", "size-5") }} Pedir pelo WhatsApp
       </button>
-      <p id="cart-checkout-hint" class="mt-2 text-center text-xs text-muted">Envio pelo WhatsApp disponível em breve.</p>
+      <p id="cart-checkout-hint" class="mt-2 text-center text-xs text-muted">Conferimos preço e disponibilidade antes de abrir o WhatsApp. Sem pagamento online.</p>
     </div>
   </div>
   <p class="sr-only" aria-live="polite" data-cart-live></p>
