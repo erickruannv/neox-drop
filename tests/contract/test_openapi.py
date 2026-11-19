@@ -111,3 +111,25 @@ def test_checkout_response_rejects_invalid_destinations(url):
                 "waUrl": url,
             }
         )
+
+
+def test_all_registered_operations_match_approved_contract(contract):
+    from app.core.config import Settings
+    from app.main import create_app
+
+    runtime = create_app(Settings(_env_file=None)).openapi()
+    methods = {"get", "post", "patch", "delete"}
+    planned = {
+        (path, method): spec["operationId"]
+        for path, item in contract["paths"].items()
+        for method, spec in item.items()
+        if method in methods
+    }
+    registered = {
+        (path, method): spec["operationId"]
+        for path, item in runtime["paths"].items()
+        for method, spec in item.items()
+        if method in methods
+    }
+    assert registered == planned
+    assert len(registered) == 14

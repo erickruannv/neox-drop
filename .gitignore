@@ -36,3 +36,6 @@ htmlcov/
 node_modules/
 /dist/
 *.log
+
+# Cache local do CLI Supabase (sem configurações/credenciais no Git)
+/supabase/.temp/

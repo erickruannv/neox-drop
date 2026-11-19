@@ -4,7 +4,8 @@ Baseline a55dbbd, branch feature/backend; árvore limpa e 57 testes passaram ant
 Serena ativa no worktree correto; SPECIFY_FEATURE_DIRECTORY explícito; sem checklists/hooks extras.
 
 Escopo e ordem: T008 (migration/perfis/RLS), T009 (Auth/autorização), T010 (coleção/seed),
-T011 (CRUD), T015 (consultas públicas), T017 (cache seguro), T018 (recentes).
+T011 (CRUD), T015 (consultas públicas), T017 (cache seguro), T018 (recentes),
+T021 (checkout, preparado após os pré-requisitos locais do catálogo).
 Nenhum arquivo UI/contrato canônico será editado. T014 depende dos templates do Claude.
 
 Ruling: preparar e testar localmente a cadeia de código nessa ordem, mas manter T008 e os
@@ -96,3 +97,51 @@ agora impede repropagação do conteúdo antes de enviar resposta; teste usa tra
 raise_app_exceptions=True e confirmou RED→GREEN sem segredo nos logs. Erro após início de
 resposta vira exceção genérica sanitizada. Também rejeitado timeout Mongo menor que 1 ms,
 que seria truncado a zero pelo driver (potencial espera sem limite). Ambos cobertos localmente.
+
+## Verificação final e estado de entrega local
+
+- `uv run --locked pytest -q`: **118 passed, 5 skipped**, sem warnings.
+- Cinco skips são exclusivamente `tests/real`: admin Auth/RLS/negação de escrita/revogação,
+  leitura anônima negada, usuário sem perfil ativo, Mongo CRUD/índices e Redis EVAL/TTL.
+- `uv run --locked ruff check app tests scripts`: All checks passed.
+- `uv run --locked ruff format --check app tests scripts`: 44 arquivos formatados.
+- `uv lock --check`: 67 pacotes, lock inalterado/consistente.
+- Parser temporário pglast v8.9: **21 instruções PostgreSQL válidas sintaticamente**;
+  não valida schemas gerenciados, execução, permissões ou RLS. Sem nova dependência no projeto.
+- Teste de contrato confirma exatamente 14 pares método/rota/operationId iguais ao OpenAPI,
+  sem editar `docs/contracts/` ou publicar o schema gerado pelo FastAPI.
+- Uvicorn startup real em 127.0.0.1:8765; probes HTTP reais, sem credenciais:
+  GET /health 503 unavailable; GET /api/products 503 SERVICE_UNAVAILABLE;
+  GET /api/admin/me 401 AUTHENTICATION_FAILED; GET /api/recent 200 items vazio;
+  POST /api/admin/auth/login, /api/checkout e /api/recent sem CSRF: 403 FORBIDDEN.
+  Servidor encerrado com shutdown completo após as verificações.
+- `python -m scripts.check_connections`: exit 2, recusa segura sem opt-in. Não abriu bancos.
+- `git diff --check` limpo e diff do baseline não altera contratos, referências, ferramentas,
+  .claude/.codex/.agents/.specify, templates/static, pyproject.toml ou uv.lock.
+  Cache criado pelo CLI Supabase em supabase/.temp preservado localmente e ignorado no Git.
+
+Falhas intermediárias foram registradas/corrigidas: fixtures SDK precisavam metadata válida;
+pytest tinha colisão de basename de testes RLS; cookies de testes precisaram domain coerente;
+asserts da Fase 1 foram atualizados quando as rotas reais foram registradas. As falhas de
+produto/segurança tiveram reproduções RED→GREEN; nenhuma falha externa foi mascarada por mock.
+
+Mudanças: app/api/{auth,admin_products,products,recent,checkout}.py; app/services/
+{admin,catalog,recent,cart}.py; app/core/{config,security,exceptions}.py; app/main.py;
+app/db/supabase.py; schemas/product.py (parâmetros HTTP); migration Supabase; mongo/
+(validador BSON/índices + wrapper); scripts/seed_products.py; testes unitários/HTTP/contrato/
+reais opt-in; .env.example; .gitignore; README; tasks e docs/TESTES-BANCOS.md.
+Inventário exato também está no diff Git do baseline a55dbbd.
+
+Ruling final: T008/T010 e aceites integrados dependentes permanecem **abertos** em tasks.md,
+com notas de preparo local, porque migrations/índices e bancos não foram executados.
+T014/T027 estão bloqueados pela integração UI; T028/T029/T031 não estão completos. Não
+alegar entrega P0 inteira ou RF-13/GLB. A revisão de segurança foi de código/local, não
+pentest ou auditoria de infraestrutura. Rate limit ainda por processo/IP: sem implantação
+multiworker; contador compartilhado e por identidade ficam como requisito antes disso.
+
+Próximos insumos externos: stack/projeto Supabase de teste autorizado, schema/migration
+aplicada após revisão, contas fictícias admin/não-admin, coleção Mongo nova de teste e
+índices conferidos, instância Upstash REST de teste, segredos locais e contato singleton
+configurado. Roteiro detalhado em docs/TESTES-BANCOS.md. Nenhum segredo foi criado/copiado
+para o Git; nenhuma conta/banco provisionado, migration aplicada, seed executada, mensagem
+WhatsApp enviada ou deploy/push/merge realizado.
