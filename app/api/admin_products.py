@@ -1,10 +1,15 @@
-from typing import Annotated, Literal
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request, Response
-from pydantic import BaseModel
 
 from app.core.security import require_csrf
-from app.schemas.product import AdminProduct, AdminProductList, ProductCreate, ProductPatch
+from app.schemas.product import (
+    AdminFilters,
+    AdminProduct,
+    AdminProductList,
+    ProductCreate,
+    ProductPatch,
+)
 from app.services.admin import require_admin
 from app.services.catalog import create_product, list_products, products_collection, update_product
 
@@ -12,20 +17,6 @@ router = APIRouter(
     prefix="/api/admin/products", tags=["Admin"], dependencies=[Depends(require_admin)]
 )
 Collection = Annotated[object, Depends(products_collection)]
-
-
-class PublicFilters(BaseModel):
-    q: str | None = Query(default=None, max_length=100)
-    brand: str | None = Query(default=None, max_length=120)
-    category: str | None = Query(default=None, max_length=120)
-    sizeBR: int | None = Query(default=None, ge=15, le=60)
-    sort: Literal["recent", "price_asc", "price_desc"] = "recent"
-    page: int = Query(default=1, ge=1)
-    limit: int = Query(default=12, ge=1, le=24)
-
-
-class AdminFilters(PublicFilters):
-    active: bool | None = None
 
 
 @router.get(

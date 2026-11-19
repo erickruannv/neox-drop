@@ -3,6 +3,7 @@ from typing import Annotated, Any, Literal
 from pydantic import (
     AfterValidator,
     AwareDatetime,
+    BaseModel,
     Field,
     StrictBool,
     StrictInt,
@@ -153,3 +154,17 @@ class FeaturedList(WireModel):
 
 class RecentList(WireModel):
     items: Annotated[list[ProductSummary], Field(max_length=5)]
+
+
+class PublicFilters(BaseModel):
+    q: str | None = Field(default=None, max_length=100)
+    brand: str | None = Field(default=None, max_length=120)
+    category: str | None = Field(default=None, max_length=120)
+    sizeBR: int | None = Field(default=None, ge=15, le=60)
+    sort: Literal["recent", "price_asc", "price_desc"] = "recent"
+    page: int = Field(default=1, ge=1)
+    limit: int = Field(default=12, ge=1, le=24)
+
+
+class AdminFilters(PublicFilters):
+    active: bool | None = None

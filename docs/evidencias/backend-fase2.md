@@ -53,3 +53,9 @@ HTTPS de origem permitida, atributos sem operadores/chaves perigosas, strings n�
 updatedAt avança ao menos 1 ms e é comparado na escrita, respeitando precisão BSON.
 91 testes locais passaram e 2 reais ignorados. Rotas exercitam Mongo via AsyncMock de coleção;
 não comprovam índices, escrita ou concorrência no servidor real.
+
+T015 preparado: catálogo público paginado, detalhe e destaques, somente active=true,
+projeção allowlist sem stock/BSON; filtro de tamanho/estoque usa o mesmo elemMatch,
+busca regex escapada, sort com _id para desempate. Detalhe GET não registra visita.
+Queries/formatos/limites e erro Mongo 503 sanitizado cobertos localmente. 93 passaram,
+2 reais ignorados. Mongo real e jornada com templates continuam sem comprovação.

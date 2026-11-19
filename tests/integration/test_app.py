@@ -20,7 +20,7 @@ async def test_health_without_services_is_unavailable(contract):
         assert response.json() == {"status": "unavailable"}
         assert (await client.get("/docs")).status_code == 404
         assert (await client.get("/openapi.json")).status_code == 404
-        assert (await client.get("/api/products")).status_code == 404
+        assert (await client.get("/api/products")).status_code == 503
         assert set(app.openapi()["paths"]) <= set(contract["paths"])
         assert app.openapi()["paths"]["/health"]["get"]["operationId"] == "health"
 
