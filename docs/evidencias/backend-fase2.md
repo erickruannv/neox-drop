@@ -73,3 +73,10 @@ GET não registra/renova visita e reconsulta produtos ativos atuais no Mongo, pr
 Sem cookie ou falha Redis: items vazio; POST válido em falha Redis: 204 best-effort. Mongo fora
 continua 503 quando necessário. 99 testes locais passaram; quatro testes reais opt-in ignorados
 (Auth/RLS, CRUD/índices Mongo e atomicidade/TTL Redis). Nenhum banco real contatado.
+
+Revisão independente Superpowers + Trail of Bits sharp-edges encontrou problemas reproduzíveis:
+DELETE descartava cookies do refresh; URL IPv6 malformada e atributos não codificáveis BSON
+levavam a 500; health consultava tabela privada com chave pública. Corrigidos com regressões
+RED→GREEN (DELETE usa Response injetado, URL/NaN/BSON rejeitados com 422, probe sem tabelas
+privadas). Não houve achado de bypass de autorização/CSRF ou estoque bruto público na revisão.
+Isso não é pentest externo nem prova do SQL executado.

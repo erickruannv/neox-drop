@@ -66,6 +66,8 @@ async def update(
 @router.delete(
     "/{id}", operation_id="deactivateProduct", status_code=204, dependencies=[Depends(require_csrf)]
 )
-async def deactivate(id: str, request: Request, collection: Collection):
+async def deactivate(id: str, request: Request, response: Response, collection: Collection):
     await update_product(collection, id, {"active": False}, request.app.state.settings)
-    return Response(status_code=204, headers={"Cache-Control": "no-store"})
+    response.status_code = 204
+    response.headers["Cache-Control"] = "no-store"
+    return response

@@ -214,3 +214,38 @@ async def test_csrf_bound_to_session_and_expiry(auth_app, monkeypatch):
             await client.post("/api/admin/auth/login", headers=headers, json=body)
         ).status_code == 403
         assert not state["requests"]
+
+
+async def test_delete_preserves_rotated_refresh_cookies(auth_app, examples):
+    from datetime import UTC, datetime
+    from unittest.mock import AsyncMock, MagicMock
+
+    from bson import ObjectId
+
+    from app.services.catalog import products_collection
+
+    app, state = auth_app
+    doc = {
+        **examples["ProductCreate"],
+        "_id": ObjectId(),
+        "createdAt": datetime.now(UTC),
+        "updatedAt": datetime.now(UTC),
+    }
+    collection = MagicMock(
+        find_one=AsyncMock(return_value=doc), find_one_and_update=AsyncMock(return_value=doc)
+    )
+
+    async def products():
+        yield collection
+
+    app.dependency_overrides[products_collection] = products
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app), base_url="http://test"
+    ) as client:
+        client.cookies.set("neox_admin_refresh", "refresh-test-only", domain="test.local")
+        result = await client.delete(
+            f"/api/admin/products/{doc['_id']}", headers=seed_csrf(client, app)
+        )
+        assert result.status_code == 204
+        assert client.cookies.get("neox_admin_refresh") == "refresh-rotated"
+        assert client.cookies.get("neox_admin_session") == "access-test-only"

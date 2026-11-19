@@ -10,6 +10,9 @@ from app.services.catalog import merge_patch, public_product, validate_product
 @pytest.mark.parametrize(
     "patch",
     [
+        {"mainImageUrl": "https://["},
+        {"attributes": {"weight": 2**64}},
+        {"attributes": {"weight": float("nan")}},
         {"priceCents": -1},
         {"priceCents": 1.5},
         {"sizes": [{"sizeBR": 40, "stock": 1}, {"sizeBR": 40, "stock": 2}]},

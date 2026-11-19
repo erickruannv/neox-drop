@@ -1,11 +1,13 @@
 import json
 import logging
+import math
 import re
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
 from urllib.parse import unquote, urlsplit
 
-from bson import ObjectId
+from bson import BSON, ObjectId
+from bson.errors import BSONError
 from fastapi import Request
 from pydantic import ValidationError
 from pymongo import ReturnDocument
@@ -52,7 +54,11 @@ def validate_product(payload, settings) -> dict:
             decoded = unquote(decoded)
         if "\\" in decoded or any(ord(c) < 32 for c in decoded):
             raise invalid_product()
-        url = urlsplit(decoded)
+        try:
+            url = urlsplit(decoded)
+            _ = url.port
+        except ValueError as exc:
+            raise invalid_product() from exc
         if value.startswith("/static/"):
             if any(part in {".", ".."} for part in url.path.split("/")):
                 raise invalid_product()
@@ -68,12 +74,18 @@ def validate_product(payload, settings) -> dict:
         value, depth = stack.pop()
         if depth > 20:
             raise invalid_product()
+        if isinstance(value, float) and not math.isfinite(value):
+            raise invalid_product()
         if isinstance(value, dict):
             if any(key.startswith("$") or "." in key or "\x00" in key for key in value):
                 raise invalid_product()
             stack.extend((item, depth + 1) for item in value.values())
         elif isinstance(value, list):
             stack.extend((item, depth + 1) for item in value)
+    try:
+        BSON.encode(data)
+    except (BSONError, OverflowError, ValueError) as exc:
+        raise invalid_product() from exc
     return data
 
 
