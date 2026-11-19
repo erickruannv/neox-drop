@@ -1,10 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 
-from app.core.exceptions import ApiFault
 from app.schemas.product import FeaturedList, ProductDetail, ProductList, PublicFilters
-from app.services.catalog import list_products, products_collection, public_product
+from app.services.catalog import list_products, product_detail, products_collection, public_product
 
 router = APIRouter(prefix="/api", tags=["Público"])
 Collection = Annotated[object, Depends(products_collection)]
@@ -26,11 +25,8 @@ async def listing(collection: Collection, filters: Annotated[PublicFilters, Quer
     response_model=ProductDetail,
     response_model_exclude_unset=True,
 )
-async def detail(slug: str, collection: Collection):
-    doc = await collection.find_one({"slug": slug, "active": True})
-    if not doc or doc.get("active") is not True:
-        raise ApiFault(404, "PRODUCT_NOT_FOUND", "Produto não encontrado.")
-    return public_product(doc)
+async def detail(slug: str, request: Request, collection: Collection):
+    return await product_detail(collection, slug, request.app.state.settings)
 
 
 @router.get(

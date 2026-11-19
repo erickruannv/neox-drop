@@ -1,3 +1,5 @@
+import json
+import logging
 import re
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
@@ -11,7 +13,8 @@ from pymongo.errors import DuplicateKeyError
 
 from app.core.exceptions import ApiFault
 from app.db.mongodb import mongodb_client
-from app.schemas.product import AdminProduct, ProductCreate
+from app.db.redis import redis_client
+from app.schemas.product import AdminProduct, ProductCreate, ProductDetail
 
 
 async def products_collection(request: Request):
@@ -125,6 +128,7 @@ async def create_product(collection, payload, settings):
         await collection.insert_one(doc)
     except DuplicateKeyError as exc:
         raise ApiFault(409, "PRODUCT_CONFLICT", "SKU ou slug já utilizado.") from exc
+    await invalidate_product(settings, str(doc["_id"]))
     return admin_product(doc)
 
 
@@ -151,6 +155,7 @@ async def update_product(collection, product_id: str, changes: dict, settings):
         raise ApiFault(409, "PRODUCT_CONFLICT", "SKU ou slug já utilizado.") from exc
     if doc is None:
         raise ApiFault(409, "PRODUCT_CONFLICT", "Produto alterado por outra requisição.")
+    await invalidate_product(settings, str(doc["_id"]))
     return admin_product(doc)
 
 
@@ -194,3 +199,47 @@ async def list_products(collection, filters, public: bool):
         "limit": filters.limit,
         "total": await collection.count_documents(query),
     }
+
+
+logger = logging.getLogger("neox.catalog")
+
+
+async def invalidate_product(settings, product_id: str):
+    try:
+        async with redis_client(settings) as redis:
+            await redis.delete(f"cache:product:{product_id}")
+    except Exception:
+        logger.warning("event=cache_invalidation_unavailable")
+
+
+async def product_detail(collection, slug: str, settings):
+    query = {"slug": slug, "active": True}
+    probe = await collection.find_one(query, {"_id": 1, "active": 1, "updatedAt": 1})
+    if not probe or probe.get("active") is not True:
+        raise ApiFault(404, "PRODUCT_NOT_FOUND", "Produto não encontrado.")
+    key = f"cache:product:{probe['_id']}"
+    try:
+        async with redis_client(settings) as redis:
+            cached = await redis.get(key)
+        if cached:
+            envelope = json.loads(cached)
+            if envelope["version"] == probe["updatedAt"].isoformat():
+                payload = ProductDetail.model_validate(envelope["payload"]).model_dump(
+                    mode="json",
+                    exclude_unset=True,
+                )
+                if payload["id"] == str(probe["_id"]) and payload["slug"] == slug:
+                    return payload
+    except Exception:
+        logger.warning("event=cache_read_unavailable")
+    doc = await collection.find_one({"_id": probe["_id"], "active": True})
+    if not doc or doc.get("active") is not True:
+        raise ApiFault(404, "PRODUCT_NOT_FOUND", "Produto não encontrado.")
+    payload = public_product(doc)
+    envelope = {"version": doc["updatedAt"].isoformat(), "payload": payload}
+    try:
+        async with redis_client(settings) as redis:
+            await redis.set(key, json.dumps(envelope), ex=settings.cache_ttl_seconds)
+    except Exception:
+        logger.warning("event=cache_write_unavailable")
+    return payload

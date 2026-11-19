@@ -59,3 +59,10 @@ projeção allowlist sem stock/BSON; filtro de tamanho/estoque usa o mesmo elemM
 busca regex escapada, sort com _id para desempate. Detalhe GET não registra visita.
 Queries/formatos/limites e erro Mongo 503 sanitizado cobertos localmente. 93 passaram,
 2 reais ignorados. Mongo real e jornada com templates continuam sem comprovação.
+
+T017 preparado: cache de detalhe com envelope versionado e TTL 300s, probe Mongo de
+active/updatedAt em cada hit; dados cacheados passam pelo schema público e conferência de
+id/slug. Falhas Redis degradam para leitura Mongo; falha Mongo nunca é mascarada pelo cache.
+Escritas invalidam após commit e não alegam rollback quando DEL falha. Teste reproduz cache
+antigo após escrita com DEL falhando, e valida retorno atualizado pela versão do Mongo,
+sem flag local de worker. Sem prova de dois workers reais; 96 passaram, 2 reais ignorados.

@@ -37,7 +37,10 @@ async def test_detail_and_featured_without_visit_side_effect(catalog_app, contra
         response = await client.get(f"/api/products/{doc['slug']}")
         assert response.status_code == 200
         validate(contract, "ProductDetail", response)
-        assert collection.find_one.call_args.args[0] == {"slug": doc["slug"], "active": True}
+        assert collection.find_one.call_args_list[0].args[0] == {
+            "slug": doc["slug"],
+            "active": True,
+        }
         assert not response.headers.get("set-cookie")
         response = await client.get("/api/featured")
         assert response.status_code == 200
