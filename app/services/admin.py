@@ -11,6 +11,10 @@ from app.schemas.auth import AdminProfile
 
 
 async def admin_client(request: Request):
+    if request.url.path != "/api/admin/auth/login" and not (
+        request.cookies.get("neox_admin_session") or request.cookies.get("neox_admin_refresh")
+    ):
+        raise ApiFault(401, "AUTHENTICATION_FAILED", "Autenticação necessária.")
     async with supabase_client(request.app.state.settings) as client:
         yield client
 

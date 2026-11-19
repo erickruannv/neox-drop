@@ -44,3 +44,12 @@ T010 preparado: validador BSON derivado do ProductCreate aprovado + ObjectId/dat
 Mongosh e script Python novos recusam coleção existente e banco sem sufixo _test; seed
 canônica fictícia usa setOnInsert, sem sobrescrever produto. Nenhum script foi executado
 contra banco. Três testes locais do preparo passaram; validar coleção/índices reais segue pendente.
+
+T011 preparado: POST/PATCH/GET/DELETE admin com autorização por requisição, 201/200/204,
+409 para duplicata ou edição concorrente, 404/422 seguros. Soft-delete preserva documento
+SKU/slug. PATCH mescla featured, substitui arrays e remove somente model3dUrl com null.
+Validação adicional: tamanhos únicos, inteiros BSON int64, mídia própria sem traversal ou
+HTTPS de origem permitida, atributos sem operadores/chaves perigosas, strings não vazias.
+updatedAt avança ao menos 1 ms e é comparado na escrita, respeitando precisão BSON.
+91 testes locais passaram e 2 reais ignorados. Rotas exercitam Mongo via AsyncMock de coleção;
+não comprovam índices, escrita ou concorrência no servidor real.
