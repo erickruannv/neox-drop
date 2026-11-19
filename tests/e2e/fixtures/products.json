@@ -1,0 +1,28 @@
+{
+  "extraDetails": [
+    {
+      "id": "6740a1b2c3d4e5f601000005", "sku": "NEOX-DEMO-105", "slug": "mono-low-retro",
+      "name": "Mono Low Retro", "brand": "NEOX Lab", "category": "Street",
+      "priceCents": 69990, "currency": "BRL", "active": true,
+      "description": "Produto fictício de demonstração: cano baixo preto e branco.",
+      "mainImageUrl": "/static/images/demo/mono-low-retro.svg",
+      "galleryUrls": ["/static/images/demo/mono-low-retro.svg", "/static/images/demo/coral-classic-90.svg"],
+      "sizesAvailable": [38, 39, 40, 41], "colorName": "Preto/Branco"
+    },
+    {
+      "id": "6740a1b2c3d4e5f601000006", "sku": "NEOX-DEMO-106", "slug": "knit-pace-esgotado",
+      "name": "Knit Pace", "brand": "Marca Demonstrativa", "category": "Performance",
+      "priceCents": 54990, "currency": "BRL", "active": true,
+      "description": "Produto fictício de demonstração sem numeração disponível.",
+      "mainImageUrl": "/static/images/demo/performance-knit.svg",
+      "galleryUrls": ["/static/images/demo/performance-knit.svg"],
+      "sizesAvailable": [], "colorName": "Grafite"
+    }
+  ],
+  "admin": {
+    "userId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Administrador de demonstração",
+    "role": "admin",
+    "isActive": true
+  }
+}

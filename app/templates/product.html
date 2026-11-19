@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, brl_amount %}
+{#- Contexto (ui.md): product: ProductDetail. sizesAvailable lista só numerações disponíveis;
+    contagens de estoque não são expostas. -#}
+{%- set p = product -%}
+{%- set gallery = p.galleryUrls if p.galleryUrls else [p.mainImageUrl] -%}
+
+{% block title %}{{ p.name }} — NEOX drop{% endblock %}
+{% block description %}{{ p.name }} ({{ p.brand }}), {{ p.colorName }}.{% endblock %}
+
+{% block content %}
+<div class="on-light mx-auto max-w-screen-2xl px-4 pb-8 pt-6 sm:px-6 lg:px-10 lg:pt-8">
+  <nav aria-label="Trilha" class="text-sm text-muted">
+    <ol class="flex flex-wrap items-center gap-2">
+      <li><a href="/" class="hover:text-ink hover:underline">Início</a></li>
+      <li aria-hidden="true">/</li>
+      <li><a href="/tenis" class="hover:text-ink hover:underline">Tênis</a></li>
+      <li aria-hidden="true">/</li>
+      <li><span aria-current="page" class="font-semibold text-ink">{{ p.name }}</span></li>
+    </ol>
+  </nav>
+
+  <div class="mt-6 grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-12">
+    <section aria-label="Galeria" data-gallery>
+      <div class="relative grid aspect-[4/3] place-items-center overflow-hidden rounded-3xl bg-white p-6 shadow-[0_8px_24px_rgb(0_0_0/0.06)] sm:p-10">
+        <span class="display-type pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none whitespace-nowrap text-center text-[clamp(4rem,12vw,10rem)] text-ink/[0.05]" aria-hidden="true">{{ p.name.split(" ")[0]|upper }}</span>
+        <img src="{{ gallery[0] }}" alt="{{ p.name }}, {{ p.colorName }}" width="630" height="304" fetchpriority="high"
+             class="relative w-full max-w-2xl -rotate-6 drop-shadow-[0_24px_28px_rgb(0_0_0/0.18)]" data-gallery-main>
+      </div>
+      {% if gallery|length > 1 %}
+      <ul class="mt-3 flex gap-3 overflow-x-auto pb-1" aria-label="Imagens do produto">
+        {% for url in gallery %}
+        <li>
+          <button type="button" class="grid h-20 w-28 place-items-center rounded-2xl border-2 border-transparent bg-white p-2 aria-[current=true]:border-ink"
+                  data-gallery-thumb="{{ url }}" aria-label="Imagem {{ loop.index }} de {{ gallery|length }}" aria-current="{{ 'true' if loop.first else 'false' }}">
+            <img src="{{ url }}" alt="" width="126" height="61" loading="lazy" class="max-h-14 w-auto">
+          </button>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </section>
+
+    <section aria-labelledby="produto-nome" class="lg:pt-4">
+      <p class="text-sm font-bold uppercase tracking-wide text-muted">{{ p.brand }} · {{ p.category }}</p>
+      <h1 id="produto-nome" class="display-type mt-2 text-[clamp(2rem,4vw,3.25rem)] [overflow-wrap:anywhere]">{{ p.name }}</h1>
+      <p class="mt-2 text-muted">Cor: <span class="font-semibold text-ink">{{ p.colorName }}</span></p>
+      <p class="mt-5 flex items-start gap-1.5 font-extrabold tracking-tight tabular-nums">
+        <span class="mt-0.5 text-lg">R$</span><span class="text-[2.5rem] leading-none">{{ brl_amount(p.priceCents) }}</span>
+      </p>
+      {% if p.description %}<p class="mt-5 max-w-prose leading-relaxed">{{ p.description }}</p>{% endif %}
+
+      {% set sizes = p.sizesAvailable|sort %}
+      <form class="mt-7 grid gap-6" data-add-to-cart
+            data-product-id="{{ p.id }}" data-slug="{{ p.slug }}" data-name="{{ p.name }}"
+            data-price-cents="{{ p.priceCents }}" data-image="{{ p.mainImageUrl }}">
+        {% if sizes %}
+        <fieldset>
+          <legend class="font-bold">Numeração (BR)</legend>
+          <p class="text-sm text-muted">{{ sizes|length }} {{ "numeração disponível" if sizes|length == 1 else "numerações disponíveis" }}</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            {% for s in sizes %}
+            <label class="relative">
+              <input type="radio" name="sizeBR" value="{{ s }}" required class="peer absolute inset-0 cursor-pointer opacity-0">
+              <span class="grid h-12 min-w-14 place-items-center rounded-xl border-2 border-ink/15 bg-white px-3 font-bold transition-colors peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-focus-visible:outline peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink">{{ s }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+
+        <div>
+          <label for="qty" class="block font-bold">Quantidade</label>
+          <div class="mt-2 inline-flex items-center rounded-full border-2 border-ink/15 bg-white" data-qty>
+            <button type="button" class="icon-btn" data-qty-step="-1" aria-label="Diminuir quantidade">{{ icon("minus", "size-5") }}</button>
+            <input id="qty" name="quantity" type="number" inputmode="numeric" min="1" max="10" value="1" required
+                   class="w-12 bg-transparent text-center font-bold [appearance:textfield] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none">
+            <button type="button" class="icon-btn" data-qty-step="1" aria-label="Aumentar quantidade">{{ icon("plus", "size-5") }}</button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-lime justify-center py-4 text-lg sm:justify-self-start sm:px-10">
+          {{ icon("cart", "size-5") }} Adicionar ao carrinho
+        </button>
+        {% else %}
+        <p class="rounded-2xl bg-white p-5 font-bold" role="status">Esgotado no momento.</p>
+        {% endif %}
+      </form>
+      <p class="mt-4 text-sm text-muted">Preço e disponibilidade são confirmados ao gerar o pedido pelo WhatsApp.</p>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="/static/js/product.js"></script>
+{% endblock %}

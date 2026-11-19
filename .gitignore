@@ -39,3 +39,9 @@ node_modules/
 
 # Cache local do CLI Supabase (sem configurações/credenciais no Git)
 /supabase/.temp/
+
+# Saídas do build UI (pnpm build)
+/app/static/dist/
+/tests/e2e/.preview/
+/test-results/
+/playwright-report/

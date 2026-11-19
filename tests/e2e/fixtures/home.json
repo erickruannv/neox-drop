@@ -1,0 +1,56 @@
+{
+  "featured": {
+    "items": [
+      {
+        "id": "6740a1b2c3d4e5f601000001", "sku": "NEOX-DEMO-101", "slug": "volt-runner-01",
+        "name": "Volt Runner 01", "brand": "NEOX Lab", "category": "Performance",
+        "priceCents": 89990, "currency": "BRL", "active": true,
+        "description": "Produto fictício de demonstração: cabedal claro com detalhes lima.",
+        "mainImageUrl": "/static/images/demo/volt-runner-01.svg",
+        "galleryUrls": ["/static/images/demo/volt-runner-01.svg"],
+        "sizesAvailable": [39, 40, 41, 42], "colorName": "Off-white/Lima",
+        "featured": { "enabled": true, "order": 1, "backgroundHex": "#1A1D17", "accentHex": "#BDF400" }
+      },
+      {
+        "id": "6740a1b2c3d4e5f601000002", "sku": "NEOX-DEMO-102", "slug": "coral-classic-90",
+        "name": "Coral Classic 90", "brand": "NEOX Lab", "category": "Classics",
+        "priceCents": 74990, "currency": "BRL", "active": true,
+        "description": "Produto fictício de demonstração: clássico branco com calcanhar coral.",
+        "mainImageUrl": "/static/images/demo/coral-classic-90.svg",
+        "galleryUrls": ["/static/images/demo/coral-classic-90.svg"],
+        "sizesAvailable": [38, 39, 40], "colorName": "Branco/Coral",
+        "featured": { "enabled": true, "order": 2, "backgroundHex": "#2B1217", "accentHex": "#F23659" }
+      },
+      {
+        "id": "6740a1b2c3d4e5f601000003", "sku": "NEOX-DEMO-103", "slug": "grey-trail-9",
+        "name": "Grey Trail 9", "brand": "Marca Demonstrativa", "category": "Street",
+        "priceCents": 99990, "currency": "BRL", "active": true,
+        "description": "Produto fictício de demonstração: camadas em tons de cinza.",
+        "mainImageUrl": "/static/images/demo/grey-trail-9.svg",
+        "galleryUrls": ["/static/images/demo/grey-trail-9.svg"],
+        "sizesAvailable": [40, 41, 43], "colorName": "Cinza",
+        "featured": { "enabled": true, "order": 3, "backgroundHex": "#1C2226", "accentHex": "#9DB4C0" }
+      },
+      {
+        "id": "6740a1b2c3d4e5f601000004", "sku": "NEOX-DEMO-104", "slug": "sand-court-og",
+        "name": "Sand Court OG", "brand": "Marca Demonstrativa", "category": "Classics",
+        "priceCents": 59990, "currency": "BRL", "active": true,
+        "description": "Produto fictício de demonstração: tom areia com sola caramelo.",
+        "mainImageUrl": "/static/images/demo/sand-court-og.svg",
+        "galleryUrls": ["/static/images/demo/sand-court-og.svg"],
+        "sizesAvailable": [37, 38, 39, 40], "colorName": "Areia/Caramelo",
+        "featured": { "enabled": true, "order": 4, "backgroundHex": "#2A231B", "accentHex": "#E2C79F" }
+      }
+    ]
+  },
+  "launches": {
+    "items": [
+      { "id": "6740a1b2c3d4e5f601000005", "sku": "NEOX-DEMO-105", "slug": "mono-low-retro", "name": "Mono Low Retro", "brand": "NEOX Lab", "category": "Street", "priceCents": 69990, "mainImageUrl": "/static/images/demo/mono-low-retro.svg", "sizesAvailable": [38, 39, 40, 41], "active": true },
+      { "id": "6740a1b2c3d4e5f601000003", "sku": "NEOX-DEMO-103", "slug": "grey-trail-9", "name": "Grey Trail 9", "brand": "Marca Demonstrativa", "category": "Street", "priceCents": 99990, "mainImageUrl": "/static/images/demo/grey-trail-9.svg", "sizesAvailable": [40, 41, 43], "active": true },
+      { "id": "6740a1b2c3d4e5f601000002", "sku": "NEOX-DEMO-102", "slug": "coral-classic-90", "name": "Coral Classic 90", "brand": "NEOX Lab", "category": "Classics", "priceCents": 74990, "mainImageUrl": "/static/images/demo/coral-classic-90.svg", "sizesAvailable": [38, 39, 40], "active": true },
+      { "id": "6740a1b2c3d4e5f601000004", "sku": "NEOX-DEMO-104", "slug": "sand-court-og", "name": "Sand Court OG", "brand": "Marca Demonstrativa", "category": "Classics", "priceCents": 59990, "mainImageUrl": "/static/images/demo/sand-court-og.svg", "sizesAvailable": [37, 38, 39, 40], "active": true }
+    ],
+    "page": 1, "limit": 4, "total": 4
+  },
+  "recent": { "items": [] }
+}

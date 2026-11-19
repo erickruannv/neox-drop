@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, product_card %}
+{#- Contexto (docs/contracts/ui.md): featured: FeaturedList, launches: ProductList, recent: RecentList. -#}
+
+{% block content %}
+{% include "partials/hero.html" %}
+
+<div class="on-light">
+  {# Faixa de confiança: só afirmações verificáveis (cap. 05) — sem frete grátis, parcelamento ou trocas. #}
+  <section aria-label="Como funciona" class="border-b border-ink/10">
+    <ul class="mx-auto grid max-w-screen-2xl grid-cols-1 gap-x-6 gap-y-5 px-4 py-6 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:divide-x lg:divide-ink/10 lg:px-10">
+      {% for ic, title, text in [
+        ("grid", "Catálogo de tênis", "Marcas, categorias e numerações."),
+        ("chat", "Pedido via WhatsApp", "Revise o carrinho e envie a solicitação."),
+        ("tag", "Preço conferido", "Revalidado ao gerar o pedido."),
+        ("headset", "Atendimento a confirmar", "Entrega combinada com a loja."),
+      ] %}
+      <li class="flex items-center gap-4 lg:justify-center lg:px-4">
+        <span class="text-ink">{{ icon(ic, "size-8 shrink-0") }}</span>
+        <span>
+          <span class="block font-bold">{{ title }}</span>
+          <span class="block text-sm text-muted">{{ text }}</span>
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section id="colecoes" aria-labelledby="colecoes-titulo" class="mx-auto max-w-screen-2xl scroll-mt-24 px-4 pt-8 sm:px-6 lg:px-10">
+    <h2 id="colecoes-titulo" class="sr-only">Coleções</h2>
+    <ul class="grid gap-4 md:grid-cols-3 lg:gap-6">
+      {% for key, title, text, bg, img in [
+        ("Street", "Street", "Estilo urbano o tempo todo.", "bg-raspberry bg-gradient-to-r from-raspberry to-[#c2305c]", "street-rose"),
+        ("Classics", "Classics", "Modelos icônicos que nunca saem de moda.", "bg-coral-deep bg-gradient-to-r from-coral-deep via-coral-deep to-coral", "coral-classic-90"),
+        ("Performance", "Performance", "Tecnologia e conforto para ir mais longe.", "bg-deep-teal bg-gradient-to-r from-deep-teal to-[#21414a]", "performance-knit"),
+      ] %}
+      <li>
+        <a href="/tenis?category={{ key|urlencode }}" class="collection-card group {{ bg }}">
+          <span class="relative z-10 flex max-w-[52%] flex-col">
+            <span class="text-xs font-semibold uppercase tracking-wider">Coleção</span>
+            <span class="display-type mt-1 text-[clamp(1.5rem,2.4vw,2.25rem)]">{{ title }}</span>
+            <span class="mt-2 text-sm leading-snug">{{ text }}</span>
+            <span class="mt-auto inline-grid size-9 place-items-center rounded-full bg-white pt-0 text-ink transition-transform group-hover:translate-x-1" aria-hidden="true">{{ icon("arrow-right", "size-4") }}</span>
+          </span>
+          <img src="/static/images/demo/{{ img }}.svg" alt="" width="630" height="304" loading="lazy"
+               class="pointer-events-none absolute -right-8 bottom-3 w-[54%] max-w-72 -rotate-6 drop-shadow-[0_18px_20px_rgb(0_0_0/0.35)]">
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section aria-labelledby="lancamentos-titulo" class="mx-auto max-w-screen-2xl px-4 pt-12 sm:px-6 lg:px-10">
+    <div class="flex items-center gap-4 sm:gap-6">
+      <span class="hidden h-1 w-14 rounded bg-lime sm:block" aria-hidden="true"></span>
+      <h2 id="lancamentos-titulo" class="display-type min-w-0 text-[clamp(1.5rem,3.5vw,2.5rem)]">Lançamentos</h2>
+      <a href="/tenis?sort=recent" class="ml-auto inline-flex shrink-0 items-center gap-2 font-bold hover:underline">Ver todos {{ icon("arrow-right", "size-5") }}</a>
+    </div>
+
+    {% set products = launches["items"] if launches and launches["items"] else [] %}
+    {% if products %}
+    <ul class="mt-6 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+      {% for p in products %}
+      <li>
+        {{ product_card(p) }}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="mt-6 rounded-2xl bg-white p-6 text-muted">Nenhum lançamento disponível no momento. <a href="/tenis" class="font-bold text-ink underline">Ver catálogo</a></p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="/static/js/hero.js"></script>
+{% endblock %}

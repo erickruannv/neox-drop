@@ -1,0 +1,109 @@
+{% from "partials/macros.html" import icon, brand %}
+{%- set current_path = request.url.path if request else "/" -%}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ siteName|default("NEOX drop") }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}NEOX drop: catálogo de tênis com pedido via WhatsApp.{% endblock %}">
+  {% if csrfToken %}<meta name="csrf-token" content="{{ csrfToken }}">{% endif %}
+  <meta name="theme-color" content="#151515">
+  <link rel="preload" href="/static/dist/fonts/archivo-latin-wdth-italic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/dist/app.css">
+  {% block head %}{% endblock %}
+</head>
+<body class="min-h-dvh">
+  <a href="#conteudo" class="sr-only-focusable fixed left-4 top-4 z-50 rounded-full bg-lime px-4 py-2 font-bold text-ink">Pular para o conteúdo</a>
+  {%- if demoMode is defined and demoMode %}
+  <p class="bg-lime px-4 py-1.5 text-center text-xs font-bold text-ink sm:text-sm" data-demo-banner>
+    Modo demonstração: produtos e respostas fictícios, sem banco de dados e sem WhatsApp real.
+  </p>
+  {%- endif %}
+
+  <header class="sticky top-0 z-40 bg-ink text-paper">
+    <div class="mx-auto flex h-18 max-w-screen-2xl items-center gap-4 px-4 sm:px-6 lg:h-20 lg:gap-8 lg:px-10">
+      {{ brand() }}
+      <span class="hidden h-9 w-px bg-white/25 lg:block" aria-hidden="true"></span>
+
+      {% block header_nav %}
+      <nav class="hidden lg:block" aria-label="Principal">
+        <ul class="flex items-center gap-9">
+          <li><a class="nav-link" href="/" {% if current_path == "/" %}aria-current="page"{% endif %}>Início</a></li>
+          <li><a class="nav-link" href="/tenis" {% if current_path.startswith("/tenis") %}aria-current="page"{% endif %}>Tênis</a></li>
+          <li><a class="nav-link" href="/tenis#marcas">Marcas</a></li>
+          <li><a class="nav-link" href="/#colecoes">Coleções</a></li>
+        </ul>
+      </nav>
+
+      <form action="/tenis" method="get" role="search" class="ml-auto hidden md:block">
+        <label for="busca-header" class="sr-only">Buscar tênis</label>
+        <div class="flex h-11 w-64 items-center gap-2 rounded-full bg-white/10 px-4 text-paper/80 focus-within:bg-white/15 xl:w-80">
+          {{ icon("search", "size-5 shrink-0") }}
+          <input id="busca-header" name="q" type="search" maxlength="100" placeholder="Busque seu tênis…" autocomplete="off"
+                 class="w-full bg-transparent text-sm text-paper placeholder:text-paper/60 focus:outline-none">
+        </div>
+      </form>
+
+      {% endblock %}
+
+      <div class="ml-auto flex items-center gap-1 md:ml-0">
+        {% block header_actions %}
+        <a href="/admin/login" class="icon-btn hover:bg-white/10" aria-label="Área administrativa">{{ icon("user") }}</a>
+        <button type="button" id="cart-button" class="icon-btn relative hover:bg-white/10" aria-label="Carrinho" aria-haspopup="dialog" aria-controls="cart-drawer">
+          {{ icon("cart") }}
+          <span data-cart-count hidden class="absolute right-0.5 top-0.5 grid min-w-5 place-items-center rounded-full bg-coral px-1 text-[11px] font-bold text-white"></span>
+        </button>
+
+        <details class="group relative lg:hidden">
+          <summary class="icon-btn cursor-pointer list-none hover:bg-white/10 [&::-webkit-details-marker]:hidden" aria-label="Menu">{{ icon("menu") }}</summary>
+          <div class="absolute right-0 top-14 w-[min(20rem,calc(100vw-2rem))] rounded-2xl bg-ink-soft p-4 shadow-2xl ring-1 ring-white/10">
+            <form action="/tenis" method="get" role="search" class="mb-3 md:hidden">
+              <label for="busca-menu" class="sr-only">Buscar tênis</label>
+              <div class="flex h-11 items-center gap-2 rounded-full bg-white/10 px-4">
+                {{ icon("search", "size-5 shrink-0") }}
+                <input id="busca-menu" name="q" type="search" maxlength="100" placeholder="Busque seu tênis…"
+                       class="w-full bg-transparent text-sm text-paper placeholder:text-paper/60 focus:outline-none">
+              </div>
+            </form>
+            <nav aria-label="Principal (menu)">
+              <ul class="grid gap-1 text-base font-semibold">
+                <li><a class="block rounded-lg px-3 py-3 hover:bg-white/10" href="/" {% if current_path == "/" %}aria-current="page"{% endif %}>Início</a></li>
+                <li><a class="block rounded-lg px-3 py-3 hover:bg-white/10" href="/tenis">Tênis</a></li>
+                <li><a class="block rounded-lg px-3 py-3 hover:bg-white/10" href="/tenis#marcas">Marcas</a></li>
+                <li><a class="block rounded-lg px-3 py-3 hover:bg-white/10" href="/#colecoes">Coleções</a></li>
+              </ul>
+            </nav>
+          </div>
+        </details>
+        {% endblock %}
+      </div>
+    </div>
+  </header>
+
+  <main id="conteudo" tabindex="-1" class="focus:outline-none">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="mt-16 bg-ink text-paper/80">
+    <div class="mx-auto grid max-w-screen-2xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-[1fr_auto] lg:px-10">
+      <div class="space-y-4">
+        {{ brand() }}
+        <p class="max-w-md text-sm leading-relaxed">Projeto de demonstração acadêmica. Os pedidos são solicitações enviadas pelo WhatsApp: não há pagamento online e a disponibilidade é confirmada no atendimento.</p>
+      </div>
+      <nav aria-label="Rodapé">
+        <ul class="grid gap-2 text-sm font-semibold">
+          <li><a class="hover:text-lime" href="/tenis">Todos os tênis</a></li>
+          <li><a class="hover:text-lime" href="/#colecoes">Coleções</a></li>
+          <li><a class="hover:text-lime" href="/admin/login">Área administrativa</a></li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+  {% block cart %}
+  {% include "partials/cart.html" %}
+  <script type="module" src="/static/js/cart.js"></script>
+  {% endblock %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>
