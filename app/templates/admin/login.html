@@ -30,6 +30,9 @@
       </button>
     </form>
     <p class="mt-6 text-sm text-muted">Acesso restrito à equipe da loja. Não há cadastro público.</p>
+    {%- if demoMode is defined and demoMode %}
+    <p class="mt-3 rounded-xl bg-lime/30 p-3 text-sm font-semibold" data-demo-login-hint>Demonstração: qualquer e-mail válido com qualquer senha entra. Nenhuma conta real é usada.</p>
+    {%- endif %}
   </section>
 </div>
 {% endblock %}
