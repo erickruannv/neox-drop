@@ -3,8 +3,9 @@
 Roteiro operacional da Fase 3: [configuração gratuita e retomada por serviço](CONFIGURAR-BANCOS-TESTE.md).
 
 O backend possui as 14 operações JSON previstas, com teste local de método/rota/operationId.
-Isso não comprova integração real. Nesta rodada nenhum banco foi acessado e nenhuma migration
-foi aplicada. Cinco testes em `tests/real/` ficam ignorados sem opt-in; os testes em
+Isso não comprova integração real. O histórico atualizado das leituras Supabase e da aplicação
+manual informada pelo usuário está em [backend-fase3.md](evidencias/backend-fase3.md).
+Cinco testes em `tests/real/` ficam ignorados sem opt-in; os testes em
 `tests/integration/` exercitam HTTP/serviços locais com dublês de rede/coleção.
 
 ## Configuração local
@@ -32,14 +33,19 @@ não identificam se uma URL/chave é de produção: o responsável deve conferir
 Não há fallback de telefone por env: o destino vem exclusivamente de `store_settings`.
 Cookies de autenticação são HttpOnly/SameSite=Lax; CSRF assinado é vinculado ao access token,
 expira e gira no login/refresh/logout. O helper `issue_csrf` fornece o token ao futuro contexto
-Jinja2, nunca o JWT. Os loaders/telas dependem de T014 e dos templates do Claude; não foi criado
-endpoint JSON alternativo de bootstrap. Testes de API geram esse contexto pelo helper Python.
+Jinja2, nunca o JWT. Os loaders T014 estão implementados; os templates/static precisam estar
+integrados no mesmo checkout. Não existe endpoint JSON alternativo de bootstrap.
 Após expiração do access cookie, GET `/api/admin/me` pode renovar sessão via refresh; a UI deve
 usar o novo contexto CSRF antes da próxima escrita. Validar essa jornada com os templates reais.
 
 ## Supabase: migration e perfis
 
 Revisão definitiva para aplicação manual e consultas antes/depois: [SQL-SUPABASE-TESTE.md](SQL-SUPABASE-TESTE.md).
+
+O usuário informou aplicação manual bem-sucedida da migration como postgres no SQL Editor;
+não reaplicar nem reconciliar o histórico CLI automaticamente. Postflight e RLS de sessões
+reais continuam pendentes. Executar somente o roteiro de leitura
+`supabase/verification/admin_profiles_postflight.sql` e conferir seus resultados esperados.
 
 O arquivo `supabase/migrations/20261119105020_admin_profiles_rls.sql` foi criado por
 `npx --yes supabase@3.2.0 migration new admin_profiles_rls --workdir "$PWD"`.

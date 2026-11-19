@@ -163,3 +163,64 @@ Login real ainda depende de COOKIE_SECRET local, opt-in explícito de conexões 
 perfil ativo provisionado manualmente sob autorização e postflight/RLS comportamental.
 Não criamos usuários/perfis nem promovemos contas. MongoDB Atlas e Upstash ainda sem
 configuração local; não declaramos integração real desses serviços.
+
+## Loaders executáveis e preparação da integração (19/11/2026)
+
+T014 implementada parcialmente em feature/backend: rotas HTML /, /tenis,
+/tenis/{slug}, /admin/login, /admin e /admin/produtos e mount /static. Reutilizam catálogo,
+autorização Supabase e CSRF existentes, preservando as 14 operações JSON/OpenAPI e seus corpos.
+Contextos seguem ui.md, HTML não é cacheado, produto ausente retorna HTML 404, visitante sem
+sessão recebe 303 para login e perfil negado recebe 403 sem dados administrativos.
+
+Revisão independente encontrou refresh perdido quando a consulta MongoDB falha após renovar
+sessão. Quatro regressões falharam antes da correção e passaram depois: HTML/API, erro tratado
+503 e inesperado 500. Middleware preserva os novos cookies HttpOnly/CSRF e no-store apenas em
+erros após renovação e autorização bem-sucedidas. Sucesso/logout mantêm seu tratamento próprio.
+Revisão posterior confirmou correção sem novos achados bloqueantes.
+
+Verificação completa: `uv run pytest -q`: 129 passed, 5 skipped. `uv run ruff check app tests
+scripts`, `uv run ruff format --check app tests scripts`, `uv lock --check` e `git diff --check`
+aprovados. Os cinco testes reais continuam ignorados por falta de configuração/opt-in; não
+foram substituídos por mocks como prova de bancos. Settings/.env privados não foram alterados.
+
+Uvicorn iniciou realmente em loopback, um worker, com conexões desabilitadas; smoke HTTP:
+/health 503, /api/products 503, /api/admin/products 401 e /admin/produtos 303. O processo de
+verificação foi encerrado. Isso comprova inicialização/proteções locais, não serviços reais.
+
+Snapshot temporário do frontend 36b0492, sem editar o checkout do Claude: templates reais com
+StrictUndefined renderizaram home, catálogo, detalhe, login e painel com HTTP 200; sem sessão,
+painel retornou 303. Coleção Mongo e autorização do painel foram explicitamente substituídas
+nesse smoke: integração de contexto Jinja, não autenticação real. Snapshot removido ao terminar.
+
+Worktrees: main em /Users/dg/Documents/NeoxDrop; feature/backend em NeoxDrop-backend;
+feature/frontend em NeoxDrop-frontend. Frontend avançou de e0bec72 para 36b0492 durante esta
+rodada. A confirmação de entrega final foi solicitada; nenhum merge/checkout/push/deploy foi
+feito, nem alteração no worktree do Claude. Não existe ainda branch de integração desta rodada.
+Backend isolado não contém templates/static; essas dependências virão do merge autorizado.
+
+Preview já existente do Claude respondeu HTTP 200 com banner de demonstração em
+http://127.0.0.1:4180/ . É o servidor Python de demonstração, separado do FastAPI: catálogo,
+login/painel e checkout usam dados/respostas fictícios, sem banco ou WhatsApp real.
+Não inserir credenciais reais nesse login. Para iniciar novamente quando a porta estiver livre:
+`cd /Users/dg/Documents/NeoxDrop-frontend` e `pnpm demo`. Não encerramos o servidor existente.
+O navegador assistido não pôde abrir porque seu host está indisponível nesta sessão.
+
+Git: .env ignorado e não rastreado, apenas .env.example entre arquivos de configuração de env.
+Comparação em memória da chave configurada contra 534 blobs de todas as refs locais não
+identificou correspondências; nenhum valor foi impresso. Nenhum arquivo frontend, contrato,
+migration, configuração de ferramentas ou referência foi modificado pelo backend nesta rodada.
+Prontidão para push do backend depende da revisão do diff final; não equivale a prontidão de
+produção. Rate limit continua por processo: usar um worker local; antes de multiworker é
+necessário limitar no gateway/Redis. Supabase postflight/RLS, MongoDB, Upstash e perfil ativo
+continuam bloqueios da jornada administrativa real.
+
+Build/UI do snapshot 36b0492: `pnpm build` aprovado (vendor e Tailwind), render_preview.py
+validou/renderizou os contextos contra OpenAPI, e Playwright executou 94 testes com Chromium:
+92 passed, 2 skipped em 28s. Desktop 1440px e mobile 360px; as exclusões mobile são menu
+visível apenas em desktop e arraste 3D por mouse. Jornada coberta inclui home, catálogo,
+detalhe, carrinho, checkout e telas administrativas. Respostas API nesses testes são
+simuladas; não comprovam autenticação, estoque, contato WhatsApp ou bancos reais. GLB usado
+pelo teste é sintético, não ativo licenciado para publicação. Avisos Node sobre NO_COLOR/
+FORCE_COLOR não afetaram resultado. Build, fixtures, servidor e saídas rodaram em diretório
+temporário isolado, removido ao terminar; nenhuma instalação/edição no checkout do Claude.
+Git do frontend continuou limpo no mesmo commit. Não houve merge, push ou deploy.

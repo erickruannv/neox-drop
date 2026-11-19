@@ -3,7 +3,7 @@ import logging
 from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
-from starlette.responses import JSONResponse
+from starlette.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 logger = logging.getLogger("neox.errors")
 
@@ -50,6 +50,17 @@ class ApiFault(Exception):
 
 
 async def api_fault(request: Request, exc: ApiFault):
+    if request.url.path in {"/admin", "/admin/produtos"}:
+        if exc.status == 401:
+            return RedirectResponse(
+                "/admin/login", status_code=303, headers={"Cache-Control": "no-store"}
+            )
+        if exc.status == 403:
+            return HTMLResponse(
+                "<h1>Acesso administrativo não autorizado.</h1>",
+                status_code=403,
+                headers={"Cache-Control": "no-store"},
+            )
     return error_response(exc.status, exc.code, exc.message)
 
 
@@ -63,11 +74,15 @@ async def auth_error(request: Request, exc):
         response = error_response(429, "RATE_LIMITED", "Limite de requisições excedido.")
         response.headers["Retry-After"] = "60"
         return response
+    if request.url.path in {"/admin", "/admin/produtos"}:
+        return RedirectResponse(
+            "/admin/login", status_code=303, headers={"Cache-Control": "no-store"}
+        )
     return error_response(401, "AUTHENTICATION_FAILED", "Autenticação necessária ou inválida.")
 
 
 class SanitizedErrorsMiddleware:
-    """Impede que ServerErrorMiddleware repropague exceções contendo segredos ao Uvicorn."""
+    """Sanitiza falhas e preserva a renovação de sessão nas respostas de erro."""
 
     def __init__(self, app):
         self.app = app
@@ -81,6 +96,9 @@ class SanitizedErrorsMiddleware:
         async def tracked_send(message):
             nonlocal started
             if message["type"] == "http.response.start":
+                renewed = scope.get("state", {}).get("renewed_session_cookies", [])
+                if message["status"] >= 400 and renewed:
+                    message["headers"].extend([*renewed, (b"cache-control", b"no-store")])
                 started = True
             await send(message)
 
@@ -90,4 +108,4 @@ class SanitizedErrorsMiddleware:
             if started:
                 raise RuntimeError("Resposta interrompida.") from None
             response = await unexpected_error(None, None)
-            await response(scope, receive, send)
+            await response(scope, receive, tracked_send)

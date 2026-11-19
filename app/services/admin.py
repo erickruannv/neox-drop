@@ -97,5 +97,9 @@ async def require_admin(
         profile = await authorize(client, token)
     if renewed:
         session_cookies(request.app.state.settings, response, renewed)
+        # A sessão já girou no Auth; falhas posteriores não podem perder o refresh novo.
+        request.state.renewed_session_cookies = [
+            (key, value) for key, value in response.raw_headers if key == b"set-cookie"
+        ]
     request.state.admin_access_token = token
     return profile

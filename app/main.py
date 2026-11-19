@@ -1,6 +1,9 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from httpx import HTTPError
 from postgrest.exceptions import APIError
 from pymongo.errors import PyMongoError
@@ -29,6 +32,8 @@ from app.core.security import BodyLimitMiddleware, RateLimitMiddleware
 from app.db.health import check_connections
 from app.schemas.common import Health
 
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings if settings is not None else get_settings()
@@ -53,6 +58,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(products_router)
     application.include_router(recent_router)
     application.include_router(checkout_router)
+    application.mount("/static", StaticFiles(directory=STATIC_DIR, check_dir=False), name="static")
 
     @application.get(
         "/health",

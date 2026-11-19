@@ -1,5 +1,9 @@
 # SQL definitivo — aplicação manual em neox-drop-test
 
+**Atualização 19/11/2026:** o usuário informou execução manual com sucesso, como postgres,
+e preflight aprovado. Não reaplicar a migration nem alterar histórico remoto automaticamente.
+O próximo passo é somente o postflight de leitura abaixo; RLS com sessões reais segue pendente.
+
 O usuário confirmou a criação do projeto e de duas contas Auth de teste. Esta revisão foi
 **somente local**: nenhum SQL, leitura de tabelas, migration, criação de conta ou promoção
 administrativa foi executado no Supabase. Não foram solicitadas ou lidas senhas/chaves.
