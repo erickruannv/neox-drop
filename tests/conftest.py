@@ -17,8 +17,10 @@ def examples():
 
 
 @pytest.fixture(autouse=True)
-def isolate_settings_environment(monkeypatch):
+def isolate_settings_environment(monkeypatch, request):
     from app.core.config import Settings
 
+    if "tests/real/" in str(request.fspath):
+        return
     for name in Settings.model_fields:
         monkeypatch.delenv(name.upper(), raising=False)
