@@ -11,6 +11,7 @@ from app.api.admin_products import router as admin_products_router
 from app.api.auth import router as auth_router
 from app.api.pages import router as pages_router
 from app.api.products import router as products_router
+from app.api.recent import router as recent_router
 from app.core.config import Settings, get_settings
 from app.core.exceptions import (
     ApiFault,
@@ -47,6 +48,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(auth_router)
     application.include_router(admin_products_router)
     application.include_router(products_router)
+    application.include_router(recent_router)
 
     @application.get(
         "/health",

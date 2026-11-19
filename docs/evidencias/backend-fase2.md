@@ -66,3 +66,10 @@ id/slug. Falhas Redis degradam para leitura Mongo; falha Mongo nunca é mascarad
 Escritas invalidam após commit e não alegam rollback quando DEL falha. Teste reproduz cache
 antigo após escrita com DEL falhando, e valida retorno atualizado pela versão do Mongo,
 sem flag local de worker. Sem prova de dois workers reais; 96 passaram, 2 reais ignorados.
+
+T018 preparado: POST recentes valida produto ativo e usa EVAL único com LREM/LPUSH/LTRIM/EXPIRE,
+IDs ObjectId canônicos, até 5 únicos, TTL 604800s, cookie anônimo aleatório HttpOnly/SameSite.
+GET não registra/renova visita e reconsulta produtos ativos atuais no Mongo, preservando ordem.
+Sem cookie ou falha Redis: items vazio; POST válido em falha Redis: 204 best-effort. Mongo fora
+continua 503 quando necessário. 99 testes locais passaram; quatro testes reais opt-in ignorados
+(Auth/RLS, CRUD/índices Mongo e atomicidade/TTL Redis). Nenhum banco real contatado.
