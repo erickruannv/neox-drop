@@ -82,6 +82,9 @@
   </header>
 
   <main id="conteudo" tabindex="-1" class="focus:outline-none">
+    {% if serviceMessage is defined and serviceMessage %}
+    <p role="status" class="bg-lime px-4 py-3 text-center font-bold text-ink" data-service-unavailable>{{ serviceMessage }}</p>
+    {% endif %}
     {% block content %}{% endblock %}
   </main>
 

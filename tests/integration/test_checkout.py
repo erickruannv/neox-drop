@@ -2,9 +2,6 @@ from unittest.mock import AsyncMock
 
 import httpx
 from jsonschema import Draft202012Validator
-from starlette.responses import Response
-
-from app.core.security import issue_csrf
 
 
 async def test_checkout_http_revalidates_and_matches_contract(catalog_app, monkeypatch, contract):
@@ -14,8 +11,10 @@ async def test_checkout_http_revalidates_and_matches_contract(catalog_app, monke
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app), base_url="http://test"
     ) as client:
-        token = issue_csrf(app.state.settings, Response())
-        client.cookies.set("neox_csrf", token, domain="test.local")
+        page = await client.get(f"/tenis/{doc['slug']}")
+        assert page.status_code == 200
+        token = client.cookies.get("neox_csrf")
+        assert token and token in page.text
         headers = {"Origin": app.state.settings.allowed_origin, "X-CSRF-Token": token}
         body = {
             "items": [{"productId": str(doc["_id"]), "sizeBR": 40, "quantity": 2, "priceCents": 1}],

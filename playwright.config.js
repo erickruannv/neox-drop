@@ -1,12 +1,16 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Serve o HTML renderizado por `pnpm preview` (Jinja2 + fixtures OpenAPI); sem backend Node.
+const fastapiURL = process.env.NEOX_FASTAPI_URL;
+
+// Sem URL, testa fixtures; com URL, testa o FastAPI já iniciado, sem interceptar a API.
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: true,
   reporter: [["list"]],
-  use: { baseURL: "http://127.0.0.1:4173" },
-  webServer: {
+  testMatch: fastapiURL ? "**/fastapi.spec.js" : undefined,
+  testIgnore: fastapiURL ? [] : ["**/fastapi.spec.js"],
+  use: { baseURL: fastapiURL ?? "http://127.0.0.1:4173" },
+  webServer: fastapiURL ? undefined : {
     command: "python3 -m http.server 4173 --bind 127.0.0.1 --directory tests/e2e/.preview",
     url: "http://127.0.0.1:4173/",
     reuseExistingServer: !process.env.CI,

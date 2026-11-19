@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request, Response
-from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from app.api.products import featured
@@ -19,21 +18,48 @@ templates = Jinja2Templates(directory=Path(__file__).resolve().parents[1] / "tem
 Collection = Annotated[object, Depends(products_collection)]
 
 
-def render(request: Request, response: Response, name: str, **context):
+def render(request: Request, response: Response, name: str, *, status_code=200, **context):
     session = getattr(request.state, "admin_access_token", None)
-    token = issue_csrf(
-        request.app.state.settings,
-        response,
-        session if session is not None else request.cookies.get("neox_admin_session", ""),
+    token = (
+        issue_csrf(
+            request.app.state.settings,
+            response,
+            session if session is not None else request.cookies.get("neox_admin_session", ""),
+        )
+        if request.app.state.settings.cookie_secret
+        else ""
     )
     page = templates.TemplateResponse(
         request=request,
         name=name,
         context={"siteName": "NEOX drop", "csrfToken": token, **context},
+        status_code=status_code,
         headers={"Cache-Control": "no-store"},
     )
     page.raw_headers.extend((k, v) for k, v in response.raw_headers if k == b"set-cookie")
     return page
+
+
+def unavailable(request: Request):
+    context = {
+        "serviceMessage": "Catálogo temporariamente indisponível. Tente novamente mais tarde.",
+        "message": "Não foi possível consultar o catálogo.",
+    }
+    name = "error.html"
+    if request.url.path == "/":
+        name = "home.html"
+        context.update(
+            featured={"items": []},
+            recent={"items": []},
+            launches={"items": [], "page": 1, "limit": 4, "total": 0},
+        )
+    elif request.url.path == "/tenis":
+        name = "catalog.html"
+        context.update(
+            catalog={"items": [], "page": 1, "limit": 12, "total": 0},
+            filters=dict(request.query_params),
+        )
+    return render(request, Response(), name, status_code=503, **context)
 
 
 @router.get("/")
@@ -72,13 +98,24 @@ async def product(slug: str, request: Request, response: Response, collection: C
     except ApiFault as exc:
         if exc.status != 404:
             raise
-        return HTMLResponse("<h1>Produto não encontrado.</h1>", status_code=404)
+        return render(
+            request, response, "error.html", status_code=404, message="Produto não encontrado."
+        )
     return render(request, response, "product.html", product=detail)
 
 
 @router.get("/admin/login")
 async def login(request: Request, response: Response):
-    return render(request, response, "admin/login.html")
+    settings = request.app.state.settings
+    message = ""
+    if not (
+        settings.test_connections_enabled
+        and settings.supabase_url
+        and settings.supabase_key
+        and settings.cookie_secret
+    ):
+        message = "A autenticação administrativa aguarda configuração do ambiente de teste."
+    return render(request, response, "admin/login.html", serviceMessage=message)
 
 
 @router.get("/admin")

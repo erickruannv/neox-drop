@@ -22,6 +22,7 @@ def page_templates(monkeypatch):
                 ),
                 "catalog.html": "{{ catalog.total }} {{ filters.q }}",
                 "product.html": "{{ product.name }}",
+                "error.html": "<h1>{{ message }}</h1>",
                 "admin/login.html": '<meta name="csrf-token" content="{{ csrfToken }}">',
                 "admin/products.html": (
                     "{{ admin.displayName }} {{ products.total }} {{ csrfToken }}"
@@ -154,6 +155,28 @@ async def test_refresh_cookies_survive_catalog_failure(auth_app, path, unexpecte
         assert client.cookies.get("neox_admin_session") == "access-test-only"
         assert all("HttpOnly" in c for c in response.headers.get_list("set-cookie"))
         assert response.headers["cache-control"] == "no-store"
+        if response.headers["content-type"].startswith("text/html"):
+            assert client.cookies.get("neox_csrf") in response.text
         assert "access-test-only" not in response.text
         assert "secret://" not in response.text
         assert (await client.get("/api/admin/me")).status_code == 200
+
+
+async def test_real_templates_without_database_show_unavailability_not_demo():
+    app = create_app(Settings(_env_file=None, cookie_secret="local-test-" * 8))
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        for path in ("/", "/tenis", "/tenis/qualquer-produto"):
+            response = await client.get(path)
+            assert response.status_code == 503
+            assert response.headers["content-type"].startswith("text/html")
+            assert "data-service-unavailable" in response.text
+            assert "Catálogo temporariamente indisponível" in response.text
+            assert "data-demo-banner" not in response.text
+            assert '"priceCents"' not in response.text
+            assert response.headers["cache-control"] == "no-store"
+        login = await client.get("/admin/login")
+        assert login.status_code == 200
+        assert client.cookies.get("neox_csrf") in login.text
+        assert "autenticação administrativa aguarda" in login.text
+        assert (await client.get("/admin/produtos")).status_code == 303
+        assert (await client.get("/api/products")).status_code == 503

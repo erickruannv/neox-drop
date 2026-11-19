@@ -4,6 +4,11 @@ Este roteiro prepara a validação real; não provisiona recursos automaticament
 Pré-requisitos técnicos e limites: [TESTES-BANCOS.md](TESTES-BANCOS.md).
 Diagnóstico desta rodada: [evidências da Fase 3](evidencias/backend-fase3.md).
 
+**Estado atual:** Supabase de teste e duas contas já foram criados; usuário informou migration
+aplicada manualmente. Não repetir criação nem aplicação. Prosseguir apenas com o postflight
+de leitura em `supabase/verification/admin_profiles_postflight.sql`. MongoDB/Upstash seguem
+sem credenciais locais. O FastAPI integrado já abre em http://127.0.0.1:8000/ sem simular catálogo.
+
 ## 1. Escolher recursos gratuitos e isolados
 
 Crie recursos dedicados à NEOX de teste, com dados fictícios. Os nomes abaixo são sugestões

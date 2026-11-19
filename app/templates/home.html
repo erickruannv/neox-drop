@@ -67,7 +67,7 @@
       {% endfor %}
     </ul>
     {% else %}
-    <p class="mt-6 rounded-2xl bg-white p-6 text-muted">Nenhum lançamento disponível no momento. <a href="/tenis" class="font-bold text-ink underline">Ver catálogo</a></p>
+    <p class="mt-6 rounded-2xl bg-white p-6 text-muted">{% if serviceMessage is defined and serviceMessage %}Não foi possível consultar os lançamentos.{% else %}Nenhum lançamento disponível no momento.{% endif %} <a href="/tenis" class="font-bold text-ink underline">Ver catálogo</a></p>
     {% endif %}
   </section>
 </div>

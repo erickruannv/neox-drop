@@ -34,6 +34,13 @@ async def http_error(request: Request, exc: HTTPException):
 
 async def service_error(request: Request, exc: ServiceUnavailable):
     logger.warning("event=service_unavailable")
+    if request is not None and (
+        request.url.path in {"/", "/tenis", "/admin", "/admin/login", "/admin/produtos"}
+        or request.url.path.startswith("/tenis/")
+    ):
+        from app.api.pages import unavailable
+
+        return unavailable(request)
     return error_response(503, "SERVICE_UNAVAILABLE", "Serviço temporariamente indisponível.")
 
 
@@ -98,7 +105,11 @@ class SanitizedErrorsMiddleware:
             if message["type"] == "http.response.start":
                 renewed = scope.get("state", {}).get("renewed_session_cookies", [])
                 if message["status"] >= 400 and renewed:
-                    message["headers"].extend([*renewed, (b"cache-control", b"no-store")])
+                    headers = message["headers"]
+                    cookies = {v.split(b"=", 1)[0] for k, v in headers if k == b"set-cookie"}
+                    headers[:] = [(k, v) for k, v in headers if k != b"cache-control"]
+                    headers.extend((k, v) for k, v in renewed if v.split(b"=", 1)[0] not in cookies)
+                    headers.append((b"cache-control", b"no-store"))
                 started = True
             await send(message)
 

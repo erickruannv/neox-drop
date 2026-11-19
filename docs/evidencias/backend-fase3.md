@@ -224,3 +224,73 @@ pelo teste é sintético, não ativo licenciado para publicação. Avisos Node s
 FORCE_COLOR não afetaram resultado. Build, fixtures, servidor e saídas rodaram em diretório
 temporário isolado, removido ao terminar; nenhuma instalação/edição no checkout do Claude.
 Git do frontend continuou limpo no mesmo commit. Não houve merge, push ou deploy.
+
+## Integração definitiva local do frontend final (19/11/2026)
+
+Usuário confirmou oficialmente entrega final 36b0492 e autorizou integração. As três worktrees
+estavam limpas: main fc48c18, backend 610cc39, frontend 36b0492. Reutilizamos feature/backend,
+sem nova branch/worktree. Merge de dois pais 3855a15 preserva backend e frontend. Único conflito:
+.gitignore, resolvido por união de exclusões Supabase e build UI. Main e checkout/branch do
+Claude não foram modificados. Nada enviado ao GitHub; sem deploy ou escrita em bancos.
+
+FastAPI real está iniciado em http://127.0.0.1:8000/, loopback, um worker, sem proxy headers.
+Home e catálogo usam os templates reais; como MongoDB não está configurado, renderizam
+HTML 503 com aviso, sem inventar produtos/estoque/preços. Falha de consulta é distinguida de
+catálogo vazio. Detalhe sem banco mostra página de erro 503, não produto fictício. Carrinho
+real abre no header. Login HTML 200 em /admin/login fornece meta CSRF + cookie HttpOnly;
+sem sessão /admin e /admin/produtos redirecionam 303 ao login. Painel não foi liberado com
+perfil fictício; renderização autorizada permanece coberta por testes locais com dublês.
+Não foi necessário alterar OpenAPI nem criar bootstrap/API paralela.
+
+COOKIE_SECRET ausente foi gerado por secrets.token_urlsafe(48), apenas no .env ignorado,
+com modo 600, sem imprimir valor. Settings corresponde ao arquivo, flag de conexões permanece
+false. Atualização mínima dos templates feita exclusivamente neste checkout integrado:
+avisos/erros HTML e distinção entre falha e vazio; fontes originais do Claude preservadas.
+
+Compatibilidade de checkout/CSRF: teste de contrato HTTP passou a obter o token da página
+real de produto antes do POST, em vez de fabricar bootstrap por helper. Revalidação de preço
+em centavos e resposta 200 são testadas com coleção/contato simulados, não bancos reais.
+Navegador contra Uvicorn real demonstrou POST /api/checkout com CSRF válido retornando 503
+por banco indisponível; sem CSRF, 403. Nenhum waUrl ou disponibilidade real foi inventado.
+Corrigimos também a colisão de cookies CSRF/no-store em páginas de erro após refresh: cookies
+novos já definidos no HTML têm precedência, e o refresh permanece preservado em 503/500.
+
+Playwright recebeu modo NEOX_FASTAPI_URL que usa o servidor existente, sem servidor de
+fixtures nem interceptação de APIs. Oito testes desktop/mobile passaram: home/assets,
+carrinho vazio, catálogo/filtro real 503, detalhe indisponível, login/CSRF real com bloqueio
+por opt-in ausente, proteção do painel e checkout bloqueado. Uma primeira execução teve
+falha no teste ao tentar preencher filtros mobile recolhidos; teste corrigido para abrir
+summary como usuário. Outra regressão comprovou mistura de vazio/erro antes do ajuste do
+texto/visibilidade; passou depois. Não houve alteração para mascarar erro de banco.
+
+Supabase: repetidas leituras reais por Python, somente Publishable key: Auth health/settings
+200; SELECT user_id limit=0 em admin_profiles 401/42501 (negação anônima). Conector novamente
+não confirmou acesso ao projeto neox-drop-test. Postflight SQL revisto permanece somente
+SELECT e BEGIN READ ONLY/ROLLBACK, para execução manual pelo responsável. Nenhum SQL remoto
+foi executado; migration não reaplicada, histórico remoto não reconciliado. Metadados completos
+e RLS com sessões admin/não-admin continuam sem comprovação remota.
+
+Revisão independente não encontrou falha bloqueante de segurança/contrato; observação menor
+sobre vazio versus indisponibilidade foi corrigida com regressão de navegador. Auditoria
+comparou os dois valores secretos configurados contra 544 blobs de todas as refs locais e
+contra arquivos rastreáveis do checkout, sem correspondências; .env não rastreado, dist,
+node_modules e resultados de testes ignorados. Isso não é auditoria externa de produção.
+
+Pendências para jornada real: configurar MongoDB Atlas gratuito (URI, banco neox_drop_test,
+usuário restrito e IP da máquina), revisar/autorizar validator/seis índices existentes antes
+de executar inicialização; configurar Upstash gratuito com REST URL/token; confirmar postflight,
+autorizar provisionamento manual de perfil admin ativo e configurar testes de sessão. Opt-in
+APP_ENV=test/TEST_CONNECTIONS_ENABLED=true somente após conferir destinos. Para checkout
+completo, contato autorizado em store_settings e chave backend privada ainda são necessários.
+Não alteramos nenhum desses recursos. Rate limit por processo exige um worker até solução
+compartilhada antes de multiworker. RF-13 permanece pendente de GLB/licença reais.
+
+Verificação final desta integração: `uv run pytest -q`: 130 passed, 5 skipped; Ruff check e
+format no escopo backend (app/scripts/tests unit,contract,integration,real), uv lock --check
+e git diff --check aprovados. pnpm install --frozen-lockfile e build aprovados, sem upgrade
+de ferramentas/lockfiles. `pnpm test:ui --workers=2`: 92 passed, 2 skipped (28.2s); usa fixtures.
+`NEOX_FASTAPI_URL=http://127.0.0.1:8000 pnpm exec playwright test --workers=2`: 8 passed (3.2s),
+sem mocks de rede. Esses oito validam o FastAPI/JS reais com provedores desabilitados, não os
+três bancos. Os cinco testes de serviços reais continuam sem execução/opt-in. API/HTML de
+checkout não gera link real sem MongoDB/contato. README contém comandos exatos para build,
+servidor e os dois modos de testes. Servidor Uvicorn mantido ativo para visualização do usuário.
