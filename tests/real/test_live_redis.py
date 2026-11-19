@@ -11,7 +11,9 @@ async def test_real_atomic_recent_order_uniqueness_ttl(real_settings):
     visitor = secrets.token_hex(16)
     key = f"recent:visitor:{visitor}"
     identifiers = [str(ObjectId()) for _ in range(7)]
-    async with redis_client(real_settings) as redis:
+    # Várias operações de diagnóstico no mesmo contexto; app continua com deadline curto.
+    settings = real_settings.model_copy(update={"redis_timeout_seconds": 5})
+    async with redis_client(settings) as redis:
         try:
             await asyncio.gather(
                 *(

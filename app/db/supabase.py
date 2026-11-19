@@ -1,10 +1,10 @@
 from contextlib import asynccontextmanager
 
 from httpx import AsyncClient
-from supabase import AsyncClientOptions, acreate_client
 
 from app.core.config import Settings
 from app.core.exceptions import ServiceUnavailable
+from supabase import AsyncClientOptions, acreate_client
 
 
 @asynccontextmanager
@@ -37,6 +37,34 @@ async def check_supabase(settings: Settings) -> bool:
             headers={"apikey": settings.supabase_key.get_secret_value()},
         )
         response.raise_for_status()
-        # SELECT sem dados pessoais; não comprova RLS ou autorização administrativa.
-        await client.table("store_settings").select("id").eq("id", 1).limit(1).execute()
+        # Raiz REST testa disponibilidade; não consulta tabelas privadas nem comprova RLS/schema.
+        response = await client.options.httpx_client.get(
+            str(client.rest_url).rstrip("/") + "/",
+            headers={"apikey": settings.supabase_key.get_secret_value()},
+        )
+        response.raise_for_status()
         return True
+
+
+async def store_contact(settings: Settings) -> str:
+    if (
+        not settings.test_connections_enabled
+        or not settings.supabase_url
+        or not settings.supabase_secret_key
+    ):
+        return ""
+    secret = settings.supabase_secret_key.get_secret_value()
+    headers = {"apikey": secret}
+    if not secret.startswith("sb_secret_"):
+        headers["Authorization"] = f"Bearer {secret}"
+    async with AsyncClient(timeout=settings.request_timeout_seconds) as http:
+        response = await http.get(
+            settings.supabase_url.get_secret_value().rstrip("/") + "/rest/v1/store_settings",
+            params={"select": "whatsapp_e164_digits", "id": "eq.1"},
+            headers=headers,
+        )
+        response.raise_for_status()
+        rows = response.json()
+        if not isinstance(rows, list) or len(rows) > 1 or (rows and not isinstance(rows[0], dict)):
+            raise ServiceUnavailable()
+        return rows[0].get("whatsapp_e164_digits", "") if rows else ""

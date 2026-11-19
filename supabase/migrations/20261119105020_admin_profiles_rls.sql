@@ -23,6 +23,8 @@ alter table public.admin_profiles enable row level security;
 alter table public.store_settings enable row level security;
 revoke all on public.admin_profiles, public.store_settings from public, anon, authenticated;
 grant select on public.admin_profiles to authenticated;
+-- Backend do checkout lê somente contato, nunca expõe esta chave no cliente.
+grant select on public.store_settings to service_role;
 
 -- Acesso JWT revogado em logout só pode ser detectado conferindo auth.sessions.
 -- Função privada, sem argumentos, sempre restrita ao uid e session_id do chamador.

@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     csrf_ttl_seconds: int = Field(default=3600, ge=60, le=86400)
     supabase_url: SecretStr | None = None
     supabase_key: SecretStr | None = None
+    supabase_secret_key: SecretStr | None = None
     mongodb_uri: SecretStr | None = None
     mongodb_database: str = "neox_drop_test"
     upstash_redis_rest_url: SecretStr | None = None

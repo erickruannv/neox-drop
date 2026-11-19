@@ -80,3 +80,12 @@ levavam a 500; health consultava tabela privada com chave pública. Corrigidos c
 RED→GREEN (DELETE usa Response injetado, URL/NaN/BSON rejeitados com 422, probe sem tabelas
 privadas). Não houve achado de bypass de autorização/CSRF ou estoque bruto público na revisão.
 Isso não é pentest externo nem prova do SQL executado.
+
+T021 preparado após catálogo: checkout reconsulta Mongo sem cache, agrupa produto+tamanho,
+rejeita soma >10/estoque, mantém centavos inteiros e ignora preço/total extras. Não insere pedido,
+não decrementa/reserva estoque e não envia mensagem. Contato só do singleton PostgreSQL,
+via chave backend separada/opcional e grant SELECT explícito a service_role; vazio bloqueia link.
+Revisão adicional identificou Int64 BSON rejeitado por type(x) is int e limite medido após
+URL-encoding. Corrigidos com roundtrip BSON e nome acentuado: inteiros BSON são aceitos sem
+aceitar bool; limite é 8000 caracteres da mensagem conforme descrição OpenAPI (antes de encoding).
+Nenhum contrato foi alterado. 114 testes passaram, quatro reais ignorados.

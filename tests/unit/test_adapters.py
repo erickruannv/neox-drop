@@ -161,3 +161,72 @@ def test_connection_script_refuses_without_opt_in(monkeypatch, capsys):
     monkeypatch.setattr("scripts.check_connections.Settings", lambda: Settings(_env_file=None))
     assert main() == 2
     assert "Recusado" in capsys.readouterr().out
+
+
+async def test_supabase_health_uses_no_private_table(monkeypatch):
+    from functools import partial
+
+    from app.db.supabase import check_supabase
+
+    paths = []
+
+    async def handle(request):
+        paths.append(request.url.path)
+        assert "store_settings" not in request.url.path
+        return httpx.Response(200, json={})
+
+    monkeypatch.setattr(
+        "app.db.supabase.AsyncClient",
+        partial(
+            httpx.AsyncClient,
+            transport=httpx.MockTransport(handle),
+        ),
+    )
+    settings = Settings(
+        _env_file=None,
+        app_env="test",
+        test_connections_enabled=True,
+        supabase_url="http://localhost:54321",
+        supabase_key="test-public-key",
+    )
+    assert await check_supabase(settings) is True
+    assert paths == ["/auth/v1/health", "/rest/v1/"]
+
+
+async def test_store_contact_uses_only_server_key_and_no_public_fallback(monkeypatch):
+    from functools import partial
+
+    from app.db.supabase import store_contact
+
+    seen = []
+
+    async def handle(request):
+        assert request.url.path == "/rest/v1/store_settings"
+        assert request.headers["apikey"] == "sb_secret_test-not-real"
+        assert "sb_secret" not in str(request.url)
+        assert request.url.params["id"] == "eq.1"
+        seen.append(True)
+        return httpx.Response(200, json=[{"whatsapp_e164_digits": ""}])
+
+    monkeypatch.setattr(
+        "app.db.supabase.AsyncClient",
+        partial(
+            httpx.AsyncClient,
+            transport=httpx.MockTransport(handle),
+        ),
+    )
+    settings = Settings(
+        _env_file=None,
+        app_env="test",
+        test_connections_enabled=True,
+        supabase_url="http://localhost:54321",
+        supabase_key="public-test",
+    )
+    assert await store_contact(settings) == ""
+    assert not seen
+    settings = Settings(
+        **{**settings.model_dump(), "supabase_secret_key": "sb_secret_test-not-real"},
+        _env_file=None,
+    )
+    assert await store_contact(settings) == ""
+    assert seen
