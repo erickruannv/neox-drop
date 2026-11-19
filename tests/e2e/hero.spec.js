@@ -2,14 +2,14 @@ import { test, expect } from "@playwright/test";
 import fixture from "./fixtures/home.json" with { type: "json" };
 
 const items = fixture.featured.items;
-const brl = (c) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(c / 100);
+const amount = (c) => new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2 }).format(c / 100);
 const hero = (page) => page.locator("#hero");
 
 async function expectSelected(page, i) {
   const item = items[i];
   const h = hero(page);
   await expect(h.locator("h1")).toHaveText(item.name);
-  await expect(h.locator('[data-field="price"]')).toHaveText(brl(item.priceCents));
+  await expect(h.locator('[data-field="price"]')).toHaveText(amount(item.priceCents));
   await expect(h.locator('[data-field="description"]')).toHaveText(item.description);
   await expect(h.locator('[data-field="counter"]')).toHaveText(String(i + 1).padStart(2, "0"));
   await expect(h.locator('img[data-field="image"]')).toHaveAttribute("src", item.mainImageUrl);

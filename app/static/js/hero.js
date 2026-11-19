@@ -15,6 +15,7 @@ function init(root, items) {
   if (!items.length) return;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+  const amount = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fields = (name) => root.querySelectorAll(`[data-field="${name}"]`);
   const thumbs = [...root.querySelectorAll("[data-thumbs] button")];
   const dots = [...root.querySelectorAll("[data-progress] > *")];
@@ -38,7 +39,7 @@ function init(root, items) {
     set("index", (el) => (el.textContent = pad(i + 1, 3)));
     set("name", (el) => (el.textContent = item.name));
     set("description", (el) => (el.textContent = item.description ?? ""));
-    set("price", (el) => (el.textContent = brl.format(item.priceCents / 100)));
+    set("price", (el) => (el.textContent = amount.format(item.priceCents / 100)));
     set("lettering", (el) => (el.textContent = item.name.split(" ")[0].toUpperCase()));
     set("counter", (el) => (el.textContent = pad(i + 1, 2)));
     set("cta", (el) => (el.href = `/tenis/${encodeURIComponent(item.slug)}`));

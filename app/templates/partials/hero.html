@@ -1,4 +1,4 @@
-{% from "partials/macros.html" import icon, brl %}
+{% from "partials/macros.html" import icon, brl_amount %}
 {#- Contexto: featured: FeaturedList (items: ProductDetail[]). Estado inicial = primeiro item,
     renderizado no servidor; hero.js troca todos os campos juntos a partir de #hero-data. -#}
 {%- set items = featured["items"] if featured and featured["items"] else [] -%}
@@ -10,10 +10,10 @@
          data-selected="{{ first.id }}"
          style="--hero-bg: {{ fx.backgroundHex|default('#1A1D17') }}; --hero-accent: {{ fx.accentHex|default('#BDF400') }};">
   {# Arcos decorativos (ref. 04), tingidos pelo accentHex. #}
-  <div class="hero-arc pointer-events-none absolute -left-40 top-24 size-[34rem]" aria-hidden="true"></div>
+  <div class="hero-arc pointer-events-none absolute -left-[33rem] top-16 hidden size-[38rem] lg:block" aria-hidden="true"></div>
   <div class="hero-arc pointer-events-none absolute -bottom-[26rem] right-[-10rem] size-[52rem]" aria-hidden="true"></div>
 
-  <div class="relative mx-auto grid max-w-screen-2xl grid-cols-1 gap-6 px-4 pb-8 pt-8 sm:px-6 md:pt-12 lg:min-h-[34rem] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-center lg:gap-4 lg:px-24 lg:pb-24 lg:pt-14">
+  <div class="relative mx-auto grid max-w-screen-2xl grid-cols-1 gap-5 px-4 pb-8 pt-6 sm:px-6 md:pt-10 lg:min-h-[31rem] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-center lg:gap-4 lg:px-24 lg:pb-24 lg:pt-8">
     <div class="relative z-10 order-1 hero-swap" data-hero-text>
       <p class="flex items-center gap-3 text-sm font-semibold tracking-wide">
         <span class="hero-kicker-line" aria-hidden="true"></span>
@@ -21,20 +21,20 @@
         <span class="hero-kicker-line" aria-hidden="true"></span>
       </p>
       <h1 class="display-type mt-4 text-[clamp(2.1rem,4.6vw,4.5rem)] [overflow-wrap:anywhere]" data-field="name">{{ first.name }}</h1>
-      <p class="mt-5 max-w-sm text-lg leading-snug opacity-90" data-field="description">{{ first.description }}</p>
-      <p class="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl" data-field="price">{{ brl(first.priceCents) }}</p>
+      <p class="mt-3 max-w-sm text-base leading-snug opacity-90 sm:mt-5 sm:text-lg" data-field="description">{{ first.description }}</p>
+      <p class="mt-4 flex items-start gap-1.5 font-extrabold tracking-tight tabular-nums sm:mt-6"><span class="mt-0.5 text-lg sm:text-xl">R$</span><span class="text-[2rem] leading-none sm:text-[2.75rem]" data-field="price">{{ brl_amount(first.priceCents) }}</span></p>
       <a href="/tenis/{{ first.slug|urlencode }}" class="btn-lime mt-7 hidden lg:inline-flex" data-field="cta">
         Comprar agora {{ icon("arrow-right", "size-5") }}
       </a>
     </div>
 
-    <div class="relative order-2 grid min-h-[15rem] place-items-center sm:min-h-[20rem] lg:min-h-[26rem]">
+    <div class="relative order-2 grid min-h-[11rem] place-items-center sm:min-h-[18rem] lg:min-h-[24rem]">
       {# Lettering gráfico de fundo: primeira palavra do nome do destaque. #}
-      <span class="display-type pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none text-center text-[clamp(6rem,22vw,19rem)] text-white/10 hero-swap"
+      <span class="display-type pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none whitespace-nowrap text-center text-[clamp(5rem,14vw,13rem)] text-white/[0.12] hero-swap"
             aria-hidden="true" data-field="lettering">{{ first.name.split(" ")[0]|upper }}</span>
-      <div class="hero-media relative z-10 w-full max-w-[44rem]" data-hero-media>
+      <div class="hero-media relative z-10 aspect-[630/304] w-full max-w-[44rem]" data-hero-media>
         <img src="{{ first.mainImageUrl }}" alt="{{ first.name }}, {{ first.colorName }}"
-             width="660" height="360" fetchpriority="high" decoding="async"
+             width="630" height="304" fetchpriority="high" decoding="async"
              class="hero-float w-full drop-shadow-[0_30px_40px_rgb(0_0_0/0.45)]" data-field="image">
         <p class="sr-only" data-model-status></p>
       </div>
@@ -49,10 +49,10 @@
       <ul class="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0 lg:rounded-full lg:bg-black/30 lg:p-1.5 lg:backdrop-blur" aria-label="Escolher destaque" data-thumbs>
         {% for item in items %}
         <li class="snap-start">
-          <button type="button" class="thumb grid h-16 w-28 shrink-0 place-items-center rounded-full border-2 border-transparent px-2 transition-colors hover:bg-white/10 sm:w-32"
+          <button type="button" class="thumb grid h-16 w-28 shrink-0 place-items-center rounded-full border-2 border-transparent px-2 transition-colors hover:bg-white/10 aria-[current=true]:border-lime aria-[current=true]:bg-white/10 sm:w-32"
                   data-id="{{ item.id }}" aria-label="Destaque {{ loop.index }} de {{ items|length }}: {{ item.name }}"
                   {% if loop.first %}aria-current="true"{% else %}aria-current="false"{% endif %}>
-            <img src="{{ item.mainImageUrl }}" alt="" width="132" height="72" loading="lazy" class="max-h-12 w-auto">
+            <img src="{{ item.mainImageUrl }}" alt="" width="126" height="61" loading="lazy" class="max-h-12 w-auto">
           </button>
         </li>
         {% endfor %}

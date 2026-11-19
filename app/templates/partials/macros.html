@@ -1,6 +1,9 @@
 {# Preço BRL a partir de centavos inteiros: 89990 -> "R$ 899,90", 129990 -> "R$ 1.299,90". #}
+{% macro brl_amount(cents) -%}
+{{ "{:,}".format(cents // 100)|replace(",", ".") }},{{ "%02d"|format(cents % 100) }}
+{%- endmacro %}
 {% macro brl(cents) -%}
-R$&nbsp;{{ "{:,}".format(cents // 100)|replace(",", ".") }},{{ "%02d"|format(cents % 100) }}
+R$&nbsp;{{ brl_amount(cents) }}
 {%- endmacro %}
 
 {# Ícones de traço (24px, currentColor), sempre decorativos: o rótulo fica no controle. #}

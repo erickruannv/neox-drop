@@ -195,10 +195,6 @@
   .hero-float {
     animation: hero-float 6s ease-in-out infinite;
   }
-  .thumb[aria-current="true"] {
-    border-color: var(--color-lime);
-    background: rgb(255 255 255 / 0.08);
-  }
   .progress-dot {
     height: 4px;
     width: 1.1rem;
@@ -221,7 +217,7 @@
   }
   .collection-card:hover img,
   .collection-card:focus-visible img {
-    transform: translateX(-6px) rotate(-4deg) scale(1.04);
+    transform: translateX(-6px) rotate(-8deg) scale(1.04);
   }
 
   .product-card {
@@ -236,9 +232,9 @@
 @keyframes hero-float {
   0%,
   100% {
-    transform: translateY(0) rotate(-5deg);
+    transform: translateY(0) rotate(-9deg);
   }
   50% {
-    transform: translateY(-10px) rotate(-4deg);
+    transform: translateY(-10px) rotate(-8deg);
   }
 }
