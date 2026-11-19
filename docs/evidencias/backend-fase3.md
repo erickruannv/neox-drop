@@ -102,3 +102,33 @@ pelos testes existentes; nenhum .env privado criado. Regressão final confirmou 
 testes existentes, scripts, migration, índices, contratos, referências e ferramentas
 permaneceram idênticos ao baseline. Alterações desta rodada limitadas a documentação,
 notas de andamento em tasks.md e campos vazios/comentários em .env.example. Sem push/merge.
+
+## Revisão final do SQL para aplicação manual (19/11/2026)
+
+O usuário confirmou projeto neox-drop-test e duas contas Auth e proibiu qualquer execução
+SQL remota nesta revisão. Essa informação não foi validada por consulta ao projeto.
+A migration canônica foi revisada localmente, preservando histórico Git, sem gerar cópia
+concorrente. Grants agora redefinem também service_role; ela não lê admin_profiles porque
+FastAPI usa bearer do usuário como authenticated + RLS. Somente SELECT store_settings
+é concedido à chave backend de checkout. Schema privado não é reaproveitado silenciosamente;
+ACLs das funções removem defaults de todos os papéis da aplicação. Trigger SECURITY INVOKER
+explícito; nenhuma promoção/criação de perfil ou usuário.
+
+Consultas somente leitura foram preparadas em supabase/verification/admin_profiles_preflight.sql
+e admin_profiles_postflight.sql. A aplicação manual e os resultados esperados estão em
+[SQL-SUPABASE-TESTE.md](../SQL-SUPABASE-TESTE.md), que registra o hash novo definitivo.
+O hash informado antes neste relatório corresponde ao snapshot anterior e não é o atual.
+
+Verificações locais: dois testes de segurança estáticos novos falharam antes dos ajustes
+e passaram depois; 120 testes unitários/contrato/HTTP local passaram. Ruff e formatação
+aprovados. pglast 8.9 aceitou as 22 instruções da migration, 7 do preflight, 13 do postflight,
+o corpo SQL do helper de sessão e o corpo PL/pgSQL do trigger. Os dois scripts de verificação
+contêm apenas SELECT e controle transacional READ ONLY/ROLLBACK, conforme AST inspecionada.
+Revisão independente de segurança não apontou achados materiais no SQL revisado.
+
+Nenhum SQL foi executado no Supabase nem em servidor PostgreSQL local; parsers não executam
+DDL ou funções. Nenhuma chave/senha foi solicitada ou exibida. Testes reais foram excluídos
+intencionalmente desta execução para respeitar a proibição de SQL remoto. Prontidão significa
+arquivo revisado para aplicação MANUAL em schema novo como postgres, não RLS/Auth já comprovados.
+O perfil admin e a compatibilidade real de auth.sessions/not_after continuam etapas supervisionadas.
+Contratos, implementação FastAPI e arquivos frontend permaneceram intactos.

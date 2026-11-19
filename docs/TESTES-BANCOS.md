@@ -39,6 +39,8 @@ usar o novo contexto CSRF antes da próxima escrita. Validar essa jornada com os
 
 ## Supabase: migration e perfis
 
+Revisão definitiva para aplicação manual e consultas antes/depois: [SQL-SUPABASE-TESTE.md](SQL-SUPABASE-TESTE.md).
+
 O arquivo `supabase/migrations/20261119105020_admin_profiles_rls.sql` foi criado por
 `npx --yes supabase@3.2.0 migration new admin_profiles_rls --workdir "$PWD"`.
 Foi revisado e teve a sintaxe analisada por parser PostgreSQL; isso não valida execução/RLS.

@@ -1,7 +1,11 @@
--- Gerada com Supabase CLI 3.2.0; aplicar somente em ambiente de teste revisado.
+-- NEOX drop: SQL definitivo para aplicação MANUAL no SQL Editor de neox-drop-test.
+-- Arquivo originado pelo CLI 3.2.0 e revisado localmente; NÃO executado pelo agente.
+-- Executar integralmente, uma vez, como postgres, após as consultas de preflight.
+-- Schema novo: colisões devem falhar e provocar rollback; não usar IF NOT EXISTS para ocultá-las.
+-- Não cria usuários nem perfis administrativos; preserva as contas existentes no Supabase Auth.
 begin;
-create schema if not exists neox_private;
-revoke all on schema neox_private from public, anon;
+create schema neox_private;
+revoke all on schema neox_private from public, anon, authenticated, service_role;
 grant usage on schema neox_private to authenticated;
 
 create table public.admin_profiles (
@@ -21,9 +25,13 @@ create table public.store_settings (
 );
 alter table public.admin_profiles enable row level security;
 alter table public.store_settings enable row level security;
-revoke all on public.admin_profiles, public.store_settings from public, anon, authenticated;
+-- Neutralizar inclusive grants padrão a service_role; BYPASSRLS não substitui GRANT.
+revoke all on public.admin_profiles, public.store_settings
+  from public, anon, authenticated, service_role;
+grant usage on schema public to authenticated, service_role;
 grant select on public.admin_profiles to authenticated;
--- Backend do checkout lê somente contato, nunca expõe esta chave no cliente.
+-- admin_profiles: FastAPI usa JWT do usuário + RLS, não service_role.
+-- Somente o checkout usa chave backend para ler contato; nunca a expor no cliente.
 grant select on public.store_settings to service_role;
 
 -- Acesso JWT revogado em logout só pode ser detectado conferindo auth.sessions.
@@ -37,20 +45,20 @@ language sql stable security definer set search_path = '' as $$
       and (s.not_after is null or s.not_after > now())
   );
 $$;
-revoke all on function neox_private.current_session_is_live() from public, anon, authenticated;
+revoke all on function neox_private.current_session_is_live() from public, anon, authenticated, service_role;
 grant execute on function neox_private.current_session_is_live() to authenticated;
 create policy read_own_admin_profile on public.admin_profiles
   for select to authenticated
   using ((select auth.uid()) = user_id and (select neox_private.current_session_is_live()));
 
 create function neox_private.set_updated_at() returns trigger
-language plpgsql set search_path = '' as $$
+language plpgsql security invoker set search_path = '' as $$
 begin
   new.updated_at = statement_timestamp();
   return new;
 end;
 $$;
-revoke all on function neox_private.set_updated_at() from public, anon, authenticated;
+revoke all on function neox_private.set_updated_at() from public, anon, authenticated, service_role;
 create trigger admin_profile_updated before update on public.admin_profiles
   for each row execute function neox_private.set_updated_at();
 create trigger store_settings_updated before update on public.store_settings

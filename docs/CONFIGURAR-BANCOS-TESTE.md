@@ -34,6 +34,7 @@ confirmar finalidade e plano. Não foi aberto nenhum banco desse projeto.
 3. Confirme que o projeto está saudável, vazio/dedicado a teste e com Data API disponível.
    **Pare aqui para a aplicação da migration:** o arquivo a revisar/autorizar é
    [20261119105020_admin_profiles_rls.sql](../supabase/migrations/20261119105020_admin_profiles_rls.sql).
+   A [revisão SQL definitiva](SQL-SUPABASE-TESTE.md) inclui consultas de preflight/postflight.
    Sua autorização deve identificar o projeto de teste e esse arquivo. Nenhuma migration
    remota será executada por inferência; não há comando remoto automático neste roteiro.
 4. Depois da aplicação autorizada, em **Authentication → Users**, prepare duas contas
