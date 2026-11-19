@@ -89,3 +89,10 @@ Revisão adicional identificou Int64 BSON rejeitado por type(x) is int e limite 
 URL-encoding. Corrigidos com roundtrip BSON e nome acentuado: inteiros BSON são aceitos sem
 aceitar bool; limite é 8000 caracteres da mensagem conforme descrição OpenAPI (antes de encoding).
 Nenhum contrato foi alterado. 114 testes passaram, quatro reais ignorados.
+
+Endurecimento adicional: exceção inesperada repropagava pelo ServerErrorMiddleware do
+Starlette e poderia alcançar logs Uvicorn mesmo com envelope sanitizado. Boundary ASGI
+agora impede repropagação do conteúdo antes de enviar resposta; teste usa transporte com
+raise_app_exceptions=True e confirmou RED→GREEN sem segredo nos logs. Erro após início de
+resposta vira exceção genérica sanitizada. Também rejeitado timeout Mongo menor que 1 ms,
+que seria truncado a zero pelo driver (potencial espera sem limite). Ambos cobertos localmente.

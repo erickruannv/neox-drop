@@ -26,6 +26,8 @@ def test_settings_from_environment_and_redaction(monkeypatch):
     "values",
     [
         {"request_timeout_seconds": 0},
+        {"request_timeout_seconds": 0.0001},
+        {"cookie_secret": "short"},
         {"max_request_bytes": 0},
         {"rate_limit_requests": 0},
         {"app_env": "production"},

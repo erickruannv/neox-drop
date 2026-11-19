@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     mongodb_database: str = "neox_drop_test"
     upstash_redis_rest_url: SecretStr | None = None
     upstash_redis_rest_token: SecretStr | None = None
-    request_timeout_seconds: float = Field(default=3.0, gt=0, le=30)
+    request_timeout_seconds: float = Field(default=3.0, ge=0.001, le=30)
     redis_timeout_seconds: float = Field(default=1.0, gt=0, le=5)
     max_request_bytes: int = Field(default=65536, gt=0, le=1048576)
     rate_limit_requests: int = Field(default=60, gt=0)

@@ -64,3 +64,30 @@ async def auth_error(request: Request, exc):
         response.headers["Retry-After"] = "60"
         return response
     return error_response(401, "AUTHENTICATION_FAILED", "Autenticação necessária ou inválida.")
+
+
+class SanitizedErrorsMiddleware:
+    """Impede que ServerErrorMiddleware repropague exceções contendo segredos ao Uvicorn."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        started = False
+
+        async def tracked_send(message):
+            nonlocal started
+            if message["type"] == "http.response.start":
+                started = True
+            await send(message)
+
+        try:
+            await self.app(scope, receive, tracked_send)
+        except Exception:
+            if started:
+                raise RuntimeError("Resposta interrompida.") from None
+            response = await unexpected_error(None, None)
+            await response(scope, receive, send)

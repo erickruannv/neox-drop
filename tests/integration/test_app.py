@@ -181,3 +181,19 @@ async def test_non_ascii_csrf_is_rejected_safely():
             ],
         )
         assert response.status_code == 403
+
+
+async def test_unexpected_error_is_not_reraised_to_server_logs(caplog):
+    app = create_app(Settings(_env_file=None))
+
+    @app.get("/test-unexpected")
+    async def endpoint():
+        raise RuntimeError("secret://must-not-reach-server-logs")
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app, raise_app_exceptions=True), base_url="http://test"
+    ) as client:
+        response = await client.get("/test-unexpected")
+        assert response.status_code == 500
+        assert response.json()["error"]["code"] == "INTERNAL_ERROR"
+    assert "secret://" not in caplog.text

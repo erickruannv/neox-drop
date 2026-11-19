@@ -16,6 +16,7 @@ from app.api.recent import router as recent_router
 from app.core.config import Settings, get_settings
 from app.core.exceptions import (
     ApiFault,
+    SanitizedErrorsMiddleware,
     ServiceUnavailable,
     api_fault,
     auth_error,
@@ -37,6 +38,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.state.settings = settings
     application.add_middleware(BodyLimitMiddleware, max_bytes=settings.max_request_bytes)
     application.add_middleware(RateLimitMiddleware, settings=settings)
+    application.add_middleware(SanitizedErrorsMiddleware)
     application.add_exception_handler(RequestValidationError, validation_error)
     application.add_exception_handler(HTTPException, http_error)
     application.add_exception_handler(ServiceUnavailable, service_error)
