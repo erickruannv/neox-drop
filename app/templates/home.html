@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "partials/macros.html" import icon, brl %}
+{% from "partials/macros.html" import icon, product_card %}
 {#- Contexto (docs/contracts/ui.md): featured: FeaturedList, launches: ProductList, recent: RecentList. -#}
 
 {% block content %}
@@ -62,18 +62,7 @@
     <ul class="mt-6 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4 lg:gap-6">
       {% for p in products %}
       <li>
-        <article class="product-card h-full">
-          <span class="self-start rounded-full bg-sand/70 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide">{{ p.category }}</span>
-          <img src="{{ p.mainImageUrl }}" alt="" width="630" height="304" loading="lazy" class="mx-auto my-3 w-full max-w-72">
-          <p class="text-xs font-bold uppercase tracking-wide text-muted">{{ p.brand }}</p>
-          <h3 class="mt-1 font-bold leading-tight">
-            <a href="/tenis/{{ p.slug|urlencode }}" class="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-3 focus-visible:after:outline-ink">{{ p.name }}</a>
-          </h3>
-          <div class="mt-2 flex items-end justify-between gap-2">
-            <p class="text-xl font-extrabold">{{ brl(p.priceCents) }}</p>
-            <span class="grid size-10 place-items-center rounded-xl bg-ink text-white" aria-hidden="true">{{ icon("arrow-right", "size-5") }}</span>
-          </div>
-        </article>
+        {{ product_card(p) }}
       </li>
       {% endfor %}
     </ul>
