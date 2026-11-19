@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon %}
+{#- Login administrativo: sem cadastro público, sem credenciais preenchidas, erro genérico.
+    admin.js envia LoginRequest com X-CSRF-Token (meta csrf-token) e recarrega o painel. -#}
+{% block title %}Entrar — Painel NEOX drop{% endblock %}
+{% block header_nav %}{% endblock %}
+{% block header_actions %}<a href="/" class="rounded-full px-4 py-2 text-sm font-semibold hover:bg-white/10">Voltar à loja</a>{% endblock %}
+{% block cart %}{% endblock %}
+
+{% block content %}
+<div class="on-light grid min-h-[calc(100dvh-5rem)] place-items-center px-4 py-12">
+  <section class="w-full max-w-md rounded-3xl bg-white p-6 shadow-[0_8px_24px_rgb(0_0_0/0.06)] sm:p-10" aria-labelledby="login-titulo">
+    <p class="text-sm font-bold uppercase tracking-wide text-muted">Painel administrativo</p>
+    <h1 id="login-titulo" class="display-type mt-2 text-4xl">Entrar</h1>
+
+    <form class="mt-8 grid gap-5" method="post" action="/api/admin/auth/login" novalidate data-admin-login>
+      <div>
+        <label for="login-email" class="mb-1 block font-semibold">E-mail</label>
+        <input id="login-email" name="email" type="email" autocomplete="username" required maxlength="254"
+               class="h-12 w-full rounded-xl border border-ink/20 bg-paper px-3 focus:border-ink focus:outline-none">
+      </div>
+      <div>
+        <label for="login-senha" class="mb-1 block font-semibold">Senha</label>
+        <input id="login-senha" name="password" type="password" autocomplete="current-password" required maxlength="256"
+               class="h-12 w-full rounded-xl border border-ink/20 bg-paper px-3 focus:border-ink focus:outline-none">
+      </div>
+      <p class="rounded-xl bg-coral-deep/10 px-4 py-3 text-sm font-semibold text-coral-deep" role="alert" data-login-error hidden></p>
+      <button type="submit" class="btn-lime justify-center py-3.5 disabled:cursor-wait disabled:opacity-60" data-login-submit>
+        Entrar {{ icon("arrow-right", "size-5") }}
+      </button>
+    </form>
+    <p class="mt-6 text-sm text-muted">Acesso restrito à equipe da loja. Não há cadastro público.</p>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="/static/js/admin.js"></script>
+{% endblock %}
