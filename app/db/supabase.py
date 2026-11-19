@@ -37,9 +37,9 @@ async def check_supabase(settings: Settings) -> bool:
             headers={"apikey": settings.supabase_key.get_secret_value()},
         )
         response.raise_for_status()
-        # Raiz REST testa disponibilidade; não consulta tabelas privadas nem comprova RLS/schema.
+        # /rest/v1/ exige Secret key; esta sonda só comprova Auth, não schema/RLS PostgreSQL.
         response = await client.options.httpx_client.get(
-            str(client.rest_url).rstrip("/") + "/",
+            str(client.auth_url).rstrip("/") + "/settings",
             headers={"apikey": settings.supabase_key.get_secret_value()},
         )
         response.raise_for_status()

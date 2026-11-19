@@ -190,7 +190,7 @@ async def test_supabase_health_uses_no_private_table(monkeypatch):
         supabase_key="test-public-key",
     )
     assert await check_supabase(settings) is True
-    assert paths == ["/auth/v1/health", "/rest/v1/"]
+    assert paths == ["/auth/v1/health", "/auth/v1/settings"]
 
 
 async def test_store_contact_uses_only_server_key_and_no_public_fallback(monkeypatch):

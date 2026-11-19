@@ -132,3 +132,34 @@ intencionalmente desta execução para respeitar a proibição de SQL remoto. Pr
 arquivo revisado para aplicação MANUAL em schema novo como postgres, não RLS/Auth já comprovados.
 O perfil admin e a compatibilidade real de auth.sessions/not_after continuam etapas supervisionadas.
 Contratos, implementação FastAPI e arquivos frontend permaneceram intactos.
+
+## Aplicação manual informada e diagnóstico real (19/11/2026)
+
+O usuário informou aplicação manual bem-sucedida, como postgres, da migration
+`20261119105020_admin_profiles_rls.sql`, com preflight aprovado. Não reaplicamos SQL,
+não reconciliamos histórico remoto e não executamos SQL de escrita. O conector disponível
+não lista `neox-drop-test`; sem acesso de gerenciamento, o roteiro único de postflight
+continua `supabase/verification/admin_profiles_postflight.sql` (transação READ ONLY/ROLLBACK).
+As tabelas, policies, funções, triggers e grants esperados estão descritos nesse arquivo;
+sua confirmação remota completa depende do resultado manual. SELECT de service_role em
+admin_profiles continua desnecessário: a autorização usa o JWT do usuário + authenticated/RLS.
+
+Leituras HTTP reais por Python/httpx com apenas a Publishable key configurada:
+- Auth health e settings: HTTP 200.
+- Raiz REST: HTTP 401, `Secret API key required`; a documentação oficial confirma que
+  o OpenAPI da Data API exige Secret key, embora a Publishable funcione nas rotas de tabelas:
+  https://supabase.com/docs/guides/getting-started/api-keys . Não usamos Secret key.
+- admin_profiles, SELECT user_id com limit=0: HTTP 401, código 42501, permissão de tabela
+  negada ao acesso anônimo. Nenhuma linha pessoal retornou. Isso confirma comunicação com
+  a rota da tabela e negação anônima, mas não comprova RLS de usuários autenticados.
+
+Settings leu SUPABASE_URL/KEY iguais ao arquivo local, chave com formato Publishable;
+TEST_CONNECTIONS_ENABLED permanece false. A chave foi aceita pelo endpoint configurado;
+o nome amigável do projeto não foi comprovado pelo conector. O healthcheck passou a usar
+Auth health/settings, sem depender da raiz restrita. Ele não é prova do schema PostgreSQL.
+Regressão: 120 passed, 5 skipped; Ruff aprovado. Nenhum segredo registrado neste relatório.
+
+Login real ainda depende de COOKIE_SECRET local, opt-in explícito de conexões de teste,
+perfil ativo provisionado manualmente sob autorização e postflight/RLS comportamental.
+Não criamos usuários/perfis nem promovemos contas. MongoDB Atlas e Upstash ainda sem
+configuração local; não declaramos integração real desses serviços.
