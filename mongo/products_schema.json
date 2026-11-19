@@ -1,0 +1,208 @@
+{
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "required": [
+        "sku",
+        "slug",
+        "name",
+        "brand",
+        "category",
+        "priceCents",
+        "mainImageUrl",
+        "description",
+        "currency",
+        "galleryUrls",
+        "colorName",
+        "active",
+        "sizes",
+        "createdAt",
+        "updatedAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sku": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "slug": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "name": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "brand": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "category": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "priceCents": {
+          "bsonType": [
+            "int",
+            "long"
+          ],
+          "minimum": 0
+        },
+        "mainImageUrl": {
+          "bsonType": "string",
+          "minLength": 1,
+          "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$"
+        },
+        "description": {
+          "bsonType": "string"
+        },
+        "currency": {
+          "bsonType": "string",
+          "enum": [
+            "BRL"
+          ]
+        },
+        "galleryUrls": {
+          "bsonType": "array",
+          "minItems": 1,
+          "items": {
+            "bsonType": "string",
+            "minLength": 1,
+            "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$"
+          }
+        },
+        "model3dUrl": {
+          "bsonType": "string",
+          "minLength": 1,
+          "pattern": "^(?:/static/[^\\s?#]+|https://[^\\s]+)$"
+        },
+        "colorName": {
+          "bsonType": "string",
+          "minLength": 1
+        },
+        "featured": {
+          "bsonType": "object",
+          "required": [
+            "enabled",
+            "order",
+            "backgroundHex",
+            "accentHex"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "bsonType": "bool"
+            },
+            "order": {
+              "bsonType": [
+                "int",
+                "long"
+              ],
+              "minimum": 1
+            },
+            "backgroundHex": {
+              "bsonType": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "accentHex": {
+              "bsonType": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            }
+          }
+        },
+        "attributes": {
+          "bsonType": "object",
+          "additionalProperties": true
+        },
+        "active": {
+          "bsonType": "bool"
+        },
+        "sizes": {
+          "bsonType": "array",
+          "minItems": 1,
+          "items": {
+            "bsonType": "object",
+            "required": [
+              "sizeBR",
+              "stock"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "sizeBR": {
+                "bsonType": [
+                  "int",
+                  "long"
+                ],
+                "minimum": 15,
+                "maximum": 60
+              },
+              "stock": {
+                "bsonType": [
+                  "int",
+                  "long"
+                ],
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "_id": {
+          "bsonType": "objectId"
+        },
+        "createdAt": {
+          "bsonType": "date"
+        },
+        "updatedAt": {
+          "bsonType": "date"
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "key": {
+        "sku": 1
+      },
+      "name": "uniq_sku",
+      "unique": true
+    },
+    {
+      "key": {
+        "slug": 1
+      },
+      "name": "uniq_slug",
+      "unique": true
+    },
+    {
+      "key": {
+        "active": 1,
+        "category": 1,
+        "createdAt": -1
+      },
+      "name": "catalog_by_category"
+    },
+    {
+      "key": {
+        "active": 1,
+        "brand": 1,
+        "createdAt": -1
+      },
+      "name": "catalog_by_brand"
+    },
+    {
+      "key": {
+        "active": 1,
+        "featured.enabled": 1,
+        "featured.order": 1
+      },
+      "name": "featured_order"
+    },
+    {
+      "key": {
+        "active": 1,
+        "sizes.sizeBR": 1
+      },
+      "name": "catalog_by_size"
+    }
+  ]
+}

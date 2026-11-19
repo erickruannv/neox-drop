@@ -38,3 +38,9 @@ pública/admin signup. Helpers prontos para contexto Jinja2, ligação HTML depe
 Testes negativos incluem perfil inativo/role indevida, senha inválida, CSRF/Origin, assinatura,
 expiração/vínculo, replay negado no dublê de RLS e perfil revalidado após refresh.
 O rate limit continua local por processo; não haverá implantação/multiworker nesta rodada.
+
+T010 preparado: validador BSON derivado do ProductCreate aprovado + ObjectId/datas BSON,
+índices únicos SKU/slug e índices de consulta; configuração em mongo/products_schema.json.
+Mongosh e script Python novos recusam coleção existente e banco sem sufixo _test; seed
+canônica fictícia usa setOnInsert, sem sobrescrever produto. Nenhum script foi executado
+contra banco. Três testes locais do preparo passaram; validar coleção/índices reais segue pendente.
