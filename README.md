@@ -5,6 +5,8 @@ OpenAPI estão registradas: Auth/admin, CRUD, catálogo/destaques, recentes e ch
 Há testes locais; Auth/RLS/persistência reais permanecem sem comprovação, com testes opt-in.
 Veja o [guia dos três bancos](docs/TESTES-BANCOS.md) e as
 [evidências da Fase 2](docs/evidencias/backend-fase2.md).
+A Fase 3 está no [roteiro de configuração dos bancos de teste](docs/CONFIGURAR-BANCOS-TESTE.md),
+com [diagnóstico sem credenciais](docs/evidencias/backend-fase3.md).
 
 Stack: Python 3.13 + FastAPI, Jinja2 + Tailwind compilado + JavaScript + Model Viewer,
 Supabase Auth/PostgreSQL, MongoDB e Redis/Upstash. Não há pagamento ou reserva de estoque.

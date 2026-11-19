@@ -1,5 +1,7 @@
 # Conectar e testar os bancos de desenvolvimento
 
+Roteiro operacional da Fase 3: [configuração gratuita e retomada por serviço](CONFIGURAR-BANCOS-TESTE.md).
+
 O backend possui as 14 operações JSON previstas, com teste local de método/rota/operationId.
 Isso não comprova integração real. Nesta rodada nenhum banco foi acessado e nenhuma migration
 foi aplicada. Cinco testes em `tests/real/` ficam ignorados sem opt-in; os testes em
