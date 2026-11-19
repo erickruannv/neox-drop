@@ -36,3 +36,9 @@ htmlcov/
 node_modules/
 /dist/
 *.log
+
+# Saídas do build UI (pnpm build)
+/app/static/dist/
+/tests/e2e/.preview/
+/test-results/
+/playwright-report/

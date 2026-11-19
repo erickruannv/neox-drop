@@ -1,0 +1,23 @@
+{
+  "name": "neox-drop-ui",
+  "private": true,
+  "description": "Build CSS/JS e testes UI da NEOX drop (sem servidor Node).",
+  "type": "module",
+  "packageManager": "pnpm@10.6.2",
+  "scripts": {
+    "build:css": "tailwindcss -i app/static/css/input.css -o app/static/dist/app.css --minify",
+    "build:vendor": "node tests/e2e/tools/copy-vendor.mjs",
+    "build": "pnpm build:vendor && pnpm build:css",
+    "dev:css": "tailwindcss -i app/static/css/input.css -o app/static/dist/app.css --watch",
+    "preview": "pnpm build && uv run --no-project --with jinja2==3.1.6 --with jsonschema==4.26.0 python tests/e2e/tools/render_preview.py",
+    "test:ui": "pnpm preview && playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@google/model-viewer": "^4.4.0",
+    "@playwright/test": "^1.65.1",
+    "@tailwindcss/cli": "4",
+    "tailwindcss": "4"
+  }
+}
