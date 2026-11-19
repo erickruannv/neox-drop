@@ -51,5 +51,5 @@ test("sem destaques/lançamentos: hero da marca e estado vazio, sem preço", asy
   await page.goto("/empty/");
   await expect(page.locator("h1")).toHaveText("Catálogo de tênis");
   await expect(page.getByText("Nenhum lançamento disponível no momento.")).toBeVisible();
-  await expect(page.locator("body")).not.toContainText("R$");
+  await expect(page.locator("main")).not.toContainText("R$");
 });

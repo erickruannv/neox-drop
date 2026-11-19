@@ -209,6 +209,24 @@
     background: var(--color-lime);
   }
 
+  /* Carrinho lateral: <dialog> nativo ancorado à direita. */
+  .cart-drawer {
+    margin: 0 0 0 auto;
+    height: 100dvh;
+    max-height: 100dvh;
+    width: min(28rem, 100vw);
+    max-width: 100vw;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    box-shadow: -24px 0 48px rgb(0 0 0 / 0.25);
+  }
+  .cart-drawer[open] {
+    animation: drawer-in 320ms var(--ease-out-soft);
+  }
+  .cart-drawer::backdrop {
+    background: rgb(0 0 0 / 0.5);
+  }
+
   .collection-card {
     @apply relative isolate flex min-h-44 overflow-hidden rounded-2xl p-6 text-white sm:min-h-48;
   }
@@ -226,6 +244,12 @@
   .product-card:hover,
   .product-card:focus-within {
     @apply -translate-y-1 shadow-[0_2px_4px_rgb(0_0_0/0.06),0_16px_32px_rgb(0_0_0/0.1)];
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(100%);
   }
 }
 

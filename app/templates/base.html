@@ -21,6 +21,7 @@
       {{ brand() }}
       <span class="hidden h-9 w-px bg-white/25 lg:block" aria-hidden="true"></span>
 
+      {% block header_nav %}
       <nav class="hidden lg:block" aria-label="Principal">
         <ul class="flex items-center gap-9">
           <li><a class="nav-link" href="/" {% if current_path == "/" %}aria-current="page"{% endif %}>Início</a></li>
@@ -39,9 +40,12 @@
         </div>
       </form>
 
+      {% endblock %}
+
       <div class="ml-auto flex items-center gap-1 md:ml-0">
+        {% block header_actions %}
         <a href="/admin/login" class="icon-btn hover:bg-white/10" aria-label="Área administrativa">{{ icon("user") }}</a>
-        <button type="button" id="cart-button" class="icon-btn relative hover:bg-white/10" aria-label="Carrinho" aria-disabled="true" title="Carrinho em construção">
+        <button type="button" id="cart-button" class="icon-btn relative hover:bg-white/10" aria-label="Carrinho" aria-haspopup="dialog" aria-controls="cart-drawer">
           {{ icon("cart") }}
           <span data-cart-count hidden class="absolute right-0.5 top-0.5 grid min-w-5 place-items-center rounded-full bg-coral px-1 text-[11px] font-bold text-white"></span>
         </button>
@@ -67,6 +71,7 @@
             </nav>
           </div>
         </details>
+        {% endblock %}
       </div>
     </div>
   </header>
@@ -90,6 +95,10 @@
       </nav>
     </div>
   </footer>
+  {% block cart %}
+  {% include "partials/cart.html" %}
+  <script type="module" src="/static/js/cart.js"></script>
+  {% endblock %}
   {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,49 @@
+{% from "partials/macros.html" import icon %}
+{#- Carrinho lateral. Persistência: só {productId,sizeBR,quantity} em localStorage (neox.cart.v1).
+    Nome/foto/preço exibidos são temporários; o servidor recalcula no checkout (T021/T022). -#}
+<dialog id="cart-drawer" class="cart-drawer on-light" aria-labelledby="cart-title">
+  <div class="flex h-full flex-col">
+    <div class="flex items-center justify-between border-b border-ink/10 px-5 py-4">
+      <h2 id="cart-title" class="display-type text-2xl">Carrinho</h2>
+      <button type="button" class="icon-btn hover:bg-ink/5" data-cart-close aria-label="Fechar carrinho">{{ icon("close") }}</button>
+    </div>
+
+    <ul class="flex-1 divide-y divide-ink/10 overflow-y-auto px-5" data-cart-list></ul>
+    <div class="flex flex-1 flex-col items-center justify-center gap-3 px-5 text-center" data-cart-empty>
+      <p class="font-bold">Seu carrinho está vazio.</p>
+      <a href="/tenis" class="btn-lime">Ver tênis {{ icon("arrow-right", "size-5") }}</a>
+    </div>
+
+    <div class="border-t border-ink/10 px-5 py-5" data-cart-footer>
+      <div class="flex items-baseline justify-between">
+        <span class="font-semibold">Subtotal estimado</span>
+        <span class="text-2xl font-extrabold tabular-nums" data-cart-subtotal>R$ 0,00</span>
+      </div>
+      <p class="mt-1 text-xs text-muted" data-cart-note>Preço e disponibilidade são confirmados ao gerar o pedido.</p>
+      <button type="button" class="btn-lime mt-4 w-full justify-center opacity-50" disabled aria-describedby="cart-checkout-hint">
+        {{ icon("chat", "size-5") }} Pedir pelo WhatsApp
+      </button>
+      <p id="cart-checkout-hint" class="mt-2 text-center text-xs text-muted">Envio pelo WhatsApp disponível em breve.</p>
+    </div>
+  </div>
+  <p class="sr-only" aria-live="polite" data-cart-live></p>
+</dialog>
+
+<template id="cart-item-template">
+  <li class="flex gap-3 py-4">
+    <img src="" alt="" width="96" height="46" class="h-16 w-24 shrink-0 rounded-xl bg-paper object-contain p-1" data-item="image">
+    <div class="min-w-0 flex-1">
+      <a href="" class="block truncate font-bold hover:underline" data-item="name"></a>
+      <p class="text-sm text-muted">Numeração <span data-item="size"></span></p>
+      <div class="mt-2 flex items-center justify-between gap-2">
+        <div class="inline-flex items-center rounded-full border border-ink/15">
+          <button type="button" class="grid size-11 place-items-center" data-item-step="-1">{{ icon("minus", "size-4") }}</button>
+          <span class="w-6 text-center font-bold tabular-nums" data-item="qty"></span>
+          <button type="button" class="grid size-11 place-items-center disabled:opacity-30" data-item-step="1">{{ icon("plus", "size-4") }}</button>
+        </div>
+        <span class="font-extrabold tabular-nums" data-item="total"></span>
+      </div>
+    </div>
+    <button type="button" class="icon-btn shrink-0 self-start text-muted hover:bg-ink/5 hover:text-ink" data-item-remove>{{ icon("trash", "size-5") }}</button>
+  </li>
+</template>
