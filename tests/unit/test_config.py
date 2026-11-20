@@ -34,6 +34,20 @@ def test_settings_from_environment_and_redaction(monkeypatch):
         {"test_connections_enabled": True},
         {"allowed_origin": "https://example.invalid/path"},
         {"mongodb_uri": "https://example.invalid"},
+        {"mongodb_uri": "mongodb://external.invalid/db"},
+        {"mongodb_uri": "mongodb://localhost:27017,external.invalid:27017/?tls=false"},
+        {"mongodb_uri": "mongodb+srv://cluster.invalid/?tls=false"},
+        {"mongodb_uri": "mongodb+srv://cluster.invalid/?ssl=false"},
+        {"mongodb_uri": "mongodb+srv://cluster.invalid/?tlsInsecure=true"},
+        {"mongodb_uri": "mongodb+srv://cluster.invalid/?tlsAllowInvalidCertificates=true"},
+        {"mongodb_uri": "mongodb+srv://cluster.invalid/?tlsAllowInvalidHostnames=true"},
+        {"mongodb_uri": "mongodb+srv://cluster.invalid/?tls=true&TLS=false"},
+        {
+            "mongodb_uri": "mongodb+srv://cluster.invalid",
+            "mongodb_database": "shop",
+            "app_env": "test",
+            "test_connections_enabled": True,
+        },
         {"supabase_url": "http://external.invalid"},
     ],
 )
@@ -47,3 +61,10 @@ def test_example_env_loads_without_credentials():
     assert settings.test_connections_enabled is False
     assert settings.supabase_key is None
     assert settings.mongodb_uri is None
+
+
+@pytest.mark.parametrize(
+    "uri", ["mongodb+srv://cluster.invalid/", "mongodb://host.invalid/?tls=true"]
+)
+def test_secure_remote_mongodb_configuration(uri):
+    assert Settings(_env_file=None, mongodb_uri=uri).mongodb_uri

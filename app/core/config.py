@@ -1,6 +1,6 @@
 from functools import lru_cache
 from typing import Literal
-from urllib.parse import urlsplit
+from urllib.parse import parse_qsl, urlsplit
 
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -77,12 +77,38 @@ class Settings(BaseSettings):
             url = urlsplit(value.get_secret_value())
             if url.scheme not in {"mongodb", "mongodb+srv"} or not url.netloc:
                 raise ValueError("URI MongoDB inválida.")
+            options = [(k.lower(), v.lower()) for k, v in parse_qsl(url.query)]
+            for key, option in options:
+                if key in {
+                    "tlsinsecure",
+                    "tlsallowinvalidcertificates",
+                    "tlsallowinvalidhostnames",
+                }:
+                    if option != "false":
+                        raise ValueError("Não desative a verificação TLS do MongoDB.")
+            # A exceção loopback é só para seed único, nunca para lista que começa em localhost.
+            remote = "," in url.netloc.rsplit("@", 1)[-1] or url.hostname not in {
+                "localhost",
+                "127.0.0.1",
+                "::1",
+            }
+            tls = [v for k, v in options if k in {"tls", "ssl"}]
+            if remote and (
+                any(v != "true" for v in tls) or (url.scheme != "mongodb+srv" and not tls)
+            ):
+                raise ValueError("MongoDB remoto exige TLS verificado.")
         return value
 
     @model_validator(mode="after")
     def test_connections_only(self):
         if self.test_connections_enabled and self.app_env != "test":
             raise ValueError("Conexões exigem APP_ENV=test e autorização de ambiente de teste.")
+        if (
+            self.test_connections_enabled
+            and self.mongodb_uri
+            and not self.mongodb_database.endswith("_test")
+        ):
+            raise ValueError("Banco MongoDB autorizado nesta etapa precisa terminar em _test.")
         return self
 
 
