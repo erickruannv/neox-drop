@@ -1,3 +1,4 @@
+import mimetypes
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -33,6 +34,8 @@ from app.db.health import check_connections
 from app.schemas.common import Health
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
+mimetypes.add_type("model/gltf-binary", ".glb")
+mimetypes.add_type("model/gltf+json", ".gltf")
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
