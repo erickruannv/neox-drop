@@ -40,7 +40,9 @@ R$&nbsp;{{ brl_amount(cents) }}
 {% macro product_card(p) -%}
 <article class="product-card h-full">
   <span class="self-start rounded-full bg-sand/70 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide" data-card="category">{{ p.category }}</span>
-  <img src="{{ p.mainImageUrl }}" alt="" width="630" height="304" loading="lazy" class="mx-auto my-3 w-full max-w-72" data-card="image">
+  <div class="relative my-3 aspect-[3/2]">
+    <img src="{{ p.mainImageUrl }}" alt="" width="1200" height="800" loading="lazy" decoding="async" class="absolute inset-0 size-full object-contain" data-card="image">
+  </div>
   <p class="text-xs font-bold uppercase tracking-wide text-muted" data-card="brand">{{ p.brand }}</p>
   <h3 class="mt-1 font-bold leading-tight">
     <a href="/tenis/{{ p.slug|urlencode }}" class="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-3 focus-visible:after:outline-ink" data-card="link">{{ p.name }}</a>
