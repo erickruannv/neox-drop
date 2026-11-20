@@ -294,3 +294,72 @@ sem mocks de rede. Esses oito validam o FastAPI/JS reais com provedores desabili
 três bancos. Os cinco testes de serviços reais continuam sem execução/opt-in. API/HTML de
 checkout não gera link real sem MongoDB/contato. README contém comandos exatos para build,
 servidor e os dois modos de testes. Servidor Uvicorn mantido ativo para visualização do usuário.
+
+## Preparação da demonstração com persistência Atlas (20/11/2026)
+
+Mantida feature/backend a partir de 11dbca1; integração 3855a15 não foi refeita. Adaptador
+Mongo assíncrono, timeouts, fechamento de clientes, validator, seis índices e CRUD já existiam.
+Preços em centavos, tamanhos/estoques, allowlist, duplicatas, concorrência, projeção pública,
+cache versionado e soft-delete têm testes locais. Cadastro/listagem existem no painel; edição
+PATCH e desativação DELETE estão disponíveis na API, sem novos controles UI nesta rodada.
+
+Alterações necessárias: configuração rejeita Mongo remoto sem TLS, flags que desativam
+certificado/hostname, TLS=false/ssl=false e banco habilitado sem sufixo _test. TLS do SRV
+continua o padrão do driver; localhost único é permitido para testes locais. Revisão independente
+encontrou bypass em multi-host iniciado por localhost; regressão falhou antes e passou depois
+quando toda lista de hosts passou a exigir TLS. Revisor confirmou variantes com userinfo/IPv6.
+Não adicionamos dependências nem alteramos contratos, migrations, índices aprovados ou frontend.
+
+Script existente scripts.seed_products ganhou --verify: lê collection.options e index_information,
+confere validator strict/error, seis nomes, chaves/ordem e unique; rejeita índices parciais,
+sparse, hidden, TTL ou collation divergentes nos índices esperados. Não cria nem corrige nada.
+--initialize --verify prepara coleção VAZIA, com índices, apenas após autorização de escrita de
+teste. --seed continua separado/opcional e não é necessário para o cadastro real pelo painel.
+No ambiente atual, --verify recusou antes de conectar porque o opt-in está false; isso não
+comprova schema remoto. Testes locais cobrem metadados válidos, ausência de índice, chave
+incorreta, índice parcial e validator com warn. O teste real Mongo exigirá --verify bem-sucedido.
+
+Novo tests/real/test_live_storefront.py, sem dependency_overrides/MockTransport: login HTTP
+Supabase, POST produto, leitura com outro cliente Mongo, catálogo público e Jinja imediatos,
+detalhe, renovação por refresh cookie, PATCH de centavos, DELETE lógico, exclusão do catálogo
+e logout. É teste PREPARADO, não executado em bancos reais. Seu produto usa SKU aleatório
+controlado de teste; limpeza afeta somente esse SKU em banco _test, nunca a coleção. Não é
+prova de cliques no painel ou checkout WhatsApp. Mongo/Supabase precisam estar configurados.
+
+Contas reais de teste passam a ser lidas do .env privado somente depois de RUN_REAL_INTEGRATION=1
+explícito no processo; não carregamos .env em os.environ nem habilitamos conexões sozinhos.
+O ambiente exportado tem precedência. Teste RLS não tenta mais UPDATE, mesmo para provar
+negação: permissões de escrita devem ser conferidas no postflight somente SELECT. O teste
+anônimo exige 42501 ou zero linhas, sem aceitar indisponibilidade/erro de schema como sucesso.
+Depois de logout o JWT original é explicitamente mantido na chamada de leitura, para conferir
+a negação por sessão revogada em vez de obter um falso positivo como anon.
+
+Supabase: conector novamente não lista neox-drop-test. Leituras reais por Python com Publishable
+key: Auth health 200; SELECT user_id limit=0 em admin_profiles 401/42501, sem dados de usuários.
+Postflight de tabelas, grants, políticas, funções e triggers segue em
+supabase/verification/admin_profiles_postflight.sql, BEGIN READ ONLY/SELECT/ROLLBACK. Não
+executado remotamente; nenhuma migration reaplicada, SQL de escrita ou perfil/usuário criado.
+Depois do postflight, somente o responsável pode escolher o UUID da conta destinada ao admin
+e criar/vincular sua linha em public.admin_profiles pelo Table Editor (role admin, is_active true,
+display_name). Segunda conta permanece sem perfil ativo. Não executamos essa promoção.
+
+Redis revisado: Upstash REST HTTPS, token privado de escrita para EVAL, telemetria desabilitada,
+deadline e fechamento de cliente; recentes usam até cinco IDs únicos e TTL604800, resolvidos
+no Mongo antes da projeção pública. Redis indisponível degrada recentes/cache e não autoriza
+preço de checkout. Testes locais e teste Redis real opt-in existentes preservados; nenhuma
+chave foi criada no Upstash. A integração dos três serviços e a seção recentes na UI não
+foram comprovadas nesta rodada. Atlas/Upstash ainda não têm credenciais configuradas localmente.
+
+Verificações: 146 testes locais passaram; seis testes reais ignorados sem opt-in. Ruff check/
+format do backend e uv lock --check aprovados. Oito E2E Playwright desktop/mobile passaram em
+2.8s contra Uvicorn novo com o código atual, sem mocks de rede, conexões false e origem loopback
+própria; processo de teste encerrado. Validam páginas/CSRF/guards/503 e assets, não persistência
+real. Não repetimos a suíte UI de fixtures, pois fontes frontend e contratos não mudaram.
+SecretStr/erros sanitizados mantidos; nenhum valor secreto registrado. Flag de conexão/.env
+privado preservados. Worktree do Claude limpa e intacta; sem push, deploy ou recursos pagos.
+
+Próxima ação humana: Atlas, Projects → New Project → neox-drop-test → Next → Create Project;
+sem convidar membros. Depois criar somente cluster Free/M0 com custo zero, sem sample data,
+usuário readWrite limitado a neox_drop_test e IP atual (nunca 0.0.0.0/0). Colar URI SRV somente
+no .env local. Não criar products manualmente; inicialização com validator/índices será etapa
+separada e autorizada, sem seed. Procedimento atualizado em CONFIGURAR-BANCOS-TESTE.md.

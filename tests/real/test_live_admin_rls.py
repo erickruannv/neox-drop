@@ -1,16 +1,11 @@
-import os
-
 from postgrest.exceptions import APIError
 
 from app.db.supabase import supabase_client
 
 
-async def test_real_auth_own_profile_rls_and_denied_write(real_settings):
-    email = os.getenv("NEOX_TEST_ADMIN_EMAIL")
-    password = os.getenv("NEOX_TEST_ADMIN_PASSWORD")
-    assert email and password, "Configure uma conta fictícia de teste previamente autorizada."
+async def test_real_auth_own_profile_rls_and_revoked_session(real_settings, real_account):
     async with supabase_client(real_settings) as client:
-        auth = await client.auth.sign_in_with_password({"email": email, "password": password})
+        auth = await client.auth.sign_in_with_password(real_account("admin"))
         assert auth.session and auth.user
         try:
             client.postgrest.auth(auth.session.access_token)
@@ -19,20 +14,11 @@ async def test_real_auth_own_profile_rls_and_denied_write(real_settings):
             profile = rows[0]
             assert profile["user_id"] == str(auth.user.id)
             assert profile["role"] == "admin" and profile["is_active"] is True
-            try:
-                response = (
-                    await client.table("admin_profiles")
-                    .update({"display_name": profile["display_name"]})
-                    .eq("user_id", str(auth.user.id))
-                    .execute()
-                )
-            except APIError:
-                pass
-            else:
-                assert not response.data, "RLS/GRANT permitiu escrita indevida."
+            # Grants de escrita são conferidos pelo postflight SELECT, sem tentar UPDATE.
         finally:
             await client.auth.admin.sign_out(auth.session.access_token, scope="local")
         # JWT pode ainda ser aceito por Auth; a policy deve rejeitar sessão revogada.
+        client.postgrest.auth(auth.session.access_token)
         assert not (await client.table("admin_profiles").select("user_id").execute()).data
 
 
@@ -40,22 +26,20 @@ async def test_real_anon_cannot_read_profiles(real_settings):
     async with supabase_client(real_settings) as client:
         try:
             response = await client.table("admin_profiles").select("user_id").execute()
-        except APIError:
+        except APIError as exc:
+            assert exc.code == "42501", (
+                "Falha diferente de negação de permissão não comprova segurança."
+            )
             return
         assert response.data == []
 
 
-async def test_real_auth_user_without_active_admin_is_forbidden(real_settings):
+async def test_real_auth_user_without_active_admin_is_forbidden(real_settings, real_account):
     from app.core.exceptions import ApiFault
     from app.services.admin import authorize
 
-    email = os.getenv("NEOX_TEST_NONADMIN_EMAIL")
-    password = os.getenv("NEOX_TEST_NONADMIN_PASSWORD")
-    assert email and password, (
-        "Configure usuário fictício sem perfil admin ativo para teste negativo."
-    )
     async with supabase_client(real_settings) as client:
-        auth = await client.auth.sign_in_with_password({"email": email, "password": password})
+        auth = await client.auth.sign_in_with_password(real_account("nonadmin"))
         assert auth.session
         try:
             try:

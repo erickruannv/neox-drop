@@ -66,7 +66,7 @@ A migration deve criar/instalar exatamente:
 A função de sessão lê `auth.sessions` e `not_after`; essa compatibilidade exige o teste real.
 Não criar uma policy permissiva para fazer o teste passar. Se houver tabelas já existentes,
 inspecionar antes de aplicar: a migration não deve ser adaptada silenciosamente nem rerodada.
-O contato WhatsApp não é necessário para os cinco testes iniciais. Para validar checkout real,
+O contato WhatsApp não é necessário para os seis testes preparados. Para validar checkout real,
 o responsável configura um contato autorizado no singleton; não se envia mensagem no teste.
 
 ## 3. MongoDB Atlas: cluster, acesso e coleção
@@ -87,13 +87,24 @@ o responsável configura um contato autorizado no singleton; não se envia mensa
 6. Após confirmar esse destino e autorizar a inicialização de teste, use o script já preparado:
 
    ```sh
-   uv run --locked python -m scripts.seed_products --initialize --seed
+   uv run --locked python -m scripts.seed_products --initialize --verify
    ```
 
-Isso é escrita remota de teste: cria coleção, seis índices e seed fictícia. Não foi executado
+Isso é escrita remota de teste: cria coleção vazia e seis índices, sem inserir produtos.
+Não foi executado
 nesta rodada. O script recusa coleção existente, nome sem `_test` ou opt-in ausente. Se a
 coleção já existir, interromper só a inicialização e revisar estado; não usar drop/collMod
-para contornar a recusa. A seed não sobrescreve produto existente.
+para contornar a recusa. `--seed` é opcional e não deve ser usado na demonstração de cadastro
+manual. Para conferir uma coleção já preparada sem alterá-la, use apenas `--verify`:
+
+```sh
+uv run --locked python -m scripts.seed_products --verify
+```
+
+Essa opção lê validator/nível e os seis índices, incluindo ordem das chaves e unicidade;
+recusa divergências sem alterar o banco. O opt-in de conexão de teste continua obrigatório.
+URI Atlas deve usar `mongodb+srv://` com TLS; não desativar certificados/TLS. O backend recusa
+URI remota sem TLS e bancos habilitados sem sufixo `_test`.
 
 Fonte de validator/índices: [mongo/products_schema.json](../mongo/products_schema.json).
 `validationLevel=strict`, `validationAction=error`; `_id` ObjectId, datas BSON, valores int/long,
@@ -159,7 +170,7 @@ RUN_REAL_INTEGRATION=0
 `COOKIE_SECRET` é uma chave própria aleatória com pelo menos 32 caracteres; gere-a localmente
 com gerenciador de senhas/segredos e salve apenas no arquivo privado. As entradas em branco
 acima são intencionais, não credenciais. Não colar `.env` em mensagens. Mantenha limites/TTLs
-do template. A secret key Supabase é opcional nos cinco testes, necessária apenas ao contato
+do template. A secret key Supabase é opcional nos seis testes, necessária apenas ao contato
 privado do checkout. Para estes testes sem mídia remota, `MEDIA_ALLOWED_ORIGINS=[]` basta.
 
 ## 6. Retomar a validação por serviço, sem refazer funcionalidades
@@ -173,19 +184,16 @@ uv run --locked python -m scripts.check_connections
 
 Ele retorna apenas booleanos; não prova RLS, índices ou escrita. Antes de habilitar os testes,
 confirme que a conta admin/negativa e a permissão de escrita/limpeza são exclusivamente de teste.
-Para carregar também as credenciais `NEOX_TEST_*` do `.env` para o processo pytest, use:
+As contas `NEOX_TEST_*` são lidas do `.env` privado somente após opt-in explícito no processo;
+variáveis já exportadas têm precedência. Use:
 
 ```sh
-RUN_REAL_INTEGRATION=1 uv run --locked python - <<'PY'
-from dotenv import load_dotenv
-import pytest
-load_dotenv('.env', override=False)
-raise SystemExit(pytest.main(['tests/real', '-q', '--tb=short']))
-PY
+RUN_REAL_INTEGRATION=1 uv run --locked pytest tests/real -q --tb=short
 ```
 
-Esse comando só deve ser executado depois do preparo autorizado. `override=False` preserva
-valores já exportados; se houver variáveis antigas no terminal, corrigir a origem antes de testar.
+Esse comando só deve ser executado depois do preparo autorizado. Se houver variáveis antigas
+no terminal, corrigir a origem antes de testar. RUN_REAL_INTEGRATION no arquivo sozinho não
+habilita testes, nem as flags de conexão são modificadas automaticamente.
 Nunca usar `printenv`, exibir Settings completos, `--showlocals` ou `--debug` para publicar erros
 com credenciais. Em caso de erro real, registrar somente serviço, classe/código e resultado
 sanitizado; não copiar respostas/tokens de autenticação para evidências.
@@ -195,7 +203,8 @@ assim, pendência em outro banco não impede sua validação:
 
 | Arquivo | Provas esperadas e efeitos |
 |---|---|
-| `tests/real/test_live_admin_rls.py` | 3 testes: Auth admin, perfil próprio, escrita negada, logout/revogação; anon sem leitura; não-admin 403. Cria sessões e as encerra; não cria usuários. |
+| `tests/real/test_live_admin_rls.py` | 3 testes: Auth admin, perfil próprio, logout/revogação; anon sem leitura (42501 ou zero linhas); não-admin 403. Cria sessões e as encerra; não cria usuários nem tenta UPDATE. Grants de escrita são verificados pelo postflight somente SELECT. |
+| `tests/real/test_live_storefront.py` | 1 teste sem overrides: login HTTP/CSRF, cadastro, leitura independente MongoDB, catálogo/Jinja imediato, refresh, PATCH, desativação e logout. Persiste produto de teste e limpa somente seu SKU aleatório. Exige Supabase e Atlas; não comprova interação por clique no navegador. |
 | `tests/real/test_live_mongodb.py` | 1 teste: CRUD, duplicata 409, preço atualizado e soft-delete. Cria e limpa apenas SKU aleatório de teste. |
 | `tests/real/test_live_redis.py` | 1 teste: EVAL concorrente, A/B/A, cinco únicos e TTL. Cria e remove apenas chave aleatória de teste. |
 

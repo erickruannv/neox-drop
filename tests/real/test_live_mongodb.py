@@ -3,6 +3,7 @@ import secrets
 from app.core.exceptions import ApiFault
 from app.db.mongodb import mongodb_client
 from app.services.catalog import create_product, update_product
+from scripts.seed_products import verify
 
 
 async def test_real_mongo_crud_unique_indexes_and_soft_delete(real_settings, examples):
@@ -10,7 +11,9 @@ async def test_real_mongo_crud_unique_indexes_and_soft_delete(real_settings, exa
     suffix = secrets.token_hex(12)
     payload = {**examples["ProductCreate"], "sku": f"NEOX-TEST-{suffix}", "slug": f"teste-{suffix}"}
     async with mongodb_client(real_settings) as client:
-        collection = client[real_settings.mongodb_database]["products"]
+        database = client[real_settings.mongodb_database]
+        await verify(database)
+        collection = database["products"]
         try:
             created = await create_product(collection, payload, real_settings)
             assert created["priceCents"] == 15990

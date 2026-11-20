@@ -5,7 +5,7 @@ Roteiro operacional da Fase 3: [configuração gratuita e retomada por serviço]
 O backend possui as 14 operações JSON previstas, com teste local de método/rota/operationId.
 Isso não comprova integração real. O histórico atualizado das leituras Supabase e da aplicação
 manual informada pelo usuário está em [backend-fase3.md](evidencias/backend-fase3.md).
-Cinco testes em `tests/real/` ficam ignorados sem opt-in; os testes em
+Seis testes em `tests/real/` ficam ignorados sem opt-in; os testes em
 `tests/integration/` exercitam HTTP/serviços locais com dublês de rede/coleção.
 
 ## Configuração local
@@ -84,12 +84,13 @@ Auth exige teste real; não foi declarada comprovada por leitura de SQL.
 Com banco **novo**, nome `_test`, destinos conferidos e autorização de escrita de teste:
 
 ```sh
-uv run --locked python -m scripts.seed_products --initialize --seed
+uv run --locked python -m scripts.seed_products --initialize --verify
 ```
 
 Não executado nesta rodada. O script recusa coleção existente na inicialização, evitando
 `collMod` silencioso; a seed usa `$setOnInsert` por SKU e não sobrescreve registro existente.
-Repetir apenas `--seed` pressupõe os índices únicos já preparados. O validador BSON e os
+`--verify` sozinho só lê o validator/índices; não altera coleção nem dados. `--seed` continua
+opcional, separado e desnecessário para cadastrar pelo painel. O validador BSON e os
 índices estão em `mongo/products_schema.json`; o wrapper mongosh é alternativa, não deve
 ser executado além do Python na mesma coleção. Não executar scripts de `docs/reference/`.
 
@@ -115,17 +116,19 @@ RUN_REAL_INTEGRATION=1 uv run --locked pytest tests/real -q
 
 O diagnóstico é somente leitura e exibe booleanos, sem hosts/URIs/chaves. Seu exit code é
 0 para três probes bem-sucedidos, 1 para falha e 2 para configuração/opt-in ausente.
-Health Supabase testa Auth + disponibilidade da raiz REST, sem conceder leitura anônima
+Health Supabase testa Auth health/settings, sem usar a raiz REST restrita nem conceder leitura anônima
 de tabela privada; isso não verifica schema, RLS ou contato da loja.
 
-Além do `.env` de Settings, o **ambiente do processo** dos testes reais deve conter
+Após o opt-in RUN_REAL_INTEGRATION=1 no processo, testes leem do `.env` privado ou do ambiente
 `NEOX_TEST_ADMIN_EMAIL`, `NEOX_TEST_ADMIN_PASSWORD`, `NEOX_TEST_NONADMIN_EMAIL` e
 `NEOX_TEST_NONADMIN_PASSWORD`, das contas fictícias previamente autorizadas. Não colocá-los
 no Git nem como literais em comandos. Sem opt-in os testes ficam SKIPPED; com opt-in e
 configuração incompleta devem falhar, não simular sucesso.
 
-Os testes reais cobrem Auth/perfil/RLS, escrita negada a usuário, revogação de sessão,
-usuário sem admin ativo, CRUD/índices/soft-delete Mongo e EVAL/ordem/TTL Redis.
+Os testes reais preparados cobrem Auth/perfil/RLS por leitura, revogação/refresh de sessão,
+usuário sem admin ativo, HTTP cadastro–catálogo–PATCH–desativação com persistência Mongo,
+CRUD/índices/soft-delete Mongo e EVAL/ordem/TTL Redis. Nenhum UPDATE é tentado no PostgreSQL;
+grants são conferidos pelo postflight de leitura. Sem credenciais, isso é preparo, não prova real.
 O teste Mongo cria documento com SKU aleatório de teste e limpa apenas esse SKU; o teste
 Redis cria chave aleatória temporária e a remove. Isso é escrita de teste e exige autorização.
 Não medem dois workers reais, cache sob falha real ou jornada com UI/WhatsApp.
@@ -140,7 +143,8 @@ O contrato canônico continua `docs/contracts/openapi.json`.
 O rate limit é por IP/processo e a aplicação não é declarada pronta para implantação
 multiworker. Antes disso, implementar contador compartilhado/limites por identidade e testar
 falha/concurrency. Não houve deploy. T008 e os aceites reais dependentes ficam abertos;
-T014/T027 dependem da UI, T028/T029 exigem evidências reais, e T031 não está concluída.
+T014 tem UI integrada mas falta a jornada com serviços reais; T027/T028/T029 exigem evidências reais,
+e T031 não está concluída.
 RF-13 continua pendente de GLB/licenças e da implementação do Claude.
 
 Fontes primárias conferidas: [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys),
