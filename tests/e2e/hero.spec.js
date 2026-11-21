@@ -62,11 +62,16 @@ test("anuncia a troca em região aria-live", async ({ page }) => {
   await expect(hero(page).locator("[data-live]")).toContainText(`Destaque 4 de 4: ${items[3].name}`);
 });
 
-test("sem model3dUrl: só foto 2D, nenhum model-viewer nem promessa de 3D", async ({ page }) => {
+test("sem model3dUrl: só foto 2D, nenhum visualizador nem promessa de giro", async ({ page }) => {
+  const i = items.findIndex((it) => !it.model3dUrl);
   await page.goto("/");
+  await hero(page).locator(`[data-thumbs] button[data-id="${items[i].id}"]`).click();
+  await expectSelected(page, i);
   await expect(hero(page).locator('img[data-field="image"]')).toBeVisible();
   await expect(page.locator("model-viewer")).toHaveCount(0);
-  await expect(hero(page)).not.toContainText(/3D|girar/i);
+  await expect(hero(page).locator("[data-rotate-pad]")).toBeHidden();
+  await expect(hero(page).locator("[data-model-hint]")).toHaveText("Visualização 3D indisponível para este modelo");
+  await expect(hero(page)).not.toContainText(/girar/i);
 });
 
 test.describe("com model3dUrl (GLB fictício, sem ativo licenciado)", () => {

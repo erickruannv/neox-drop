@@ -1,5 +1,6 @@
 // Hero NEOX drop: carrossel de destaques (FeaturedList) com troca conjunta de nome, preço,
-// descrição, imagem, cores e CTA; Model Viewer só para GLB real, giro somente em Y.
+// descrição, imagem, cores e CTA; 3D real (GLB via Model Viewer ou embed Sketchfab), giro só em Y.
+import { createSketchfabViewer, sketchfabUid } from "./sketchfab.js";
 
 // Ângulo polar fixo (phi = min = max): sem inclinação vertical.
 // shortcut: 75deg é provisório, ajustar com o GLB licenciado em teste (T024/T025).
@@ -86,11 +87,51 @@ function init(root, items) {
     thumbs[indexOf(selected)]?.focus();
   });
 
-  // ---- Model Viewer (somente com model3dUrl; foto fica visível até o load) ----
+  // ---- 3D (somente com model3dUrl; foto fica visível até o modelo estar pronto) ----
   let viewer = null;
+  let sketch = null;
+  const hint = root.querySelector("[data-model-hint]");
+  const credit = root.querySelector('[data-field="credit"]');
+  const saveData = navigator.connection?.saveData === true;
+
+  function showCredit(item, is3d) {
+    const a = item.attributes ?? {};
+    const [text, url] = is3d ? [a.model3dCredit, a.model3dCreditUrl] : [a.imageCredit, a.imageCreditUrl];
+    credit.textContent = text ?? "";
+    if (url) credit.href = url;
+    else credit.removeAttribute("href");
+  }
+
+  function sketchState(state, uid) {
+    const item = items[indexOf(selected)];
+    if (!uid || !item || sketchfabUid(item.model3dUrl) !== uid) return;
+    const img = media.querySelector('[data-field="image"]');
+    const ready = state === "ready";
+    img.hidden = ready;
+    showCredit(item, ready);
+    hint.textContent = { loading: "Carregando modelo 3D…", ready: "Arraste para girar 360°", error: "Modelo 3D indisponível agora" }[state] ?? "";
+    status(ready ? "Modelo 3D carregado. Arraste na horizontal ou use as setas para girar." : "");
+  }
 
   async function syncModel(item) {
     const img = media.querySelector('[data-field="image"]');
+    showCredit(item, false);
+    hint.textContent = item.model3dUrl ? "" : "Visualização 3D indisponível para este modelo";
+    const uid = sketchfabUid(item.model3dUrl);
+    if (uid && saveData) {
+      sketch?.hide();
+      hint.textContent = "3D desativado (economia de dados)";
+      img.hidden = false;
+      return;
+    }
+    if (uid) {
+      viewer?.remove();
+      viewer = null;
+      sketch ??= createSketchfabViewer(media, { reduced, zoom: 0.62, onState: sketchState });
+      sketch.show(uid, `Modelo 3D de ${item.name}, ${item.colorName}`);
+      return;
+    }
+    sketch?.hide();
     if (!item.model3dUrl) {
       viewer?.remove();
       viewer = null;
@@ -130,6 +171,8 @@ function init(root, items) {
       if (mv.dataset.id !== selected) return;
       mv.classList.remove("opacity-0");
       img.hidden = true;
+      hint.textContent = "Arraste para girar 360°";
+      showCredit(items[indexOf(selected)], true);
       status(`Modelo 3D carregado. Arraste na horizontal para girar.`);
     });
     mv.addEventListener("error", () => {

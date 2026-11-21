@@ -32,11 +32,17 @@
       {# Lettering gráfico de fundo: primeira palavra do nome do destaque. #}
       <span class="display-type pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none whitespace-nowrap text-center text-[clamp(5rem,14vw,13rem)] text-white/[0.12] hero-swap"
             aria-hidden="true" data-field="lettering">{{ first.name.split(" ")[0]|upper }}</span>
-      <div class="hero-media relative z-10 aspect-[630/304] w-full max-w-[44rem]" data-hero-media>
+      <div class="hero-media relative z-10 aspect-[16/10] w-full max-w-[44rem] sm:aspect-[630/304]" data-hero-media>
         <img src="{{ first.mainImageUrl }}" alt="{{ first.name }}, {{ first.colorName }}"
              width="630" height="304" fetchpriority="high" decoding="async"
              class="hero-float size-full object-contain drop-shadow-[0_30px_40px_rgb(0_0_0/0.45)]" data-field="image">
         <p class="sr-only" data-model-status></p>
+      </div>
+      {%- set fa = first.attributes if first.attributes else {} %}
+      <div class="relative z-10 mt-1 flex w-full max-w-[44rem] flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs">
+        <p class="flex items-center gap-1.5 font-semibold opacity-90" data-model-hint>{% if not first.get('model3dUrl') %}Visualização 3D indisponível para este modelo{% endif %}</p>
+        <p class="opacity-70"><a class="underline-offset-2 hover:underline" target="_blank" rel="noopener noreferrer" data-field="credit"
+           {% if fa.get('imageCreditUrl') %}href="{{ fa.imageCreditUrl }}"{% endif %}>{{ fa.get('imageCredit', '') }}</a></p>
       </div>
     </div>
 

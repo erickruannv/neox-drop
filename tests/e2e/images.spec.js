@@ -43,7 +43,8 @@ test("hero: imagem fica dentro da área de mídia em qualquer proporção", asyn
   await expect(img).toBeVisible();
   expect(await img.evaluate((el) => getComputedStyle(el).objectFit)).toBe("contain");
   const m = await box(media);
-  expect(Math.abs(m.height - (m.width * 304) / 630)).toBeLessThan(2);
+  const ratio = page.viewportSize().width < 640 ? 10 / 16 : 304 / 630; // celular: palco 3D mais alto
+  expect(Math.abs(m.height - m.width * ratio)).toBeLessThan(2);
   const thumbs = await box(page.locator("[data-thumbs]"));
   expect(m.bottom).toBeLessThanOrEqual(thumbs.top + 1); // não invade as miniaturas
 });

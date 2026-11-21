@@ -59,7 +59,7 @@ def pages() -> tuple[dict[str, tuple[str, dict]], dict]:
     extra = json.loads((FIXTURES / "products.json").read_text())
     details = home["featured"]["items"] + extra["extraDetails"]
     catalog = {"items": [summary(d) for d in details], "page": 1, "limit": 12, "total": len(details)}
-    inactive = admin_product({**details[3], "id": "6740a1b2c3d4e5f6010000ff", "sku": "NEOX-DEMO-199", "slug": "sand-court-arquivado", "active": False}, 9)
+    inactive = admin_product({**next(d for d in details if d["slug"] == "sand-court-og"), "id": "6740a1b2c3d4e5f6010000ff", "sku": "NEOX-DEMO-199", "slug": "sand-court-arquivado", "active": False}, 9)
     admin_items = [admin_product(d, i) for i, d in enumerate(details)] + [inactive]
     empty = {"featured": {"items": []}, "launches": {"items": [], "page": 1, "limit": 4, "total": 0}, "recent": {"items": []}}
     model = copy.deepcopy(home)

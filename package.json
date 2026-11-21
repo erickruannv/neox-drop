@@ -11,6 +11,7 @@
     "dev:css": "tailwindcss -i app/static/css/input.css -o app/static/dist/app.css --watch",
     "preview": "pnpm build && uv run --no-project --with jinja2==3.1.6 --with jsonschema==4.26.0 python tests/e2e/tools/render_preview.py",
     "test:ui": "pnpm preview && playwright test",
+    "test:3d": "playwright test -c playwright.live.config.js",
     "demo": "pnpm build && uv run --no-project --with jinja2==3.1.6 --with jsonschema==4.26.0 python tests/e2e/tools/demo_server.py"
   },
   "devDependencies": {

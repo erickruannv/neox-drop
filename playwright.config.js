@@ -3,6 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 // Serve o HTML renderizado por `pnpm preview` (Jinja2 + fixtures OpenAPI); sem backend Node.
 export default defineConfig({
   testDir: "tests/e2e",
+  testIgnore: "live/**",
   fullyParallel: true,
   reporter: [["list"]],
   use: { baseURL: "http://127.0.0.1:4173" },

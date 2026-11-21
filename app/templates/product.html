@@ -39,6 +39,23 @@
         {% endfor %}
       </ul>
       {% endif %}
+      {%- set pa = p.attributes if p.get('attributes') else {} %}
+      <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+        {% if p.get('model3dUrl') %}
+        <button type="button" class="inline-flex h-11 items-center gap-2 rounded-full border-2 border-ink/15 bg-white px-4 font-bold transition-colors hover:border-ink aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-white"
+                aria-pressed="false" data-view-3d data-model="{{ p.model3dUrl }}">
+          {{ icon("cube", "size-5") }} <span data-view-3d-label>Ver em 3D</span>
+        </button>
+        {% endif %}
+        <p class="sr-only" aria-live="polite" data-gallery-status></p>
+        {% if pa.get('imageCredit') or pa.get('model3dCredit') %}
+        <ul class="text-xs text-muted">
+          {% for k in ["imageCredit", "model3dCredit"] if pa.get(k) %}
+          <li>{% if pa.get(k ~ "Url") %}<a href="{{ pa[k ~ 'Url'] }}" target="_blank" rel="noopener noreferrer" class="hover:text-ink hover:underline">{{ pa[k] }}</a>{% else %}{{ pa[k] }}{% endif %}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
     </section>
 
     <section aria-labelledby="produto-nome" class="lg:pt-4">
