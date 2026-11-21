@@ -363,3 +363,93 @@ sem convidar membros. Depois criar somente cluster Free/M0 com custo zero, sem s
 usuário readWrite limitado a neox_drop_test e IP atual (nunca 0.0.0.0/0). Colar URI SRV somente
 no .env local. Não criar products manualmente; inicialização com validator/índices será etapa
 separada e autorizada, sem seed. Procedimento atualizado em CONFIGURAR-BANCOS-TESTE.md.
+
+
+## Integração visual aprovada ac1f7f1 — 21/11/2026
+
+Worktree backend inicialmente limpa em feature/3d-assets/23f2610; retorno seguro a
+feature/backend/50078b4 e merge local --no-ff/--no-commit de ac1f7f1 (feature/frontend).
+Git conciliou home.html, catalog.html e base.html automaticamente, sem marcadores de conflito.
+Revisão semântica conservou csrfToken, estados 503, redirecionamento/autorização admin,
+contratos de checkout, cookies e rotas. Nenhum contrato OpenAPI foi alterado. A worktree
+frontend permaneceu limpa no commit aprovado; main e feature/3d-assets não foram integradas.
+Backups não rastreados do laboratório foram preservados fora da loja em
+/tmp/neox-3d-tools/preserved-worktree-leftovers; seus originais versionados continuam em 23f2610.
+Nenhum GLB experimental, arquivo do laboratório ou banco remoto entrou nesta integração.
+
+Fotografias WebP e créditos via attributes preservados; modelo e fotografia seguem o produto
+selecionado. Performance foi ocultada e as duas coleções restantes usam grid de duas colunas,
+sem produto/fotografia inventados. Crédito Christian H./CC BY 2.0 também aparece nas coleções,
+mesmo quando o hero não tem dados. CSP aplicada em HTML/API/erros: script self + SDK
+static.sketchfab.com, frame sketchfab.com, sem unsafe-inline para scripts ou unsafe-eval;
+estilos inline continuam necessários para tokens dinâmicos do hero. Mídia externa depende
+de MEDIA_ALLOWED_ORIGINS válido (origens HTTPS exatas; para cadastrar embeds, incluir
+https://sketchfab.com). Nosniff, base-uri/object/frame-ancestors restritos preservam isolamento.
+
+app.main:app em http://127.0.0.1:8000/ continua a aplicação real, sem fixtures/fallback
+fictício: TEST_CONNECTIONS_ENABLED=false mantém catálogo/checkout em 503 e admin protegido.
+Para avaliar a nova interface sem autorizar escrita em bancos, scripts.preview_storefront:app
+em http://127.0.0.1:8001/ reutiliza as DUAS fixtures aprovadas do Claude somente em páginas e
+GETs públicos. Banner identifica preços/estoque ilustrativos. Não importa fixtures de admin,
+não substitui autenticação/CSRF/escritas, não gera WhatsApp nem simula persistência. Esse
+entrypoint é ferramenta local opt-in, não configuração de publicação; importa app.main, que
+valida .env indiretamente, mas suas próprias conexões são false e sua chave CSRF é efêmera.
+Comandos exatos estão no README; ambos servidores usam loopback, um worker e no-proxy-headers.
+
+Evidências visuais reais desta execução FastAPI: [home](integracao-home.png) e
+[Samba no viewer](integracao-samba-3d.png). Produtos/estoque são fixtures explícitas; o iframe
+Sketchfab, SDK, texturas, rede e renderização GPU são reais. Nenhum route.fulfill nesses testes.
+Aparência em celular físico e fidelidade exata de SKU dos embeds não foram comprovadas.
+
+Verificações finais:
+
+- pnpm install --frozen-lockfile e pnpm build: sucesso, sem upgrades ou aprovação de scripts.
+- uv lock --check: sucesso; pytest -q: 163 passed, 6 skipped (3,44 s).
+- Ruff check/format backend: sucesso, 49 arquivos. Escopo UI Python legado não foi reformatado.
+- pnpm test:ui --workers=2: 112 passed, 4 skipped (32,8 s), fixtures/mocks explícitos.
+- NEOX_FASTAPI_URL=http://127.0.0.1:8000 pnpm exec playwright test --workers=2:
+  8 passed (3,8 s), sem mocks de rede; prova guards/CSRF/503, não bancos.
+- NEOX_FASTAPI_URL=http://127.0.0.1:8001 pnpm exec playwright test -c playwright.live.config.js:
+  12 passed (1,3 min), Chromium completo/GPU Apple M1, desktop e mobile emulado. Inclui os
+  dois modelos, troca, arraste horizontal, vertical sem inclinação, reduced-motion, galeria,
+  crédito, fotos carregadas, navegação/carrinho/CSP e bloqueio de checkout/admin.
+- Duas regressões iniciais falharam antes de ocultar Performance e adicionar CSP e passaram
+  após correção. Validação de origem encontrou e corrigiu aceitação de ponto-e-vírgula.
+- No harness, primeira captura falhou por diretório inexistente; criação automática adicionada.
+  Verificação mobile aguardava imagens lazy fora da tela; agora rola a página. Uma execução
+  interrompida aguardava estabilidade da foto animada; rolagem não exige imóvel. Rodada final
+  completa acima passou; não alteramos a animação nem falsificamos respostas para passar.
+- .env ignorado/não rastreado; zero correspondências dos segredos locais configurados nos
+  arquivos rastreados. Dist/node_modules/resultados permanecem ignorados. Nenhum valor logado.
+  Revisão independente de código não encontrou bug bloqueante; validou isolamento do preview.
+
+Estado dos bancos nesta rodada (configuração conferida sem valores): Supabase URL/Publishable,
+COOKIE_SECRET e MONGODB_URI presentes; banco esperado neox_drop_test. Supabase secret key e
+Upstash REST URL/token ausentes. Não houve conexão/SQL remoto nem validação real de RLS/CRUD.
+Migration 20261119105020_admin_profiles_rls.sql permanece registrada como aplicada MANUALMENTE
+pelo usuário; não reaplicada. Os seis testes reais continuam ignorados, não equivalem a sucesso.
+
+Prioridades até entrega: (1) responsável executar postflight somente leitura, confirmar RLS e
+provisionar perfil admin ativo apenas com autorização explícita; testar as duas contas/sessão;
+(2) restringir usuário Atlas/IP, revisar/autorizar validator e seis índices, então demonstrar
+cadastro→leitura persistida→catálogo→edição/desativação; sem seed obrigatório; (3) configurar
+Upstash gratuito e testar recentes/TTL/degradação; (4) contato autorizado em store_settings e
+chave backend privada para checkout WhatsApp; (5) revisão final GitHub sem segredos, push só
+com autorização, e vídeo acadêmico 5–10min diferenciando real/fixture/pendente. Manter um worker
+até rate limit compartilhado. Não houve push, deploy, compra ou mudança remota.
+
+Plano técnico 3D definitivo, sem reconstrução procedural aproximada:
+
+1. Fixar SKU/colorway antes de adquirir arquivo: AM95 preto/branco/lima ainda precisa de
+   confirmação frente ao NDSTRKT; AM90 Infrared requer arquivo exatamente correspondente;
+   NB9060 cinza exige SKU aprovado (U9060GRY era provisório); Samba OG deve ser B75806.
+2. Obter malha-base fiel gratuitamente com autorização escrita de modificação E hospedagem
+   GLB público, ou captura própria autorizada do par exato com escala e vistas completas.
+   Embed/preço/preview não licencia o arquivo. Sem fonte adequada, manter fotografia existente
+   e não declarar conclusão. Não comprar ou extrair geometria de viewers.
+3. Preservar original; corrigir scan/retopologia/UVs e PBR a partir de referências calibradas,
+   comparar lateral/3⁄4/traseira/superior/clay e aprovar fidelidade antes de reduzir polígonos.
+4. Exportar GLB autocontido, otimizar sem apagar detalhes, associar em model3dUrl e atributos
+   de crédito existentes; testar foto-poster, carregamento sob clique, Y-only, falhas, tamanho
+   e aparelhos físicos. Só então substituir o embed. Licenças editoriais atuais não comprovam
+   autorização comercial; RF-13 e os quatro modelos definitivos continuam pendentes.

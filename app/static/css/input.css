@@ -227,6 +227,55 @@
     background: rgb(0 0 0 / 0.5);
   }
 
+  .viewer-3d {
+    margin: auto;
+    padding: 0;
+    width: min(72rem, calc(100vw - 1rem));
+    max-width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 1rem);
+    border-radius: 1.5rem;
+    background: #141617;
+    color: #fff;
+    box-shadow: 0 32px 80px rgb(0 0 0 / 0.5);
+  }
+  .viewer-3d[open] {
+    animation: viewer-in 280ms var(--ease-out-soft);
+  }
+  .viewer-3d::backdrop {
+    background: rgb(0 0 0 / 0.72);
+    backdrop-filter: blur(4px);
+  }
+  .viewer-3d-stage {
+    aspect-ratio: 4 / 5;
+    max-height: calc(100dvh - 11rem);
+    margin-inline: auto;
+    background:
+      radial-gradient(ellipse 55% 45% at 50% 62%, rgb(189 244 0 / 0.12), transparent 70%),
+      linear-gradient(180deg, #1d2021, #101213);
+  }
+  @media (min-width: 640px) {
+    .viewer-3d-stage {
+      aspect-ratio: 16 / 9;
+    }
+  }
+  .viewer-3d-stage[data-loading]::after {
+    content: "";
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: -1.25rem 0 0 -1.25rem;
+    border-radius: 9999px;
+    border: 3px solid rgb(255 255 255 / 0.15);
+    border-top-color: var(--color-lime);
+    animation: viewer-spin 900ms linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .viewer-3d-stage[data-loading]::after {
+      animation: none;
+    }
+  }
+
   .collection-card {
     @apply relative isolate flex min-h-44 overflow-hidden rounded-2xl p-6 text-white sm:min-h-48;
   }
@@ -244,6 +293,19 @@
   .product-card:hover,
   .product-card:focus-within {
     @apply -translate-y-1 shadow-[0_2px_4px_rgb(0_0_0/0.06),0_16px_32px_rgb(0_0_0/0.1)];
+  }
+}
+
+@keyframes viewer-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+
+@keyframes viewer-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

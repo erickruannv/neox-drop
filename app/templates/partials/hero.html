@@ -32,11 +32,19 @@
       {# Lettering gráfico de fundo: primeira palavra do nome do destaque. #}
       <span class="display-type pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none whitespace-nowrap text-center text-[clamp(5rem,14vw,13rem)] text-white/[0.12] hero-swap"
             aria-hidden="true" data-field="lettering">{{ first.name.split(" ")[0]|upper }}</span>
-      <div class="hero-media relative z-10 aspect-[630/304] w-full max-w-[44rem]" data-hero-media>
+      <div class="hero-media relative z-10 aspect-[16/10] w-full max-w-[46rem]" data-hero-media>
         <img src="{{ first.mainImageUrl }}" alt="{{ first.name }}, {{ first.colorName }}"
-             width="630" height="304" fetchpriority="high" decoding="async"
-             class="hero-float w-full drop-shadow-[0_30px_40px_rgb(0_0_0/0.45)]" data-field="image">
-        <p class="sr-only" data-model-status></p>
+             width="1600" height="1000" fetchpriority="high" decoding="async"
+             class="hero-float size-full object-contain drop-shadow-[0_30px_40px_rgb(0_0_0/0.45)]" data-field="image">
+      </div>
+      {%- set fa = first.get('attributes') or {} %}
+      <div class="relative z-10 mt-2 flex w-full max-w-[46rem] flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <button type="button" class="inline-flex h-11 items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 text-sm font-bold backdrop-blur transition-colors hover:bg-white/20"
+                data-open-3d aria-label="Ver {{ first.name }} em 3D" {% if not first.get('model3dUrl') %}hidden{% endif %}>
+          {{ icon("cube", "size-5") }} Ver em 3D
+        </button>
+        <p class="text-xs opacity-70"><a class="underline-offset-2 hover:underline" target="_blank" rel="noopener noreferrer" data-field="credit"
+           {% if fa.get('imageCreditUrl') %}href="{{ fa.imageCreditUrl }}"{% endif %}>{{ fa.get('imageCredit', '') }}</a></p>
       </div>
     </div>
 
@@ -46,13 +54,13 @@
 
     {# Miniaturas: rolagem horizontal no celular, pílula central no desktop. #}
     <div class="order-3 lg:absolute lg:bottom-6 lg:left-1/2 lg:-translate-x-1/2">
-      <ul class="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0 lg:rounded-full lg:bg-black/30 lg:p-1.5 lg:backdrop-blur" aria-label="Escolher destaque" data-thumbs>
+      <ul class="-mx-4 flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:scroll-px-0 sm:px-0 lg:rounded-full lg:bg-black/30 lg:p-1.5 lg:backdrop-blur" aria-label="Escolher destaque" data-thumbs>
         {% for item in items %}
         <li class="snap-start">
           <button type="button" class="thumb grid h-16 w-28 shrink-0 place-items-center rounded-full border-2 border-transparent px-2 transition-colors hover:bg-white/10 aria-[current=true]:border-lime aria-[current=true]:bg-white/10 sm:w-32"
                   data-id="{{ item.id }}" aria-label="Destaque {{ loop.index }} de {{ items|length }}: {{ item.name }}"
                   {% if loop.first %}aria-current="true"{% else %}aria-current="false"{% endif %}>
-            <img src="{{ item.mainImageUrl }}" alt="" width="126" height="61" loading="lazy" class="max-h-12 w-auto">
+            <img src="{{ item.mainImageUrl }}" alt="" width="126" height="61" loading="lazy" class="max-h-12 w-auto max-w-full object-contain">
           </button>
         </li>
         {% endfor %}

@@ -91,8 +91,16 @@ async def auth_error(request: Request, exc):
 class SanitizedErrorsMiddleware:
     """Sanitiza falhas e preserva a renovação de sessão nas respostas de erro."""
 
-    def __init__(self, app):
+    def __init__(self, app, media_origins=()):
         self.app = app
+        media = " ".join(media_origins)
+        self.policy = (
+            "default-src 'self'; script-src 'self' https://static.sketchfab.com; "
+            "style-src 'self' 'unsafe-inline'; "
+            f"img-src 'self' data: blob: {media}; connect-src 'self' {media}; "
+            "font-src 'self'; frame-src https://sketchfab.com; worker-src 'self' blob:; "
+            "object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+        ).encode("ascii")
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
@@ -103,6 +111,13 @@ class SanitizedErrorsMiddleware:
         async def tracked_send(message):
             nonlocal started
             if message["type"] == "http.response.start":
+                message["headers"].extend(
+                    [
+                        (b"content-security-policy", self.policy),
+                        (b"x-content-type-options", b"nosniff"),
+                        (b"referrer-policy", b"strict-origin-when-cross-origin"),
+                    ]
+                )
                 renewed = scope.get("state", {}).get("renewed_session_cookies", [])
                 if message["status"] >= 400 and renewed:
                     headers = message["headers"]

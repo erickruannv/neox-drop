@@ -23,6 +23,7 @@ R$&nbsp;{{ brl_amount(cents) }}
 {%- elif name == "close" %}<path d="M18 6 6 18M6 6l12 12"/>
 {%- elif name == "trash" %}<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
 {%- elif name == "logout" %}<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+{%- elif name == "cube" %}<path d="M12 2 3 7v10l9 5 9-5V7Z"/><path d="m3 7 9 5 9-5M12 12v10"/>
 {%- elif name == "tag" %}<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/>
 {%- endif %}
 </svg>
@@ -38,16 +39,18 @@ R$&nbsp;{{ brl_amount(cents) }}
 
 {# Card de produto (ProductSummary). data-card=* permite ao catalog.js clonar e preencher. #}
 {% macro product_card(p) -%}
-<article class="product-card h-full">
-  <span class="self-start rounded-full bg-sand/70 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide" data-card="category">{{ p.category }}</span>
-  <img src="{{ p.mainImageUrl }}" alt="" width="630" height="304" loading="lazy" class="mx-auto my-3 w-full max-w-72" data-card="image">
+<article class="product-card group h-full">
+  <div class="relative mb-4 aspect-[3/2] overflow-hidden rounded-xl bg-paper">
+    <img src="{{ p.mainImageUrl }}" alt="" width="1200" height="800" loading="lazy" decoding="async" class="absolute inset-0 size-full object-contain p-2 transition-transform duration-500 ease-out-soft group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100" data-card="image">
+    <span class="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide" data-card="category">{{ p.category }}</span>
+  </div>
   <p class="text-xs font-bold uppercase tracking-wide text-muted" data-card="brand">{{ p.brand }}</p>
   <h3 class="mt-1 font-bold leading-tight">
     <a href="/tenis/{{ p.slug|urlencode }}" class="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-3 focus-visible:after:outline-ink" data-card="link">{{ p.name }}</a>
   </h3>
   <div class="mt-2 flex items-end justify-between gap-2">
     <p class="text-xl font-extrabold" data-card="price">{{ brl(p.priceCents) }}</p>
-    <span class="grid size-10 place-items-center rounded-xl bg-ink text-white" aria-hidden="true">{{ icon("arrow-right", "size-5") }}</span>
+    <span class="grid size-10 place-items-center rounded-xl bg-ink text-white transition-colors duration-300 group-hover:bg-lime group-hover:text-ink" aria-hidden="true">{{ icon("arrow-right", "size-5 transition-transform duration-300 group-hover:translate-x-0.5") }}</span>
   </div>
 </article>
 {%- endmacro %}

@@ -109,3 +109,36 @@ async def test_product_media_stays_associated_in_detail_featured_and_html(
         assert all(hero_data[0][k] == v for k, v in media.items())
         collection.insert_one.assert_not_awaited()
         collection.find_one_and_update.assert_not_awaited()
+
+
+@pytest.fixture
+def curated_media():
+    from pathlib import Path
+
+    source = Path(__file__).resolve().parents[1] / "e2e/fixtures/home.json"
+    return json.loads(source.read_text())["featured"]["items"]
+
+
+@pytest.mark.parametrize("index", [0, 1])
+async def test_curated_embed_and_credits_reach_fastapi_unchanged(catalog_app, curated_media, index):
+    from app.schemas.product import ProductCreate
+
+    # Coleção simulada: comprova integração loader/schema/template, não persistência Atlas.
+    item = curated_media[index]
+    payload = {k: v for k, v in item.items() if k in ProductCreate.model_fields}
+    payload["sizes"] = [{"sizeBR": size, "stock": 1} for size in item["sizesAvailable"]]
+    validated = validate_product(
+        payload, Settings(_env_file=None, media_allowed_origins=["https://sketchfab.com"])
+    )
+    app, _, doc, cursor = catalog_app
+    doc.update(validated)
+    cursor.to_list.return_value = [doc]
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app), base_url="http://test") as c:
+        product = (await c.get(f"/api/products/{item['slug']}")).json()
+        assert product["model3dUrl"] == item["model3dUrl"]
+        assert product["attributes"] == item["attributes"]
+        page = await c.get(f"/tenis/{item['slug']}")
+        assert page.status_code == 200
+        assert item["attributes"]["imageCredit"] in page.text
+        assert item["attributes"]["model3dCreditUrl"] in page.text
+        assert "data-open-3d" in page.text

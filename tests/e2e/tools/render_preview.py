@@ -59,22 +59,29 @@ def pages() -> tuple[dict[str, tuple[str, dict]], dict]:
     extra = json.loads((FIXTURES / "products.json").read_text())
     details = home["featured"]["items"] + extra["extraDetails"]
     catalog = {"items": [summary(d) for d in details], "page": 1, "limit": 12, "total": len(details)}
-    inactive = admin_product({**details[3], "id": "6740a1b2c3d4e5f6010000ff", "sku": "NEOX-DEMO-199", "slug": "sand-court-arquivado", "active": False}, 9)
+    inactive = admin_product({**details[0], "id": "6740a1b2c3d4e5f6010000ff", "sku": "NEOX-DEMO-199", "slug": "arquivado-exemplo", "active": False}, 9)
+    # Só para testar o estado "esgotado": não entra no catálogo nem na vitrine.
+    sold_out = {**details[-1], "id": "6740a1b2c3d4e5f6010000fe", "sku": "NEOX-DEMO-198", "slug": "esgotado-exemplo", "sizesAvailable": []}
     admin_items = [admin_product(d, i) for i, d in enumerate(details)] + [inactive]
     empty = {"featured": {"items": []}, "launches": {"items": [], "page": 1, "limit": 4, "total": 0}, "recent": {"items": []}}
     model = copy.deepcopy(home)
     # GLB inexistente: exercita o caminho Model Viewer -> erro -> fallback 2D, sem ativo 3D.
     model["featured"]["items"][0]["model3dUrl"] = "/static/models/nao-existe.glb"
 
+    no3d = copy.deepcopy(home)
+    for item in no3d["featured"]["items"]:
+        item.pop("model3dUrl", None)
+
     out = {
         "": ("home.html", home),
+        "sem-3d": ("home.html", no3d),
         "empty": ("home.html", empty),
         "model": ("home.html", model),
         "tenis": ("catalog.html", {"catalog": catalog, "filters": {}}),
         "admin/login": ("admin/login.html", {}),
         "admin/produtos": ("admin/products.html", {"products": {"items": admin_items, "page": 1, "limit": 24, "total": len(admin_items)}, "admin": extra["admin"]}),
     }
-    for d in details:
+    for d in details + [sold_out]:
         out[f"tenis/{d['slug']}"] = ("product.html", {"product": d})
     mock = {"details": details, "catalog": catalog["items"], "adminProduct": admin_items[0]}
     validate_as("ProductList", catalog)

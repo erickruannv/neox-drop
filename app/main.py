@@ -46,7 +46,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.state.settings = settings
     application.add_middleware(BodyLimitMiddleware, max_bytes=settings.max_request_bytes)
     application.add_middleware(RateLimitMiddleware, settings=settings)
-    application.add_middleware(SanitizedErrorsMiddleware)
+    application.add_middleware(
+        SanitizedErrorsMiddleware, media_origins=settings.media_allowed_origins
+    )
     application.add_exception_handler(RequestValidationError, validation_error)
     application.add_exception_handler(HTTPException, http_error)
     application.add_exception_handler(ServiceUnavailable, service_error)

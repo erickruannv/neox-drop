@@ -8,7 +8,7 @@ export default defineConfig({
   fullyParallel: true,
   reporter: [["list"]],
   testMatch: fastapiURL ? "**/fastapi.spec.js" : undefined,
-  testIgnore: fastapiURL ? [] : ["**/fastapi.spec.js"],
+  testIgnore: fastapiURL ? ["**/live/**"] : ["**/fastapi.spec.js", "**/live/**"],
   use: { baseURL: fastapiURL ?? "http://127.0.0.1:4173" },
   webServer: fastapiURL ? undefined : {
     command: "python3 -m http.server 4173 --bind 127.0.0.1 --directory tests/e2e/.preview",

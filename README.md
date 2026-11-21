@@ -42,6 +42,32 @@ O diagnóstico somente leitura é `uv run --locked python -m scripts.check_conne
 recusa sem opt-in (código 2); com opt-in retorna 0 se todos responderem ou 1 em falha.
 Não executar contra produção. O health agrega os probes, sem expor hosts/credenciais.
 
+## Avaliar o frontend aprovado pelo FastAPI
+
+Vitrine isolada com os dois exemplos do Claude (Air Max 90 e Samba), sem escrever nos bancos:
+
+```sh
+pnpm build
+uv run --locked uvicorn scripts.preview_storefront:app --host 127.0.0.1 --port 8001 --workers 1 --no-proxy-headers
+open http://127.0.0.1:8001/
+```
+
+O banner identifica preços/estoque ilustrativos. Apenas páginas e GETs públicos usam as
+fixtures aprovadas; admin, CSRF e operações de escrita continuam nos handlers reais, com
+conexões desabilitadas. Login, persistência e checkout não são simulados como bem-sucedidos.
+Esse entrypoint é ferramenta local de avaliação, não deve ser publicado. A importação de
+`app.main` ainda valida a configuração local; um `.env` inválido pode impedir sua inicialização. O entrypoint real
+continua `app.main:app` em :8000, sem fallback para fixtures. Nenhum GLB do laboratório foi integrado.
+
+Teste de navegação/3D real, com rede e GPU, contra a vitrine FastAPI já iniciada:
+
+```sh
+NEOX_FASTAPI_URL=http://127.0.0.1:8001 pnpm exec playwright test -c playwright.live.config.js
+```
+
+Os embeds dependem do Sketchfab e têm as limitações de licença descritas em
+[assets-licenses.md](docs/assets-licenses.md). Não comprovam GLBs próprios licenciados.
+
 ## Verificar
 
 ```sh
@@ -58,7 +84,7 @@ Auth/RLS ou persistência real. Schemas mantêm projeções pública/admin disti
 campos opcionais com `model_dump(mode='json', exclude_unset=True)`.
 Rate limit: janela fixa por IP/processo local, sem confiar em X-Forwarded-For; backend
 compartilhado e limites por identidade precisam ser tratados na autenticação/multiworker.
-CSRF/Origin e rotação de cookies foram implementados; o contexto HTML depende de T014.
+CSRF/Origin e rotação de cookies foram implementados; os loaders servem os templates integrados.
 Limite de corpo conta bytes reais nas operações de escrita.
 
 - [Evidências históricas da Fase 1](docs/evidencias/backend-fase1.md).

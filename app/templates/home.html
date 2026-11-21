@@ -4,6 +4,7 @@
 
 {% block content %}
 {% include "partials/hero.html" %}
+{% include "partials/viewer3d.html" %}
 
 <div class="on-light">
   {# Faixa de confiança: só afirmações verificáveis (cap. 05) — sem frete grátis, parcelamento ou trocas. #}
@@ -28,11 +29,10 @@
 
   <section id="colecoes" aria-labelledby="colecoes-titulo" class="mx-auto max-w-screen-2xl scroll-mt-24 px-4 pt-8 sm:px-6 lg:px-10">
     <h2 id="colecoes-titulo" class="sr-only">Coleções</h2>
-    <ul class="grid gap-4 md:grid-cols-3 lg:gap-6">
+    <ul class="grid gap-4 md:grid-cols-2 lg:gap-6">
       {% for key, title, text, bg, img in [
-        ("Street", "Street", "Estilo urbano o tempo todo.", "bg-raspberry bg-gradient-to-r from-raspberry to-[#c2305c]", "street-rose"),
-        ("Classics", "Classics", "Modelos icônicos que nunca saem de moda.", "bg-coral-deep bg-gradient-to-r from-coral-deep via-coral-deep to-coral", "coral-classic-90"),
-        ("Performance", "Performance", "Tecnologia e conforto para ir mais longe.", "bg-deep-teal bg-gradient-to-r from-deep-teal to-[#21414a]", "performance-knit"),
+        ("Street", "Street", "Estilo urbano o tempo todo.", "bg-raspberry bg-gradient-to-r from-raspberry to-[#c2305c]", "/static/images/products/adidas-samba-og/main.webp"),
+        ("Classics", "Classics", "Modelos icônicos que nunca saem de moda.", "bg-coral-deep bg-gradient-to-r from-coral-deep via-coral-deep to-coral", "/static/images/products/nike-air-max-90-infrared/main.webp"),
       ] %}
       <li>
         <a href="/tenis?category={{ key|urlencode }}" class="collection-card group {{ bg }}">
@@ -42,12 +42,16 @@
             <span class="mt-2 text-sm leading-snug">{{ text }}</span>
             <span class="mt-auto inline-grid size-9 place-items-center rounded-full bg-white pt-0 text-ink transition-transform group-hover:translate-x-1" aria-hidden="true">{{ icon("arrow-right", "size-4") }}</span>
           </span>
-          <img src="/static/images/demo/{{ img }}.svg" alt="" width="630" height="304" loading="lazy"
-               class="pointer-events-none absolute -right-8 bottom-3 w-[54%] max-w-72 -rotate-6 drop-shadow-[0_18px_20px_rgb(0_0_0/0.35)]">
+          {# Só fotografia real e licenciada (docs/assets-licenses.md); sem foto, o card fica tipográfico. #}
+          {% if img %}
+          <img src="{{ img }}" alt="" width="1600" height="1000" loading="lazy"
+               class="pointer-events-none absolute -right-6 bottom-2 w-[60%] max-w-80 -rotate-6 drop-shadow-[0_18px_20px_rgb(0_0_0/0.35)]">
+          {% endif %}
         </a>
       </li>
       {% endfor %}
     </ul>
+    <p class="mt-3 text-xs text-muted">Foto Air Max 90: <a href="https://commons.wikimedia.org/wiki/File:Nike_Air_Max_90_Infrared_(4805905007).jpg" target="_blank" rel="noopener noreferrer" class="underline">Christian H., CC BY 2.0</a>, fundo removido. Foto Samba: LeDroider, CC0.</p>
   </section>
 
   <section aria-labelledby="lancamentos-titulo" class="mx-auto max-w-screen-2xl px-4 pt-12 sm:px-6 lg:px-10">

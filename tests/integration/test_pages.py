@@ -180,3 +180,27 @@ async def test_real_templates_without_database_show_unavailability_not_demo():
         assert "autenticação administrativa aguarda" in login.text
         assert (await client.get("/admin/produtos")).status_code == 303
         assert (await client.get("/api/products")).status_code == 503
+
+
+async def test_integrated_home_hides_unillustrated_collection_and_keeps_photo_credit():
+    app = create_app(Settings(_env_file=None))
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        page = await client.get("/")
+        assert "/tenis?category=Performance" not in page.text
+        assert "/tenis?category=Street" in page.text
+        assert "Christian H." in page.text
+        assert "CC BY 2.0" in page.text
+
+
+async def test_security_policy_allows_only_required_3d_hosts_and_survives_errors():
+    app = create_app(Settings(_env_file=None))
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        for path in ("/", "/admin/login", "/api/products", "/static/not-found"):
+            response = await client.get(path)
+            policy = response.headers.get("content-security-policy", "")
+            assert "script-src 'self' https://static.sketchfab.com" in policy
+            assert "frame-src https://sketchfab.com" in policy
+            assert "object-src 'none'" in policy
+            assert "frame-ancestors 'none'" in policy
+            assert "'unsafe-eval'" not in policy
+            assert response.headers["x-content-type-options"] == "nosniff"

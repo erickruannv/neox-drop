@@ -1,10 +1,6 @@
 // Hero NEOX drop: carrossel de destaques (FeaturedList) com troca conjunta de nome, preço,
-// descrição, imagem, cores e CTA; Model Viewer só para GLB real, giro somente em Y.
-
-// Ângulo polar fixo (phi = min = max): sem inclinação vertical.
-// shortcut: 75deg é provisório, ajustar com o GLB licenciado em teste (T024/T025).
-export const HERO_PHI = "75deg";
-const VIEWER_SRC = "/static/dist/vendor/model-viewer.min.js";
+// descrição, foto, cores e CTA. O 3D real abre sob demanda em "Ver em 3D" (viewer3d.js).
+import { open3d } from "./viewer3d.js";
 const SWAP_MS = 280;
 
 const root = document.getElementById("hero");
@@ -86,65 +82,20 @@ function init(root, items) {
     thumbs[indexOf(selected)]?.focus();
   });
 
-  // ---- Model Viewer (somente com model3dUrl; foto fica visível até o load) ----
-  let viewer = null;
+  // ---- Foto primeiro; 3D só por clique em "Ver em 3D" (palco em viewer3d.js) ----
+  const open = root.querySelector("[data-open-3d]");
+  const credit = root.querySelector('[data-field="credit"]');
 
-  async function syncModel(item) {
-    const img = media.querySelector('[data-field="image"]');
-    if (!item.model3dUrl) {
-      viewer?.remove();
-      viewer = null;
-      img.hidden = false;
-      return;
-    }
-    try {
-      await import(VIEWER_SRC);
-    } catch {
-      return; // sem WebGL/script: fallback 2D já visível
-    }
-    if (selected !== item.id) return;
-    viewer ??= createViewer(img);
-    viewer.dataset.id = item.id;
-    viewer.alt = `Modelo 3D de ${item.name}. Arraste na horizontal para girar.`;
-    viewer.poster = item.mainImageUrl;
-    viewer.toggleAttribute("auto-rotate", !reduced.matches);
-    viewer.src = item.model3dUrl;
+  function syncModel(item) {
+    const a = item.attributes ?? {};
+    credit.textContent = a.imageCredit ?? "";
+    if (a.imageCreditUrl) credit.href = a.imageCreditUrl;
+    else credit.removeAttribute("href");
+    open.hidden = !item.model3dUrl;
+    open.setAttribute("aria-label", `Ver ${item.name} em 3D`);
   }
 
-  function createViewer(img) {
-    const mv = document.createElement("model-viewer");
-    const orbit = (theta) => `${theta} ${HERO_PHI} auto`;
-    mv.setAttribute("camera-controls", "");
-    mv.setAttribute("disable-zoom", "");
-    mv.setAttribute("disable-pan", "");
-    mv.setAttribute("disable-tap", "");
-    mv.setAttribute("touch-action", "pan-y");
-    mv.setAttribute("interaction-prompt", "none");
-    mv.setAttribute("camera-orbit", orbit("0deg"));
-    mv.setAttribute("min-camera-orbit", orbit("-Infinity"));
-    mv.setAttribute("max-camera-orbit", orbit("Infinity"));
-    mv.setAttribute("rotation-per-second", "18deg");
-    mv.setAttribute("shadow-intensity", "1");
-    mv.className = "absolute inset-0 size-full opacity-0 transition-opacity duration-500";
-    mv.addEventListener("load", () => {
-      if (mv.dataset.id !== selected) return;
-      mv.classList.remove("opacity-0");
-      img.hidden = true;
-      status(`Modelo 3D carregado. Arraste na horizontal para girar.`);
-    });
-    mv.addEventListener("error", () => {
-      mv.remove();
-      if (viewer === mv) viewer = null;
-      img.hidden = false;
-      status("");
-    });
-    media.append(mv);
-    return mv;
-  }
-
-  const status = (text) => (media.querySelector("[data-model-status]").textContent = text);
-
-  reduced.addEventListener("change", () => viewer?.toggleAttribute("auto-rotate", !reduced.matches));
+  open.addEventListener("click", () => open3d(items[indexOf(selected)], open));
   applyColors(items[indexOf(selected)] ?? items[0]);
   syncModel(items[indexOf(selected)] ?? items[0]);
 }

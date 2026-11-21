@@ -1,3 +1,4 @@
+import re
 from functools import lru_cache
 from typing import Literal
 from urllib.parse import parse_qsl, urlsplit
@@ -49,6 +50,19 @@ class Settings(BaseSettings):
         ):
             raise ValueError("Origem inválida.")
         return value.rstrip("/")
+
+    @field_validator("media_allowed_origins")
+    @classmethod
+    def validate_media_origins(cls, values):
+        origins = [cls.validate_origin(value) for value in values]
+        if any(
+            not re.fullmatch(r"https://(?:[A-Za-z0-9.-]+|\[[0-9a-fA-F:]+\])(?::[0-9]{1,5})?", value)
+            for value in origins
+        ):
+            raise ValueError("Origem de mídia exige HTTPS.")
+        for value in origins:
+            _ = urlsplit(value).port
+        return origins
 
     @field_validator("supabase_url", "upstash_redis_rest_url")
     @classmethod

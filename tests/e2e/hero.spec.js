@@ -28,13 +28,14 @@ function hexToRgb(hex) {
 test("miniatura troca nome, preço, descrição, imagem, fundo, CTA e marcador juntos", async ({ page }) => {
   await page.goto("/");
   await expectSelected(page, 0);
-  await hero(page).locator(`[data-thumbs] button[data-id="${items[2].id}"]`).click();
-  await expectSelected(page, 2);
+  const last = items.length - 1;
+  await hero(page).locator(`[data-thumbs] button[data-id="${items[last].id}"]`).click();
+  await expectSelected(page, last);
 });
 
 test("cliques rápidos: estado final corresponde ao último clique (sem race)", async ({ page }) => {
   await page.goto("/");
-  for (const i of [1, 3, 2, 3, 1]) {
+  for (const i of [1, 0, 1, 0, 1]) {
     await hero(page).locator(`[data-thumbs] button[data-id="${items[i].id}"]`).click({ delay: 0 });
   }
   await expectSelected(page, 1);
@@ -58,22 +59,35 @@ test("teclado: setas nas miniaturas trocam e mantêm foco", async ({ page }) => 
 
 test("anuncia a troca em região aria-live", async ({ page }) => {
   await page.goto("/");
-  await hero(page).locator(`[data-thumbs] button[data-id="${items[3].id}"]`).click();
-  await expect(hero(page).locator("[data-live]")).toContainText(`Destaque 4 de 4: ${items[3].name}`);
+  const last = items.length - 1;
+  await hero(page).locator(`[data-thumbs] button[data-id="${items[last].id}"]`).click();
+  await expect(hero(page).locator("[data-live]")).toContainText(`Destaque ${items.length} de ${items.length}: ${items[last].name}`);
 });
 
-test("sem model3dUrl: só foto 2D, nenhum model-viewer nem promessa de 3D", async ({ page }) => {
+test("abre com a foto; sem model3dUrl não há botão 3D nem promessa de giro", async ({ page }) => {
+  await page.goto("/sem-3d/");
+  await expect(hero(page).locator('img[data-field="image"]')).toBeVisible();
+  await expect(hero(page).getByRole("button", { name: /em 3D/ })).toBeHidden();
+  await expect(page.locator("model-viewer, [data-sketchfab-frame]")).toHaveCount(0);
+  await expect(hero(page)).not.toContainText(/girar/i);
+});
+
+test("com model3dUrl: foto primeiro, nada de 3D carregado até o clique", async ({ page }) => {
   await page.goto("/");
   await expect(hero(page).locator('img[data-field="image"]')).toBeVisible();
-  await expect(page.locator("model-viewer")).toHaveCount(0);
-  await expect(hero(page)).not.toContainText(/3D|girar/i);
+  await expect(hero(page).getByRole("button", { name: `Ver ${items[0].name} em 3D` })).toBeVisible();
+  await expect(page.locator("model-viewer, [data-sketchfab-frame]")).toHaveCount(0);
 });
 
-test.describe("com model3dUrl (GLB fictício, sem ativo licenciado)", () => {
+const open3d = (page) => hero(page).getByRole("button", { name: /em 3D/ }).click();
+const dialog = (page) => page.getByRole("dialog");
+
+test.describe("Ver em 3D com GLB (fictício, sem ativo licenciado)", () => {
   test("Model Viewer travado em Y: phi igual em min/max, sem zoom/pan; foto visível enquanto carrega", async ({ page }) => {
     await page.route("**/*.glb", () => {}); // nunca responde: simula carregamento lento
     await page.goto("/model/");
-    const mv = page.locator("model-viewer");
+    await open3d(page);
+    const mv = dialog(page).locator("model-viewer");
     await expect(mv).toHaveCount(1);
     const orbit = (attr) => mv.getAttribute(attr).then((v) => v.split(/\s+/));
     const [minTheta, minPhi] = await orbit("min-camera-orbit");
@@ -86,23 +100,27 @@ test.describe("com model3dUrl (GLB fictício, sem ativo licenciado)", () => {
     await expect(mv).toHaveAttribute("disable-pan", "");
     await expect(mv).toHaveAttribute("touch-action", "pan-y");
     await expect(mv).toHaveAttribute("auto-rotate", "");
-    await expect(hero(page).locator('img[data-field="image"]')).toBeVisible();
+    await expect(dialog(page).locator("[data-viewer-poster]")).toBeVisible();
+    await expect(dialog(page).locator("[data-viewer-hint]")).toHaveText("Carregando modelo 3D…");
   });
 
   test("reduced-motion: sem auto-rotate", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.route("**/*.glb", () => {});
     await page.goto("/model/");
-    const mv = page.locator("model-viewer");
-    await expect(mv).toHaveCount(1);
-    await expect(mv).not.toHaveAttribute("auto-rotate");
+    await open3d(page);
+    await expect(dialog(page).locator("model-viewer")).not.toHaveAttribute("auto-rotate");
   });
 
-  test("falha do GLB: remove o viewer e mantém foto e carrossel", async ({ page }) => {
+  test("falha do GLB: avisa no palco; fechar devolve o foco e o carrossel segue", async ({ page }) => {
     await page.route("**/*.glb", (route) => route.abort());
     await page.goto("/model/");
-    await expect(page.locator("model-viewer")).toHaveCount(0, { timeout: 10_000 });
-    await expect(hero(page).locator('img[data-field="image"]')).toBeVisible();
+    await open3d(page);
+    await expect(dialog(page).locator("[data-viewer-hint]")).toContainText("indisponível", { timeout: 10_000 });
+    await dialog(page).getByRole("button", { name: "Fechar visualização 3D" }).click();
+    await expect(dialog(page)).toBeHidden();
+    await expect(hero(page).getByRole("button", { name: /em 3D/ })).toBeFocused();
+    await expect(page.locator("model-viewer")).toHaveCount(0);
     await hero(page).locator(`[data-thumbs] button[data-id="${items[1].id}"]`).click();
     await expectSelected(page, 1);
   });

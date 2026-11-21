@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { mock, errorBody, expectSchemaKeys } from "./helpers/api.js";
 
 // T022: consome POST /api/checkout (mock no formato do contrato); integração real depende de T021.
-const volt = mock.details.find((d) => d.slug === "volt-runner-01");
+const volt = mock.details.find((d) => d.slug === "nike-air-max-90-infrared");
 const brl = (c) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(c / 100);
 const drawer = (page) => page.getByRole("dialog", { name: "Carrinho" });
 const WA = "https://wa.me/5500000000000?text=Pedido%20NEOX";

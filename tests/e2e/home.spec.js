@@ -15,7 +15,8 @@ test("home renderiza marca, hero e lançamentos a partir do contexto", async ({ 
     await expect(cards.nth(i)).toContainText(brl(p.priceCents).replace(/\s/, " "));
     await expect(cards.nth(i).getByRole("link")).toHaveAttribute("href", `/tenis/${p.slug}`);
   }
-  for (const c of ["Street", "Classics", "Performance"]) {
+  await expect(page.locator('a[href="/tenis?category=Performance"]')).toHaveCount(0);
+  for (const c of ["Street", "Classics"]) {
     await expect(page.locator(`a[href="/tenis?category=${c}"]`)).toBeVisible();
   }
 });
