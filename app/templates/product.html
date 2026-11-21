@@ -21,7 +21,7 @@
   </nav>
 
   <div class="mt-6 grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-12">
-    <section aria-label="Galeria" data-gallery>
+    <section aria-label="Galeria" class="min-w-0" data-gallery>
       <div class="relative grid aspect-[4/3] place-items-center overflow-hidden rounded-3xl bg-white p-6 shadow-[0_8px_24px_rgb(0_0_0/0.06)] sm:p-10">
         <span class="display-type pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none whitespace-nowrap text-center text-[clamp(4rem,12vw,10rem)] text-ink/[0.05]" aria-hidden="true">{{ p.name.split(" ")[0]|upper }}</span>
         <img src="{{ gallery[0] }}" alt="{{ p.name }}, {{ p.colorName }}" width="1200" height="900" fetchpriority="high" decoding="async"
@@ -42,12 +42,11 @@
       {%- set pa = p.attributes if p.get('attributes') else {} %}
       <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
         {% if p.get('model3dUrl') %}
-        <button type="button" class="inline-flex h-11 items-center gap-2 rounded-full border-2 border-ink/15 bg-white px-4 font-bold transition-colors hover:border-ink aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-white"
-                aria-pressed="false" data-view-3d data-model="{{ p.model3dUrl }}">
-          {{ icon("cube", "size-5") }} <span data-view-3d-label>Ver em 3D</span>
+        <button type="button" class="inline-flex h-11 items-center gap-2 rounded-full bg-ink px-5 font-bold text-white transition-colors hover:bg-ink-soft"
+                data-open-3d aria-label="Ver {{ p.name }} em 3D">
+          {{ icon("cube", "size-5") }} Ver em 3D
         </button>
         {% endif %}
-        <p class="sr-only" aria-live="polite" data-gallery-status></p>
         {% if pa.get('imageCredit') or pa.get('model3dCredit') %}
         <ul class="text-xs text-muted">
           {% for k in ["imageCredit", "model3dCredit"] if pa.get(k) %}
@@ -106,8 +105,10 @@
     </section>
   </div>
 </div>
+{% include "partials/viewer3d.html" %}
 {% endblock %}
 
 {% block scripts %}
+<script type="application/json" id="product-data">{{ {"name": p.name, "colorName": p.colorName, "mainImageUrl": p.mainImageUrl, "model3dUrl": p.get("model3dUrl"), "attributes": p.get("attributes") or {}}|tojson }}</script>
 <script type="module" src="/static/js/product.js"></script>
 {% endblock %}

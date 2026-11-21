@@ -2,8 +2,8 @@ import { test, expect } from "@playwright/test";
 import fixture from "./fixtures/home.json" with { type: "json" };
 
 // Offline: substitui a Viewer API do Sketchfab por um dublê que só registra as chamadas de
-// câmera. Prova a lógica (giro só em Y, troca no carrossel, fallback). O 3D real com rede e
-// GPU é coberto por `pnpm test:3d` (tests/e2e/live).
+// câmera. Prova a lógica (foto primeiro, 3D por clique, giro só em Y, troca no carrossel,
+// fallback). O 3D real com rede e GPU é coberto por `pnpm test:3d` (tests/e2e/live).
 const items = fixture.featured.items;
 const uidOf = (item) => item.model3dUrl?.match(/models\/([0-9a-f]{32})\//)?.[1];
 const FAKE = `
@@ -25,8 +25,11 @@ test.beforeEach(async ({ page }) => {
   await page.route("https://static.sketchfab.com/**", (r) => r.fulfill({ contentType: "application/javascript", body: FAKE }));
 });
 
-const sf = (page) => page.evaluate(() => window.__sf);
-const pad = (page) => page.locator("#hero [data-rotate-pad]");
+const sf = (page) => page.evaluate(() => window.__sf ?? { inits: [], looks: [] });
+const dialog = (page) => page.getByRole("dialog");
+const pad = (page) => dialog(page).locator("[data-rotate-pad]");
+const open = (page) => page.locator("#hero").getByRole("button", { name: /em 3D/ }).click();
+const ZOOM = 0.8; // viewer3d.js: aproximação do palco
 
 async function drag(page, dx, dy) {
   const b = await pad(page).boundingBox();
@@ -38,41 +41,50 @@ async function drag(page, dx, dy) {
   await page.waitForTimeout(100);
 }
 
-test("hero: arraste horizontal gira só em Y; vertical não move a câmera", async ({ page, isMobile }) => {
+test("hero: nada do Sketchfab carrega antes do clique em 'Ver em 3D'", async ({ page }) => {
+  await page.goto("/");
+  await page.waitForTimeout(300);
+  expect((await sf(page)).inits).toEqual([]);
+  await expect(dialog(page)).toBeHidden();
+});
+
+test("palco 3D: arraste horizontal gira só em Y; vertical não move a câmera", async ({ page, isMobile }) => {
   test.skip(isMobile, "toque real coberto em test:3d");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  await open(page);
   await expect(pad(page)).toBeVisible();
-  await expect(page.locator('#hero img[data-field="image"]')).toBeHidden();
-  await expect(page.locator('#hero [data-field="credit"]')).toHaveText(items[0].attributes.model3dCredit);
+  await expect(dialog(page).locator("[data-viewer-poster]")).toBeHidden();
+  await expect(dialog(page).locator("[data-viewer-title]")).toHaveText(items[0].name);
+  await expect(dialog(page).locator("[data-viewer-credit]")).toHaveText(items[0].attributes.model3dCredit);
   const { inits } = await sf(page);
   expect(inits.map((i) => i.uid)).toEqual([uidOf(items[0])]);
   expect(inits[0].o).toMatchObject({ autostart: 1, preload: 1, transparent: 1 });
 
-  const n0 = (await sf(page)).looks.length;
   await drag(page, 200, 0);
   const looks = (await sf(page)).looks;
-  expect(looks.length).toBeGreaterThan(n0);
-  // Câmera do dublê: olho (0,-8,2.5), alvo (0,0,0.2); enquadramento aproxima 0,62x.
+  expect(looks.length).toBeGreaterThan(1);
+  // Câmera do dublê: olho (0,-8,2.5), alvo (0,0,0.2); o palco aproxima ZOOM.
   for (const [x, y, z] of looks) {
-    expect(z).toBeCloseTo(0.2 + 2.3 * 0.62, 9); // altura da câmera fixa: sem inclinação
-    expect(Math.hypot(x, y)).toBeCloseTo(8 * 0.62, 9); // distância horizontal fixa: sem zoom
+    expect(z).toBeCloseTo(0.2 + 2.3 * ZOOM, 9); // altura fixa: sem inclinação
+    expect(Math.hypot(x, y)).toBeCloseTo(8 * ZOOM, 9); // distância fixa: sem zoom
   }
   expect(looks.at(-1)[0]).not.toBeCloseTo(0, 2);
 
-  const n1 = looks.length;
+  const n = looks.length;
   await drag(page, 0, -200);
-  expect((await sf(page)).looks.length).toBe(n1);
+  expect((await sf(page)).looks.length).toBe(n);
 
   await pad(page).focus();
   await page.keyboard.press("ArrowLeft");
   await expect(pad(page)).toHaveAttribute("aria-valuetext", /graus/);
 });
 
-test("hero: reduced-motion não gira sozinho; sem ele gira até o primeiro gesto", async ({ page, isMobile }) => {
+test("palco 3D: reduced-motion não gira sozinho; sem ele gira até o primeiro gesto", async ({ page, isMobile }) => {
   test.skip(isMobile, "mesma lógica do desktop");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  await open(page);
   await expect(pad(page)).toBeVisible();
   const still = (await sf(page)).looks.length;
   await page.waitForTimeout(400);
@@ -80,6 +92,7 @@ test("hero: reduced-motion não gira sozinho; sem ele gira até o primeiro gesto
 
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.reload();
+  await open(page);
   await expect(pad(page)).toBeVisible();
   await expect.poll(async () => (await sf(page)).looks.length).toBeGreaterThan(5);
   await drag(page, 10, 0);
@@ -88,47 +101,42 @@ test("hero: reduced-motion não gira sozinho; sem ele gira até o primeiro gesto
   expect((await sf(page)).looks.length).toBe(after);
 });
 
-test("hero: carrossel troca o modelo 3D junto; sem modelo mostra foto e aviso", async ({ page }) => {
+test("palco 3D: Esc fecha, devolve o foco; reabrir após trocar o destaque carrega o modelo certo", async ({ page }) => {
   await page.goto("/");
+  await open(page);
   await expect(pad(page)).toBeVisible();
-  for (const [i, item] of items.entries()) {
-    if (i === 0) continue;
-    await page.locator(`#hero [data-thumbs] button[data-id="${item.id}"]`).click();
-    await expect(page.locator("#hero h1")).toHaveText(item.name);
-    if (uidOf(item)) {
-      await expect.poll(async () => (await sf(page)).inits.at(-1).uid).toBe(uidOf(item));
-      await expect(pad(page)).toHaveAttribute("aria-label", new RegExp(item.name));
-      await expect(page.locator('#hero img[data-field="image"]')).toBeHidden();
-    } else {
-      await expect(pad(page)).toBeHidden();
-      await expect(page.locator('#hero img[data-field="image"]')).toBeVisible();
-      await expect(page.locator("#hero [data-model-hint]")).toHaveText("Visualização 3D indisponível para este modelo");
-    }
-  }
+  await page.keyboard.press("Escape");
+  await expect(dialog(page)).toBeHidden();
+  await expect(page.locator("#hero").getByRole("button", { name: /em 3D/ })).toBeFocused();
+
+  const next = items[1];
+  await page.locator(`#hero [data-thumbs] button[data-id="${next.id}"]`).click();
+  await expect(page.locator("#hero h1")).toHaveText(next.name);
+  await open(page);
+  await expect(pad(page)).toBeVisible();
+  expect((await sf(page)).inits.at(-1).uid).toBe(uidOf(next));
+  await expect(pad(page)).toHaveAttribute("aria-label", new RegExp(next.name));
+  await expect(dialog(page).locator("[data-viewer-poster]")).toBeHidden(); // estado "ready" do 2º modelo aplicado
 });
 
-test("hero: falha ao carregar a Viewer API mantém a foto", async ({ page }) => {
+test("palco 3D: falha ao carregar a Viewer API mostra aviso e mantém a foto", async ({ page }) => {
   await page.unroute("https://static.sketchfab.com/**");
   await page.route("https://static.sketchfab.com/**", (r) => r.abort());
   await page.goto("/");
-  await expect(page.locator("#hero [data-model-hint]")).toHaveText("Modelo 3D indisponível agora");
-  await expect(page.locator('#hero img[data-field="image"]')).toBeVisible();
+  await open(page);
+  await expect(dialog(page).locator("[data-viewer-hint]")).toContainText("indisponível");
+  await expect(dialog(page).locator("[data-viewer-poster]")).toBeVisible();
   await expect(pad(page)).toBeHidden();
 });
 
-test("produto: 'Ver em 3D' abre o modelo sob demanda e volta para a foto", async ({ page }) => {
+test("produto: 'Ver em 3D' abre o mesmo palco com o modelo do produto", async ({ page }) => {
   const item = items.find(uidOf);
   await page.goto(`/tenis/${item.slug}/`);
-  const btn = page.getByRole("button", { name: "Ver em 3D" });
-  await expect(page.locator("[data-gallery] [data-sketchfab-frame]")).toHaveCount(0); // nada carregado antes do clique
-  await btn.click();
-  await expect(btn).toHaveAttribute("aria-pressed", "true");
-  await expect(page.locator("[data-gallery-main]")).toBeHidden();
-  await expect(page.locator("[data-gallery] [data-rotate-pad]")).toBeVisible();
+  await expect(page.locator("[data-sketchfab-frame]")).toHaveCount(0);
+  await page.getByRole("button", { name: `Ver ${item.name} em 3D` }).click();
+  await expect(pad(page)).toBeVisible();
   expect((await sf(page)).inits.at(-1).uid).toBe(uidOf(item));
-  await btn.click();
-  await expect(btn).toHaveAttribute("aria-pressed", "false");
-  await expect(page.locator("[data-gallery-main]")).toBeVisible();
-  await expect(page.locator("[data-gallery] [data-rotate-pad]")).toBeHidden();
-  await expect(page.getByRole("link", { name: item.attributes.model3dCredit })).toHaveAttribute("href", item.attributes.model3dCreditUrl);
+  await page.keyboard.press("Escape");
+  await expect(dialog(page)).toBeHidden();
+  await expect(page.getByRole("link", { name: item.attributes.imageCredit })).toHaveAttribute("href", item.attributes.imageCreditUrl);
 });

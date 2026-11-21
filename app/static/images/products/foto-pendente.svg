@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Foto do produto pendente">
-  <!-- Marcador próprio (sem marca): produto real ainda sem foto licenciada. Não representa o modelo. -->
-  <g fill="none" stroke="#8C8C8C" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="28 22" opacity="0.75">
-    <path d="M250 760 C240 690 270 640 340 620 L640 560 C700 548 740 520 790 470 L880 380 C910 350 950 345 990 360 L1110 410 C1160 430 1200 470 1240 520 L1330 630 C1360 668 1360 720 1340 760 Z"/>
-    <path d="M250 760 L1340 760 L1330 820 L270 820 Z"/>
-  </g>
-  <text x="800" y="910" text-anchor="middle" font-family="system-ui, sans-serif" font-size="56" font-weight="700" fill="#8C8C8C">Foto em produção</text>
-</svg>

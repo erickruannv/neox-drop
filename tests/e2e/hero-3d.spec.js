@@ -56,13 +56,15 @@ const orbit = (mv) => mv.evaluate((el) => { const o = el.getCameraOrbit(); retur
 
 test("GLB carregado: arraste horizontal gira em Y; vertical e roda não inclinam nem dão zoom", async ({ page, isMobile }) => {
   test.skip(isMobile, "arraste por mouse; toque coberto por touch-action=pan-y");
+  test.setTimeout(120_000); // SwiftShader (CPU) gera o ambiente "neutral" devagar no palco grande
   await page.emulateMedia({ reducedMotion: "reduce" }); // sem auto-rotate: mede só o arraste
   await page.route("**/*.glb", (route) => route.fulfill({ body: boxGlb(), contentType: "model/gltf-binary" }));
   await page.goto("/model/");
-  const mv = page.locator("model-viewer");
-  await expect.poll(() => mv.evaluate((el) => el.loaded), { timeout: 15_000 }).toBe(true);
-  await expect(page.locator('#hero img[data-field="image"]')).toBeHidden();
-  await expect(page.locator("[data-model-status]")).toContainText("Arraste na horizontal");
+  await page.locator("#hero").getByRole("button", { name: /em 3D/ }).click();
+  const mv = page.getByRole("dialog").locator("model-viewer");
+  await expect.poll(() => mv.evaluate((el) => el.loaded), { timeout: 90_000 }).toBe(true);
+  await expect(page.locator("[data-viewer-poster]")).toBeHidden({ timeout: 30_000 });
+  await expect(page.locator("[data-viewer-status]")).toContainText("Arraste na horizontal");
 
   const box = await mv.boundingBox();
   const cx = box.x + box.width / 2;
