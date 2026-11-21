@@ -2,74 +2,86 @@
 
 Regra: nenhuma foto, GLB ou poster entra em `app/static/` sem origem, licença e autorização
 registradas aqui. Mockups (`docs/reference/visual/04-*.png`) são referência de layout, não
-fonte de imagens. Licenças conferidas na página/API de cada arquivo em 2026-11-20.
+fonte de imagens. Licenças conferidas na página de cada arquivo em 2026-11-20/21.
 
-Atenção: licença de direito autoral (CC, CC0, embed) cobre a foto/modelo, **não** as marcas
-Nike, adidas e New Balance que aparecem neles. Uso em página de venda de pares originais é
-prática comum de revenda, mas a decisão final é do responsável.
+Atenção: licenças de foto/modelo (CC, CC0, Unsplash, Sketchfab) cobrem o direito autoral da
+foto/modelo, **não** as marcas Nike, adidas e New Balance. Decisão final de uso é do responsável.
+
+## Curadoria da vitrine de demonstração (fixtures, sem tocar em bancos)
+
+Ficam só produtos com fotografia real, nítida e do modelo/colorway exato:
+
+| Produto | Vitrine | Motivo |
+|---|---|---|
+| Nike Air Max 90 Infrared | ✅ | foto CC BY 2.0 correta |
+| adidas Samba OG branco/preto/gum | ✅ | 3 fotos (CC0 + Unsplash) corretas |
+| Nike Air Max 95 preto/cinza/lima | ❌ retirado | sem foto licenciada da colorway |
+| New Balance 9060 cinza | ❌ retirado | sem foto licenciada nem 3D |
+| Nike Dunk Low (panda) | ❌ não incluído | só fotos de mão segurando o par (Unsplash), não de produto |
+| Produtos fictícios (Volt Runner etc.) e ilustrações SVG | ❌ retirados | ilustrações; SVGs ficam no repo só para testes do admin |
 
 ## Fotos incorporadas
 
 | Arquivo | Produto | Fonte | Autor | Licença | Alteração |
 |---|---|---|---|---|---|
-| `app/static/images/products/nike-air-max-90-infrared/main.webp` | Nike Air Max 90 Infrared | [Commons: Nike Air Max 90 Infrared (4805905007).jpg](https://commons.wikimedia.org/wiki/File:Nike_Air_Max_90_Infrared_(4805905007).jpg) | Christian H. | CC BY 2.0 (atribuição obrigatória) | fundo removido (BiRefNet), recorte, WebP 1600×1000 |
-| `app/static/images/products/adidas-samba-og/main.webp` | adidas Samba OG branco/preto/gum | [Commons: Adidas Samba OG.jpg](https://commons.wikimedia.org/wiki/File:Adidas_Samba_OG.jpg) | LeDroider | CC0 | fundo e suporte de vitrine removidos, WebP 1600×1000 |
-| `app/static/images/products/foto-pendente.svg` | marcador neutro | próprio | — | próprio | sem marca; usado onde não há foto licenciada |
-| `app/static/images/demo/*.svg` | produtos fictícios | próprio | — | próprio | só demo |
+| `products/nike-air-max-90-infrared/main.webp` | Air Max 90 Infrared | [Commons](https://commons.wikimedia.org/wiki/File:Nike_Air_Max_90_Infrared_(4805905007).jpg) | Christian H. | CC BY 2.0 (crédito obrigatório) | fundo removido (BiRefNet), WebP 1600×1000 |
+| `products/adidas-samba-og/main.webp` | Samba OG | [Commons](https://commons.wikimedia.org/wiki/File:Adidas_Samba_OG.jpg) | LeDroider | CC0 | fundo e suporte removidos, WebP |
+| `products/adidas-samba-og/lateral.webp` | Samba OG (lateral) | [Unsplash fIflxqqzBQY](https://unsplash.com/photos/a-white-and-black-adidas-sneakers-on-a-wooden-floor-fIflxqqzBQY) | Cris (@cris_23) | Licença Unsplash (uso comercial, sem atribuição obrigatória) | fundo removido, WebP |
+| `products/adidas-samba-og/par.webp` | Samba OG (par 3/4) | [Unsplash kpnkWLoM3cE](https://unsplash.com/photos/a-pair-of-white-and-black-shoes-on-a-wooden-floor-kpnkWLoM3cE) | Cris (@cris_23) | Licença Unsplash | fundo removido, WebP |
 
-Atribuição exibida: hero (linha de crédito sob o tênis) e página do produto (lista de créditos),
-a partir de `attributes.imageCredit`/`imageCreditUrl` do produto.
+Crédito exibido no hero (foto) e na página do produto (fotos e 3D), via `attributes.imageCredit`,
+`imageCreditUrl`, `model3dCredit`, `model3dCreditUrl`. Recorte offline com `rembg 2.0.67`
+(`birefnet-general`) via `uv run --with` no scratchpad; nenhuma dependência no projeto.
 
-Ferramenta de recorte (offline, fora do projeto): `rembg 2.0.67` modelo `birefnet-general`,
-executado via `uv run --with` no scratchpad; nenhuma dependência adicionada ao projeto.
+Rejeitadas por modelo/cor errados: Commons `Air Max 95.jpg` (outro Air Max), `Nike Air Max 95.png`
+(Footshop, colorway Grape), `Air max 90.JPG` (branco/preto); Unsplash "air max 95" (azul/amarelo),
+"air max 90 infrared" (rosa), "new balance 9060" (Fresh Foam, 574, 327 — nenhum 9060).
 
-### Sem foto licenciada (marcador "Foto em produção")
+## 3D
 
-- **Nike Air Max 95 preto/cinza/verde-lima**: Commons só tem `Air Max 95.jpg` (domínio
-  público, mas mostra outro Air Max, não o 95) e `Nike Air Max 95.png` (Footshop, CC BY-SA 4.0,
-  colorway Grape, cor errada). Rejeitados para não associar foto errada.
-- **New Balance 9060 cinza**: nenhum arquivo no Commons; Openverse só tem um 9060 vinho (PDM).
-- Rejeitados também: `Air max 90.JPG` (domínio público, colorway branco/preto, não Infrared).
+O hero e a página do produto abrem com a **foto**; o 3D carrega só ao clicar "Ver em 3D"
+(palco `partials/viewer3d.html` + `static/js/viewer3d.js`). Dois motores, ambos com giro só em Y:
 
-## Modelos 3D (embed oficial Sketchfab)
+- **GLB próprio/licenciado → Model Viewer** (phi fixo, sem zoom/pan, luz `neutral`, nosso fundo,
+  sem interface externa). É o caminho de qualidade final assim que houver GLB com licença comercial.
+- **Embed Sketchfab** (Viewer API 1.12.1): usado hoje para AM90 e Samba. Limites: o plano gratuito
+  não permite esconder o logo/dica do player nem ajustar luz; o giro Y é nossa camada de arraste.
 
-Os arquivos não são baixados nem hospedados: o download do Sketchfab exige conta/token e a
-maioria destes modelos é paga (licença Editorial). Usamos o **player de embed** do Sketchfab,
-que o autor permite para modelos públicos (oEmbed/`/embed` respondem 200), via Viewer API
-1.12.1. A marca Sketchfab, o título e o autor aparecem no próprio player.
+| Modelo | Estado | Fonte | Licença |
+|---|---|---|---|
+| Air Max 90 Infrared | 3D real via embed | [Sketchfab c375a769…](https://sketchfab.com/3d-models/c375a769712e4ddebb2f48f1f12b99a2), alitvinenkoo13 | **Editorial** |
+| Samba OG B75806 | 3D real via embed | [Sketchfab 974e037f…](https://sketchfab.com/3d-models/974e037fd4424961b1928f7fa1e72ceb), trargus | **Editorial** |
+| Air Max 95 NDSTRKT | embed existe, produto fora da vitrine (sem foto) | [Sketchfab 41c2a1ed…](https://sketchfab.com/3d-models/41c2a1ed281542c58529fe5593c97012), trargus | **Editorial** |
+| New Balance 9060 cinza | **sem 3D** | nenhum gratuito; "9060r" do Sketchfab é um 1906R | — |
 
-| Produto | Modelo Sketchfab | Autor | Licença da loja Sketchfab | Estado |
-|---|---|---|---|---|
-| Nike Air Max 95 preto/cinza/verde-lima | [Nike Air Max 95 NDSTRKT_CZ3591-002](https://sketchfab.com/3d-models/41c2a1ed281542c58529fe5593c97012) | trargus | Editorial (download pago, não comprado) | **3D real via embed** |
-| Nike Air Max 90 Infrared | [Nike Air Max 90 (4K & UHD) Sneakers Red](https://sketchfab.com/3d-models/c375a769712e4ddebb2f48f1f12b99a2) | alitvinenkoo13 | Editorial (download pago, não comprado) | **3D real via embed** |
-| adidas Samba OG B75806 | [adidas Originals Samba OG B75806](https://sketchfab.com/3d-models/974e037fd4424961b1928f7fa1e72ceb) | trargus | Editorial (download pago, não comprado) | **3D real via embed** |
-| New Balance 9060 cinza | — | — | — | **Sem modelo 3D** |
+**Risco a decidir:** a licença Editorial do Sketchfab proíbe uso comercial/promocional dos
+arquivos. O embed é exibido pelo player do próprio Sketchfab (não baixamos nada), mas uma loja
+que vende os pares é uso comercial; recomendamos substituir por GLB com licença comercial ou
+escaneamento próprio antes de publicar.
 
-9060: o único resultado "New Balance 9060r" (v.isual.l) é na verdade um **1906R** (texto
-"1906R" visível na lateral) e é "preview only"; "9060" de leopoly1 é de 2015 (o tênis é de
-2022). Não substituímos por outro tênis. Caminhos legítimos: (a) foto-/escaneamento 3D do par
-em estoque (ex.: app de fotogrametria) e otimização no Blender para GLB; (b) comprar/licenciar
-um modelo em loja 3D (exige aprovação de custo); (c) encomendar modelagem.
+### Opções para aprovação (nada foi comprado)
 
-Limites conhecidos do embed (plano gratuito do Sketchfab):
-- `ui_*` e `orbit_constraint_*` só funcionam em conta Pro: a interface do player (título,
-  ícones, dica "click & hold") aparece e some sozinha após alguns segundos.
-- Por isso o giro só em Y é nosso: uma camada sobre o iframe captura mouse/toque/teclado e
-  chama `setCameraLookAt` girando em torno do eixo vertical; o iframe é `inert`.
-- Iluminação e sombra são as da cena do autor (não ajustáveis sem conta Pro).
-- Precisa de rede e WebGL; sem isso a foto/marcador continua visível.
+Preços vistos em busca em 2026-11-21; confirmar na página antes de qualquer compra. Modelos de
+marca em marketplaces costumam vir marcados "editorial use only" — exigir licença comercial
+explícita (Royalty Free / Standard) antes de comprar.
 
-`model3dUrl` guarda `https://sketchfab.com/models/<uid>/embed` (o contrato aceita qualquer
-https; o backend precisa liberar a origem `sketchfab.com` na allowlist). Crédito em
-`attributes.model3dCredit`/`model3dCreditUrl`.
+| Produto | Opção | Preço visto | Observação |
+|---|---|---|---|
+| New Balance 9060 | TurboSquid "New Balance 9060 sneaker" (Blender, Exclusive) | US$ 29 (+ tiers de licença US$ 99–429) | colorway e licença a confirmar |
+| New Balance 9060 | CGTrader "New Balance 9060 sea salt" | não confirmado | colorway sea salt, não cinza |
+| Air Max 95 | CGTrader pacote 3 colorways (Neon green / All black / All white) | US$ 28,99 | não é a preto/lima NDSTRKT |
+| Air Max 95 | TurboSquid Air Max 95 Neon PBR | US$ 49 | provavelmente editorial |
+| Air Max 90 Infrared | CGTrader "NIKE - AIR MAX 90 - INFRARED" (3D print) | não confirmado | malha para impressão, sem PBR provável |
+| Samba OG | CGTrader Samba OG (colorway azul) | US$ 45 | colorway errada |
+| Qualquer um | **Escanear os pares do estoque** (fotogrametria por app de celular → GLB → Model Viewer) | grátis a ~US$ 15/mês de app | colorway exata e direito autoral próprio; qualidade boa, não de configurador |
+| Qualquer um | Encomendar modelagem/escaneamento profissional | orçamento | qualidade de configurador; custo alto |
 
 ## Especificação técnica para novas fotos
 
 | Uso | Formato | Tamanho | Fundo | Campo |
 |---|---|---|---|---|
-| Hero, card e galeria (mesma imagem) | WebP com alfa | 1600×1000, tênis ~90% da largura, chão a 88% da altura | **Transparente** | `mainImageUrl` / `galleryUrls` |
+| Hero, card, galeria | WebP com alfa | 1600×1000, tênis ~90% da largura, chão a 88% da altura | transparente | `mainImageUrl` / `galleryUrls` |
 
-- Vista lateral, bico para a esquerda (padrão atual das fotos), mesma escala em todas.
-- A UI usa `object-contain` em molduras fixas: qualquer proporção cabe sem desalinhar cards.
-- Nome, marca e `colorName` do produto devem corresponder ao par fotografado.
+- Vista lateral com bico à esquerda na foto principal; outros ângulos na galeria.
+- Nome, marca e `colorName` devem corresponder ao par fotografado.
 - Arquivos em `app/static/images/products/<slug>/`; registrar cada um nesta tabela.
