@@ -2,8 +2,8 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { mock } from "./helpers/api.js";
 
-const volt = mock.details.find((d) => d.slug === "volt-runner-01");
-const coral = mock.details.find((d) => d.slug === "coral-classic-90");
+const volt = mock.details.find((d) => d.slug === "nike-air-max-90-infrared");
+const coral = mock.details.find((d) => d.slug === "adidas-samba-og");
 const brl = (c) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(c / 100);
 const stored = (page) => page.evaluate(() => JSON.parse(localStorage.getItem("neox.cart.v1")));
 const drawer = (page) => page.getByRole("dialog", { name: "Carrinho" });

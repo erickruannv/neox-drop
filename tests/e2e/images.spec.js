@@ -12,7 +12,7 @@ const svg = ([w, h, bg]) =>
 
 test.beforeEach(async ({ page }) => {
   let n = 0;
-  await page.route("**/static/images/demo/*.svg", (route) =>
+  await page.route("**/static/images/products/**", (route) =>
     route.fulfill({ contentType: "image/svg+xml", body: svg(shapes[n++ % shapes.length]) }),
   );
 });
@@ -43,14 +43,14 @@ test("hero: imagem fica dentro da área de mídia em qualquer proporção", asyn
   await expect(img).toBeVisible();
   expect(await img.evaluate((el) => getComputedStyle(el).objectFit)).toBe("contain");
   const m = await box(media);
-  const ratio = page.viewportSize().width < 640 ? 10 / 16 : 304 / 630; // celular: palco 3D mais alto
+  const ratio = 10 / 16; // fotos 1600×1000
   expect(Math.abs(m.height - m.width * ratio)).toBeLessThan(2);
   const thumbs = await box(page.locator("[data-thumbs]"));
   expect(m.bottom).toBeLessThanOrEqual(thumbs.top + 1); // não invade as miniaturas
 });
 
 test("galeria: foto não é girada nem recebe sombra retangular", async ({ page }) => {
-  await page.goto("/tenis/volt-runner-01/");
+  await page.goto("/tenis/nike-air-max-90-infrared/");
   const main = page.locator("[data-gallery-main]");
   await expect(main).toBeVisible();
   const style = await main.evaluate((el) => ({ t: getComputedStyle(el).transform, f: getComputedStyle(el).filter, fit: getComputedStyle(el).objectFit }));
