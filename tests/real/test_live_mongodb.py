@@ -1,5 +1,7 @@
 import secrets
 
+from bson import ObjectId
+
 from app.core.exceptions import ApiFault
 from app.db.mongodb import mongodb_client
 from app.services.catalog import create_product, update_product
@@ -14,8 +16,11 @@ async def test_real_mongo_crud_unique_indexes_and_soft_delete(real_settings, exa
         database = client[real_settings.mongodb_database]
         await verify(database)
         collection = database["products"]
+        identifier = None
+        assert await collection.find_one({"sku": payload["sku"]}) is None
         try:
             created = await create_product(collection, payload, real_settings)
+            identifier = created["id"]
             assert created["priceCents"] == 15990
             try:
                 await create_product(collection, payload, real_settings)
@@ -31,5 +36,9 @@ async def test_real_mongo_crud_unique_indexes_and_soft_delete(real_settings, exa
             assert await collection.find_one({"sku": payload["sku"], "active": True}) is None
             assert await collection.find_one({"sku": payload["sku"]}) is not None
         finally:
-            # Apenas documento criado por este teste, em banco explicitamente de teste.
-            await collection.delete_many({"sku": payload["sku"]})
+            if identifier:
+                # Mantém evidência inativa; nunca exclui registros existentes.
+                await collection.update_one(
+                    {"_id": ObjectId(identifier), "sku": payload["sku"]},
+                    {"$set": {"active": False}, "$currentDate": {"updatedAt": True}},
+                )

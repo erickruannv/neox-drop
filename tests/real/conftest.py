@@ -13,6 +13,8 @@ def real_settings():
     settings = Settings()
     if settings.app_env != "test" or not settings.test_connections_enabled:
         pytest.fail("Testes reais exigem APP_ENV=test e TEST_CONNECTIONS_ENABLED=true.")
+    if settings.mongodb_database != "neox_drop_test":
+        pytest.fail("Esta rodada permite apenas o banco neox_drop_test.")
     return settings
 
 
