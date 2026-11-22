@@ -453,3 +453,93 @@ Plano técnico 3D definitivo, sem reconstrução procedural aproximada:
    de crédito existentes; testar foto-poster, carregamento sob clique, Y-only, falhas, tamanho
    e aparelhos físicos. Só então substituir o embed. Licenças editoriais atuais não comprovam
    autorização comercial; RF-13 e os quatro modelos definitivos continuam pendentes.
+
+## Configuração técnica — leituras e bloqueios reais em 22/11/2026
+
+Baseline: feature/backend limpa em 38fd700; frontend ac1f7f1 e main fc48c18 limpas, laboratório
+23f2610 preservado. Não refeita integração, não alterados app/, contratos, schema Mongo ou SQL.
+Linha de base: 163 passed, 6 skipped. Nenhuma nova branch/worktree, compra, push ou deploy.
+
+### Leituras externas executadas (não mocks)
+
+- MongoDB Atlas: novo ping autenticado passou usando MONGODB_URI e TLS verificado pelo driver.
+  Banco consultado exclusivamente neox_drop_test. listCollections retornou zero coleções;
+  products não existe. connectionStatus mostrou SOMENTE atlasAdmin@admin, com escopo amplo.
+  rolesInfo para neox_drop_rw@admin retornou lista vazia: função personalizada não existe.
+  Isso não comprova allowlist restrita: ping confirma acesso atual, não ausência de 0.0.0.0/0.
+- Não há Atlas CLI/Management API autenticada disponível. Usuário de banco não equivale a
+  usuário do painel; alterações de papéis Atlas devem usar seu plano de controle, não updateUser
+  via driver. Nenhuma alteração foi tentada. Fonte: [documentação MongoDB](https://www.mongodb.com/docs/atlas/security-add-mongodb-users/).
+- Supabase configurado: GET Auth health 200 e settings 200 com Publishable; SELECT anônimo
+  limit0 em admin_profiles e store_settings retornou 401/code42501. Um teste real independente
+  `test_real_anon_cannot_read_profiles` passou em 1,52s, com flags apenas no processo. Não houve
+  login, criação/revogação de sessão, SQL remoto, escrita ou Secret key nessa verificação.
+- O conector Supabase só listou outro projeto; o ref configurado não corresponde ao listado.
+  Não abrimos o banco do projeto alheio. CUA retornou controle de navegador indisponível, sem
+  apps/tabs acessíveis. Assim, postflight, estado das duas contas, grants/funções/triggers/RLS
+  comportamental não foram confirmados. Não usar as negações anônimas como prova do postflight.
+- Upstash: sem REST URL/token no .env e sem controle autenticado do painel. Existência de
+  instância na conta não confirmada; nenhuma criada. [Plano Free oficial](https://upstash.com/pricing/redis)
+  conferido: anunciado $0, 250MB, 500mil comandos/mês, 10GB/mês, um banco Free por conta.
+  Não houve cartão, upgrade ou recursos pagos. Quota disponível na conta ainda desconhecida.
+
+### Autorizações e entradas pendentes
+
+Foram apresentadas ao usuário, ainda SEM RESPOSTA, estas operações exatas:
+
+1. Substituir atlasAdmin do usuário da URI local por somente readWrite@neox_drop_test,
+   sem função redundante; depende de acesso autenticado ao Atlas.
+2. Criar APENAS neox_drop_test.products vazia, validator strict/error de
+   mongo/products_schema.json e os seis índices nomeados aprovados (mais _id_ automático):
+   `APP_ENV=test TEST_CONNECTIONS_ENABLED=true MONGODB_DATABASE=neox_drop_test uv run --locked python -m scripts.seed_products --initialize --verify`.
+   Sem seed, drop, collMod ou alterações em outros bancos. NÃO EXECUTADO.
+
+Pedido mínimo de acesso: disponibilizar sessão Atlas/Upstash ao agente e reconectar Supabase
+à conta correta. Credenciais das quatro variáveis NEOX_TEST_ADMIN/NONADMIN_EMAIL/PASSWORD
+continuam ausentes: o usuário deve salvá-las localmente, nunca no chat. Supabase Secret key
+para checkout também ausente; contato autorizado em store_settings não pôde ser confirmado.
+Promoção admin exige UUID confirmado e autorização específica posterior. Nenhuma promoção
+ou policy permissiva foi criada. Migration aplicada manualmente conforme relato do usuário,
+sem reaplicação ou reconciliação remota automática. .env preservado, conexões false.
+
+### Trabalho local executado
+
+- Runner protegido scripts.run_real_e2e: exige opt-in NO PROCESSO, APP_ENV=test,
+  conexões true, banco exato neox_drop_test, três serviços, cookie e quatro credenciais locais.
+  Inicializa só seu próprio Uvicorn loopback/porta livre/um worker/no-proxy-headers. Artefatos
+  Playwright ficam em TemporaryDirectory privado e são removidos; stdout recebe contagens e
+  teste/arquivo/linha, nunca mensagem bruta ou credenciais. Falha continua sendo exit não-zero.
+- Novo E2E real PREPARADO em tests/e2e/real/storefront.spec.js: formulário de login/cadastro,
+  catálogo/detalhe, recentes, quantidade/subtotal, mudança de preço, checkout, link SEM CLIQUE,
+  desativação/logout, segunda conta negada. Config Playwright exclui esses testes do preview.
+  Sem opt-in, dois casos ficaram SKIPPED; isso prova a guarda, não prova a jornada real.
+- teste HTTP real existente agora inicia, encerra e reinicia dois processos Uvicorn reais;
+  outro cliente Mongo confere documento/preço e persistência. Ainda não executado externamente.
+  Cookie de acesso removido simula expiração para refresh; não é expiração temporal real do JWT.
+- Testes Mongo preservam documentos QA INATIVOS e não fazem delete_many; filtro de limpeza usa
+  SKU aleatório e ID criados pelo próprio teste. Redis usa apenas chave aleatória nova, testa
+  TTL 7 dias e expiração efetiva em 1s, depois remove somente sua chave se chegou a criá-la.
+- Revisão independente encontrou logout omitido se desativação falhasse e processo filho
+  sobrevivendo ao pnpm. Corrigidos finally de logout independentes e grupos próprios TERM/KILL.
+  Um teste local reproduziu o filho DEVNULL sobrevivente (falhou antes); passou após correção.
+  Outro teste cobre descendente segurando pipe. Só processos locais criados pelos testes foram
+  sinalizados. Não há pkill amplo nem encerramento de servidores do usuário.
+- Guias corrigidos para reutilizar Supabase/Atlas existentes, sem reaplicar migration;
+  README registra papel dos bancos, comandos reais, limites e opt-ins. Roteiro de apresentação
+  de 8min em roteiro-video.md, explicitamente preparado e não gravado.
+
+### Verificação final e limites
+
+- pytest padrão: 169 passed, 6 skipped em 8,09s (testes reais opt-out no padrão).
+- Teste Supabase de leitura independente: 1 passed em 1,52s; sem sessões ou escritas.
+- Build pnpm: aprovado; UI fixtures/mocks: 112 passed, 4 skipped em 35,4s.
+- E2E contra app.main:app com serviços desabilitados: 8 passed em 3,1s, sem mocks de rede;
+  confirma CSRF/guards/503, não CRUD nem persistência real.
+- Ruff check/format:aprovados, 51 arquivos; uv lock --check aprovado.
+- Runner real sem opt-in: exit2 esperado, recusa antes de iniciar E2E. Casos browser reais sem
+  opt-in: 2 skipped. Nenhuma jornada de escrita foi executada nesta rodada.
+- FastAPI principal ativo http://127.0.0.1:8000/ (503 de catálogo esperado); vitrine explícita
+  em:8001 permanece demonstração. Não foi habilitado banco silenciosamente para trocar 503 por 200.
+
+T008/T010/T014/T027/T029 continuam com aceite real pendente. Um teste de leitura e um ping não
+comprovam login, promoção, RLS de sessões, catálogo sincronizado, CRUD, Redis ou WhatsApp reais.

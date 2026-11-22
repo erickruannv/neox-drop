@@ -4,22 +4,28 @@ Este roteiro prepara a validação real; não provisiona recursos automaticament
 Pré-requisitos técnicos e limites: [TESTES-BANCOS.md](TESTES-BANCOS.md).
 Diagnóstico desta rodada: [evidências da Fase 3](evidencias/backend-fase3.md).
 
-**Estado atual:** Supabase de teste e duas contas já foram criados; usuário informou migration
-aplicada manualmente. Não repetir criação nem aplicação. Prosseguir apenas com o postflight
-de leitura em `supabase/verification/admin_profiles_postflight.sql`. MongoDB/Upstash seguem
-sem credenciais locais. O FastAPI integrado já abre em http://127.0.0.1:8000/ sem simular catálogo.
+**Estado verificado em 22/11/2026:** Supabase existente, duas contas informadas e migration
+aplicada manualmente pelo usuário (não reaplicar). Auth respondeu 200 e SELECT anônimo foi
+negado com 42501; isso não é postflight. Conector não lista neox-drop-test; navegador indisponível.
+Atlas Cluster0/M0 respondeu ping autenticado; usuário ainda atlasAdmin, neox_drop_rw ausente,
+products ausente. URI configurada. Upstash e credenciais das contas NEOX_TEST ainda ausentes.
+A aplicação principal :8000 mantém conexões false/503; :8001 é vitrine explícita com fixtures.
+
+As operações remotas precisam de autorização específica. O agente já apresentou o ajuste
+somente readWrite@neox_drop_test e a criação de products vazia com os seis índices abaixo;
+não há aprovação presumida. Acesso ao banco não substitui acesso ao painel administrativo Atlas.
 
 ## 1. Escolher recursos gratuitos e isolados
 
-Crie recursos dedicados à NEOX de teste, com dados fictícios. Os nomes abaixo são sugestões
-de identificação, não indicam recursos existentes. Confirme **Free / $0** no resumo antes de
-criar; se a opção gratuita não estiver disponível, pare sem aceitar plano pago ou upgrade.
+Reutilize os projetos Supabase e Atlas já existentes. A existência de Redis dedicado ainda não foi confirmada; consulte a conta antes de criar
+outro recurso, sempre após autorização. Confirme **Free / $0** antes de criar qualquer
+recurso; se a opção gratuita não existir, pare sem aceitar plano pago ou upgrade.
 Não use recursos de produção, créditos de trial como se fossem gratuitos permanentes ou addons.
 
 | Serviço | Recurso a preparar por você | Plano a selecionar |
 |---|---|---|
-| Supabase | Projeto novo `neox-drop-test` em organização Free | [Free](https://supabase.com/pricing) |
-| MongoDB Atlas | Projeto/cluster de teste; banco `neox_drop_test` | [Free](https://www.mongodb.com/pricing), não Flex/Dedicated |
+| Supabase | Projeto EXISTENTE `neox-drop-test`; não recriar | [Free](https://supabase.com/pricing) |
+| MongoDB Atlas | Cluster0/M0 EXISTENTE; banco `neox_drop_test` | [Free](https://www.mongodb.com/pricing), não Flex/Dedicated |
 | Upstash | Redis dedicado `neox-drop-test` | [Free](https://upstash.com/pricing/redis), não Pay as You Go |
 
 Preços/opções conferidos em 19/11/2026; a tela de contratação precisa continuar indicando zero.
@@ -29,24 +35,20 @@ confirmar finalidade e plano. Não foi aberto nenhum banco desse projeto.
 
 ## 2. Supabase: URL, chaves, migration e dois usuários
 
-1. No Dashboard, escolha a organização Free e crie o projeto de teste. Guarde a senha do
-   banco em seu gerenciador; a aplicação usa Auth/Data API, não essa senha de PostgreSQL.
+1. Selecione o projeto EXISTENTE neox-drop-test. A aplicação usa Auth/Data API, não senha
+   direta do PostgreSQL. Não recrie projeto ou contas.
 2. No painel de conexão/API do projeto, obtenha **Project URL**; em **Settings → API Keys**,
    obtenha a **publishable key** e, se for testar o contato do checkout, uma **secret key**
    somente para backend. Salve localmente como `SUPABASE_URL`, `SUPABASE_KEY` e
    `SUPABASE_SECRET_KEY`. Não confundir com JWT de usuário ou senha do banco.
    [Tipos e obtenção de API keys](https://supabase.com/docs/guides/getting-started/api-keys).
-3. Confirme que o projeto está saudável, vazio/dedicado a teste e com Data API disponível.
-   **Pare aqui para a aplicação da migration:** o arquivo a revisar/autorizar é
-   [20261119105020_admin_profiles_rls.sql](../supabase/migrations/20261119105020_admin_profiles_rls.sql).
-   A [revisão SQL definitiva](SQL-SUPABASE-TESTE.md) inclui consultas de preflight/postflight.
-   Sua autorização deve identificar o projeto de teste e esse arquivo. Nenhuma migration
-   remota será executada por inferência; não há comando remoto automático neste roteiro.
-4. Depois da aplicação autorizada, em **Authentication → Users**, prepare duas contas
-   fictícias com senha e email confirmado, usando o fluxo administrativo do provedor.
-   Não desative globalmente a confirmação de email nem abra signup para contornar a configuração.
-   [Gerenciamento de usuários](https://supabase.com/docs/guides/auth/users).
-5. Para a conta admin, o responsável adiciona em `public.admin_profiles` uma única linha:
+3. A migration já foi aplicada manualmente. Execute SOMENTE o postflight de leitura
+   [admin_profiles_postflight.sql](../supabase/verification/admin_profiles_postflight.sql)
+   no projeto correto, ou disponibilize acesso ao agente para executá-lo. Não reaplicar migration
+   nem reconciliar histórico remoto automaticamente.
+4. Confira as duas contas Auth já existentes. Não crie outras nem altere senhas/confirmacão
+   global para contornar erros. Guarde as credenciais apenas nas variáveis NEOX_TEST locais.
+5. Após selecionar o UUID e autorizar ESPECIFICAMENTE sua promoção, adicionar em `public.admin_profiles` uma única linha:
    `user_id` igual ao UUID real do Auth, `display_name` fictício, `role=admin`, `is_active=true`.
    Deixe datas com os defaults. A migration não cria nem promove usuários automaticamente.
    Para a outra conta, deixe **sem linha de perfil** (ou perfil inativo); não a promova.
@@ -65,15 +67,16 @@ A migration deve criar/instalar exatamente:
 
 A função de sessão lê `auth.sessions` e `not_after`; essa compatibilidade exige o teste real.
 Não criar uma policy permissiva para fazer o teste passar. Se houver tabelas já existentes,
-inspecionar antes de aplicar: a migration não deve ser adaptada silenciosamente nem rerodada.
+inspecionar pelo postflight: a migration não deve ser adaptada silenciosamente nem rerodada.
 O contato WhatsApp não é necessário para os seis testes preparados. Para validar checkout real,
 o responsável configura um contato autorizado no singleton; não se envia mensagem no teste.
 
 ## 3. MongoDB Atlas: cluster, acesso e coleção
 
-1. Em um projeto de teste, crie cluster **Free**. Use o [fluxo oficial de criação](https://www.mongodb.com/docs/atlas/tutorial/deploy-free-tier-cluster/).
-2. Em **Database Access**, crie um usuário de banco separado do login Atlas, autenticado
-   por senha/SCRAM, com `readWrite` apenas em `neox_drop_test`, restrito ao cluster de teste.
+1. Selecione o projeto EXISTENTE neox-drop-test e o Cluster0/M0. Não criar outro cluster.
+2. Em **Database Access**, use o usuário EXISTENTE indicado na URI local. Após autorização,
+   substitua atlasAdmin por SOMENTE `readWrite` em `neox_drop_test`, restrito ao Cluster0.
+   Não é necessário criar a função personalizada neox_drop_rw para usar esse papel nativo.
    Não conceder administração de todos os bancos.
    [Usuários de banco](https://www.mongodb.com/docs/atlas/security-add-mongodb-users/).
 3. Em **Network Access**, permita somente o IP atual da máquina de teste, preferencialmente
@@ -87,7 +90,7 @@ o responsável configura um contato autorizado no singleton; não se envia mensa
 6. Após confirmar esse destino e autorizar a inicialização de teste, use o script já preparado:
 
    ```sh
-   uv run --locked python -m scripts.seed_products --initialize --verify
+   APP_ENV=test TEST_CONNECTIONS_ENABLED=true MONGODB_DATABASE=neox_drop_test uv run --locked python -m scripts.seed_products --initialize --verify
    ```
 
 Isso é escrita remota de teste: cria coleção vazia e seis índices, sem inserir produtos.
@@ -125,7 +128,7 @@ com o dataset real antes de afirmar otimização. A imagem da seed é fixture, n
 
 ## 4. Upstash: Redis REST com permissão de escrita
 
-1. Na [console Upstash](https://console.upstash.com/), em Redis, escolha **Create Database**,
+1. Após acesso à conta e autorização ESPECÍFICA de criação, na [console Upstash](https://console.upstash.com/), em Redis, escolha **Create Database**,
    nome de teste, região e plano **Free**; confirme custo zero sem adicionais.
    [Passo a passo oficial](https://upstash.com/docs/redis/overall/getstarted).
 2. No bloco **Connect / REST**, copie a URL HTTPS para `UPSTASH_REDIS_REST_URL` e o token
@@ -134,6 +137,11 @@ com o dataset real antes de afirmar otimização. A imagem da seed é fixture, n
    [Credenciais REST](https://upstash.com/docs/redis/features/restapi).
 3. Não usar `redis://`, não compartilhar banco com produção e não executar FLUSHDB.
    Não é necessária migration Redis: as chaves de teste são criadas pelas operações autorizadas.
+
+Limites Free conferidos em 22/11/2026 na [página oficial](https://upstash.com/pricing/redis):
+$0, 250MB, 500mil comandos/mês e 10GB de banda/mês; um banco Free por conta. Não cadastrar cartão,
+não selecionar Pay as You Go/Prod Pack/upgrade. Confirmar Free/$0 na revisão antes de criar.
+Sem acesso à conta, não é possível confirmar quota disponível ou provisionar instância.
 
 Recentes: `recent:visitor:{id}` LIST, até cinco IDs, TTL 604800s. Cache:
 `cache:product:{id}` JSON/STRING, TTL 300s. EVAL e expiração precisam funcionar no plano escolhido;
@@ -145,7 +153,8 @@ Se `.env` ainda não existir, copie `.env.example` para `.env` em seu editor. Se
 preencha apenas os campos necessários sem sobrescrever credenciais. O Git ignora `.env`.
 A aplicação lê `.env` e o ambiente do processo; não lê `.env.test` ou `.env.local` automaticamente.
 
-Para esta etapa, edite os seguintes campos:
+Somente depois do preparo/autorização, os campos ativos seriam os abaixo. Até lá, manter
+TEST_CONNECTIONS_ENABLED=false; os diagnósticos autorizados usam overrides só no processo.
 
 ```dotenv
 APP_ENV=test
@@ -167,8 +176,8 @@ NEOX_TEST_NONADMIN_PASSWORD=
 RUN_REAL_INTEGRATION=0
 ```
 
-`COOKIE_SECRET` é uma chave própria aleatória com pelo menos 32 caracteres; gere-a localmente
-com gerenciador de senhas/segredos e salve apenas no arquivo privado. As entradas em branco
+`COOKIE_SECRET` já foi renovado neste Mac e deve ser preservado no arquivo privado.
+É uma chave própria aleatória com pelo menos 32 caracteres. As entradas em branco
 acima são intencionais, não credenciais. Não colar `.env` em mensagens. Mantenha limites/TTLs
 do template. A secret key Supabase é opcional nos seis testes, necessária apenas ao contato
 privado do checkout. Para estes testes sem mídia remota, `MEDIA_ALLOWED_ORIGINS=[]` basta.
@@ -204,9 +213,9 @@ assim, pendência em outro banco não impede sua validação:
 | Arquivo | Provas esperadas e efeitos |
 |---|---|
 | `tests/real/test_live_admin_rls.py` | 3 testes: Auth admin, perfil próprio, logout/revogação; anon sem leitura (42501 ou zero linhas); não-admin 403. Cria sessões e as encerra; não cria usuários nem tenta UPDATE. Grants de escrita são verificados pelo postflight somente SELECT. |
-| `tests/real/test_live_storefront.py` | 1 teste sem overrides: login HTTP/CSRF, cadastro, leitura independente MongoDB, catálogo/Jinja imediato, refresh, PATCH, desativação e logout. Persiste produto de teste e limpa somente seu SKU aleatório. Exige Supabase e Atlas; não comprova interação por clique no navegador. |
-| `tests/real/test_live_mongodb.py` | 1 teste: CRUD, duplicata 409, preço atualizado e soft-delete. Cria e limpa apenas SKU aleatório de teste. |
-| `tests/real/test_live_redis.py` | 1 teste: EVAL concorrente, A/B/A, cinco únicos e TTL. Cria e remove apenas chave aleatória de teste. |
+| `tests/real/test_live_storefront.py` | 1 teste sem overrides: login HTTP/CSRF, cadastro, leitura independente MongoDB, catálogo/Jinja imediato, refresh, PATCH, desativação e logout. Reinicia dois processos Uvicorn, comprova persistência e mantém produto QA inativo, sem excluir documento. Exige Supabase e Atlas; não comprova interação por clique no navegador. |
+| `tests/real/test_live_mongodb.py` | 1 teste: CRUD, duplicata 409, preço atualizado e soft-delete. Cria e mantém inativo somente o novo SKU aleatório de teste. |
+| `tests/real/test_live_redis.py` | 1 teste: EVAL concorrente, A/B/A, cinco únicos, TTL 7 dias e expiração efetiva de sua chave com TTL 1s. Cria e remove apenas chave aleatória de teste. |
 
 Depois: executar os testes de contrato e demais regressões pertinentes, sem reexecutar
 os testes mutáveis de banco desnecessariamente:
@@ -224,3 +233,21 @@ estiverem confirmados. Não conceder privilégios mais amplos para silenciar fal
 Para retomar comigo, basta informar que `.env` está preenchido, quais recursos são
 exclusivamente de teste e a situação da migration/coleção. Não envie segredos. Uma autorização
 remota deve citar o projeto e a migration revisada; não foi solicitada execução por padrão.
+
+
+## E2E real do painel e checkout (preparado; não executado)
+
+Depois de autorizar sessões e escritas de teste, configurar os três serviços, escolher/promover
+admin com autorização separada e preparar contato WhatsApp verdadeiro autorizado:
+
+```sh
+APP_ENV=test TEST_CONNECTIONS_ENABLED=true RUN_REAL_INTEGRATION=1 uv run --locked python -m scripts.run_real_e2e
+```
+
+O comando cria seu próprio servidor em loopback/porta livre e o encerra ao concluir. O teste
+usa UI de login/cadastro, catálogo/detalhe, recentes, carrinho, preço alterado, link WhatsApp
+SEM CLICAR, desativação e logout, além da segunda conta negada. Relatórios temporários privados
+são removidos; stdout não recebe credenciais/erros brutos. Sem opt-in, o runner recusa antes
+mesmo de carregar as contas. Não executar via pnpm direto com credenciais reais.
+A expiração do cookie de acesso é simulada para verificar refresh; expiração temporal real do
+JWT ainda precisa de execução específica. Testes não autorizam novas permissões automaticamente.

@@ -129,9 +129,12 @@ Os testes reais preparados cobrem Auth/perfil/RLS por leitura, revogação/refre
 usuário sem admin ativo, HTTP cadastro–catálogo–PATCH–desativação com persistência Mongo,
 CRUD/índices/soft-delete Mongo e EVAL/ordem/TTL Redis. Nenhum UPDATE é tentado no PostgreSQL;
 grants são conferidos pelo postflight de leitura. Sem credenciais, isso é preparo, não prova real.
-O teste Mongo cria documento com SKU aleatório de teste e limpa apenas esse SKU; o teste
+O teste Mongo cria documento com SKU aleatório de teste e o mantém inativo, sem excluir; o teste
 Redis cria chave aleatória temporária e a remove. Isso é escrita de teste e exige autorização.
-Não medem dois workers reais, cache sob falha real ou jornada com UI/WhatsApp.
+Não medem dois workers reais nem cache sob falha externa real. A jornada UI/WhatsApp está
+preparada no runner protegido `scripts.run_real_e2e`, mas ainda não foi executada com bancos.
+O teste HTTP de persistência reinicia dois processos Uvicorn. Redis verifica também expiração
+efetiva da própria chave temporária, sem alterar TTL das chaves da aplicação.
 
 ## Limites e evidências pendentes
 

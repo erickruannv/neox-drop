@@ -1,7 +1,7 @@
 # NEOX drop
 
 **FastAPI e frontend integrados localmente em `feature/backend`**, incluindo o commit final
-`36b0492` do Claude. Templates Jinja2 reais, CSS compilado, JavaScript e as 14 operações JSON
+`ac1f7f1` do Claude (merge local `38fd700`). Templates Jinja2 reais, CSS compilado, JavaScript e as 14 operações JSON
 do OpenAPI estão ligados. Sem MongoDB, páginas do catálogo mostram indisponibilidade HTML 503,
 sem produtos fictícios; login/carrinho abrem e o painel mantém autorização obrigatória.
 Auth/RLS/persistência reais permanecem sem comprovação completa, com testes opt-in.
@@ -12,6 +12,20 @@ com [diagnóstico sem credenciais](docs/evidencias/backend-fase3.md).
 
 Stack: Python 3.13 + FastAPI, Jinja2 + Tailwind compilado + JavaScript + Model Viewer,
 Supabase Auth/PostgreSQL, MongoDB e Redis/Upstash. Não há pagamento ou reserva de estoque.
+
+## Estado verificado em 22/11/2026
+
+| Banco | Responsabilidade | Evidência atual |
+|---|---|---|
+| Supabase PostgreSQL/Auth | Identidade, perfis admin/RLS e contato WhatsApp privado | Auth 200; leitura anônima negada 42501. Postflight e duas sessões ainda pendentes. |
+| MongoDB Atlas | Produtos, preço em centavos, estoque e destaques autoritativos | Ping autenticado/TLS passou. Ainda atlasAdmin; função neox_drop_rw e coleção products ausentes. |
+| Upstash Redis | Cinco recentes/TTL7dias e cache300s; nunca preço do checkout | Credenciais ausentes; integração real não executada. |
+
+TEST_CONNECTIONS_ENABLED permanece false no .env. Não há autorização implícita para criar
+coleção, alterar papéis, promover admin ou escrever dados. O projeto Supabase correto não
+aparece no conector atual e o controle de navegador está indisponível. Leituras não comprovam
+CRUD/RLS completos. Ver [evidências](docs/evidencias/backend-fase3.md) e
+[roteiro de apresentação](docs/evidencias/roteiro-video.md).
 
 ## Executar localmente
 
@@ -79,7 +93,7 @@ pnpm test:ui --workers=2
 NEOX_FASTAPI_URL=http://127.0.0.1:8000 pnpm exec playwright test --workers=2
 ```
 
-Os testes atuais usam ASGI local, fixtures canônicas e dublês dos serviços. Não comprovam
+A suíte padrão usa ASGI/processos locais, fixtures canônicas e dublês dos serviços. Não comprova
 Auth/RLS ou persistência real. Schemas mantêm projeções pública/admin distintas; serializar
 campos opcionais com `model_dump(mode='json', exclude_unset=True)`.
 Rate limit: janela fixa por IP/processo local, sem confiar em X-Forwarded-For; backend
@@ -98,6 +112,22 @@ Limite de corpo conta bytes reais nas operações de escrita.
 acima já iniciado, com TEST_CONNECTIONS_ENABLED=false, e testa o FastAPI sem interceptar APIs:
 assets, navegação, CSRF, carrinho vazio e bloqueios de catálogo/checkout/admin sem configuração.
 Não comprova operações bem-sucedidas nos bancos.
+
+Após autorização ESPECÍFICA das sessões e escritas de teste, três bancos configurados e
+as quatro NEOX_TEST_* salvas apenas no .env local, o E2E real usa um único comando:
+
+```sh
+APP_ENV=test TEST_CONNECTIONS_ENABLED=true RUN_REAL_INTEGRATION=1 uv run --locked python -m scripts.run_real_e2e
+```
+
+O runner inicia/encerra seu próprio FastAPI local, passa credenciais apenas ao processo de
+teste, usa relatórios temporários privados e imprime somente contagens/arquivo/linha de falha.
+Não rodar os testes reais diretamente pelo pnpm: erros do Playwright podem incluir campos de
+login. Não envia mensagens WhatsApp. Produtos QA permanecem inativos para preservar evidências;
+chaves Redis exclusivas são temporárias. A jornada real ainda não foi executada.
+O teste Python tests/real/test_live_storefront.py reinicia processos Uvicorn de verdade e
+confere o documento usando outro cliente MongoDB. O refresh remove o cookie de acesso para
+simular expiração; não comprova expiração real de JWT por espera de tempo.
 
 T008: usuário informou migration aplicada manualmente; não reaplicar. Postflight somente
 leitura e RLS com sessões reais continuam pendentes. Leituras reais de Supabase Auth passaram;
