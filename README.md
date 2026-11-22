@@ -35,8 +35,10 @@ sem Redis; isso não comprova o fluxo completo. A vitrine :8001 é demonstraçã
 prova de persistência. Não recriar Mongo/Supabase nem reaplicar a migration manual já executada.
 
 **Única ação manual atual:** Supabase → neox-drop-test → SQL Editor → New query, como postgres:
-executar [admin_profiles_postflight.sql](supabase/verification/admin_profiles_postflight.sql)
-e retornar os resultados. É somente leitura. Depois será solicitada autorização específica
+executar [admin_profiles_pending.sql](supabase/verification/admin_profiles_pending.sql)
+e retornar a única linha JSON. A consulta trata só pendências e mostra UUIDs/e-mails mascarados
+das duas contas, sem ativá-las. Contagens, RLS e grants de tabela já informados não são repetidos.
+Depois será solicitada autorização específica
 para ativar UMA conta existente; a outra permanece sem privilégio. Nenhuma promoção automática.
 
 Credenciais ficam apenas no .env privado, conforme [.env.example](.env.example). Não enviar
