@@ -87,7 +87,9 @@ Com banco **novo**, nome `_test`, destinos conferidos e autorização de escrita
 uv run --locked python -m scripts.seed_products --initialize --verify
 ```
 
-Não executado nesta rodada. O script recusa coleção existente na inicialização, evitando
+Executado com autorização em 22/11/2026: products vazia, strict/error e seis índices verificados
+no Atlas com papel neox_drop_test@admin restrito a neox_drop_test. Não repetir a inicialização.
+O script recusa coleção existente na inicialização, evitando
 `collMod` silencioso; a seed usa `$setOnInsert` por SKU e não sobrescreve registro existente.
 `--verify` sozinho só lê o validator/índices; não altera coleção nem dados. `--seed` continua
 opcional, separado e desnecessário para cadastrar pelo painel. O validador BSON e os

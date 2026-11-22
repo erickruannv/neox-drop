@@ -585,3 +585,64 @@ Funções em Free podem levar até 30s para propagar, conforme [MongoDB](https:/
 Próximo bloqueio do login: acesso ao projeto Supabase correto para postflight, identificação do
 UUID da conta escolhida e autorização separada de promoção; disponibilidade local das contas NEOX_TEST_*. A autorização Mongo não concede autorização de promoção ou
 inserção de produtos, portanto cadastro real será uma etapa mutável separada.
+
+## MongoDB Atlas — estrutura criada e validada, 22/11/2026
+
+O usuário confirmou visualmente projeto/cluster e a configuração no painel: a função
+personalizada foi criada como **neox_drop_test**, não neox_drop_rw, herdando readWrite no
+banco neox_drop_test, sem Apply to any database; conta restrita a um cluster. Essa atualização
+foi aceita sem renomear/criar outra função. A confirmação administrativa do projeto e da
+restrição de cluster é do usuário; o agente não obteve acesso ao plano de controle Atlas.
+
+Antes de escrever, conexão SRV/TLS Cluster0 validada, ping autenticado, identidade autenticada
+comparada internamente com a URI local (sem registrar usuário/senha/URI). connectionStatus
+retornou somente neox_drop_test@admin. Dois recursos efetivos de privilégio, ambos no banco
+neox_drop_test; nenhum recurso global/cluster/anyResource ou banco diferente. Ações necessárias
+createCollection/createIndex/listCollections/listIndexes/find presentes; atlasAdmin ausente.
+O namespace @admin da função não equivale a atlasAdmin ou permissão geral no banco admin.
+
+Com essas pré-condições, executados initialize(database) e verify(database) do script existente,
+exclusivamente em neox_drop_test, conforme autorização explícita. Criada apenas products, com
+validationLevel=strict e validationAction=error e validator igual ao JSON revisado. Índices:
+
+| Nome | Chaves | Único |
+|---|---|---|
+| _id_ (automático) | _id:1 | Sim, implícito no MongoDB |
+| uniq_sku | sku:1 | Sim |
+| uniq_slug | slug:1 | Sim |
+| catalog_by_category | active:1,category:1,createdAt:-1 | Não |
+| catalog_by_brand | active:1,brand:1,createdAt:-1 | Não |
+| featured_order | active:1,featured.enabled:1,featured.order:1 | Não |
+| catalog_by_size | active:1,sizes.sizeBR:1 | Não |
+
+SHA256 de mongo/products_schema.json usado:
+a4a245a53aea8adc01194636cceeee5b8199655d915fd92082490376da4f4b89.
+A primeira saída de diagnóstico usou default unique=false para _id_, pois a propriedade não
+vem explícita em index_information; a unicidade de _id_ é implícita e foi corretamente
+identificada na leitura independente. Não houve mudança no índice _id_.
+
+Provas reais posteriores à criação:
+
+- Novo cliente autenticado: ping passou, papel/escopo correto, listIndexes com exatamente os
+  sete nomes esperados; count_documents retornou ZERO. Nenhum INSERT/seed/CRUD foi chamado.
+- Script canônico, em processo separado, somente leitura:
+  `APP_ENV=test TEST_CONNECTIONS_ENABLED=true MONGODB_DATABASE=neox_drop_test REQUEST_TIMEOUT_SECONDS=30 uv run --locked python -m scripts.seed_products --verify`
+  exit 0, Verificação concluída. Confere validator inteiro, strict/error e seis índices/chaves/
+  unicidade, sem tolerar alterações sparse/hidden/parciais/TTL/collation.
+- FastAPI ASGI com Atlas real, sem dependency_overrides/mocks: GET /api/products 200 (items 0),
+  /api/featured 200 (items 0), / 200 e /tenis 200, sem estado de serviço indisponível. Nenhuma rota
+  mutável chamada. Isso comprova leitura de catálogo vazio, não cadastro ou persistência de produto.
+- Testes locais focados de configuração/inicialização: 32 passed em 0,24s; usam dublês para DDL
+  e não foram apresentados como teste remoto. Sem código de aplicação/schema/contrato alterado.
+
+APP_ENV/test_connections usados somente em processos de operação/teste. .env preservado com
+TEST_CONNECTIONS_ENABLED=false; servidor principal já iniciado não foi reconfigurado. Não
+confundir os quatro GETs ASGI com mudança automática do servidor em :8000. Nenhum produto,
+usuário Auth, outro banco/coleção, Supabase ou Redis alterado; sem push/deploy/custos novos.
+Não executar --initialize novamente contra a coleção existente; futuras conferências usam --verify.
+
+Próxima etapa: acesso ao projeto Supabase correto para executar postflight de leitura, identificar
+UUID da conta escolhida e apresentar associação role=admin/is_active=true para autorização
+separada. Não promover automaticamente. Depois validar login/negação da segunda conta e,
+somente com autorização de INSERT, cadastrar o primeiro produto fictício pela interface.
+Estrutura Mongo concluída; CRUD real, login administrativo e checkout continuam sem comprovação.

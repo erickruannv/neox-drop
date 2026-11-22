@@ -7,17 +7,18 @@ Diagnóstico desta rodada: [evidências da Fase 3](evidencias/backend-fase3.md).
 **Estado verificado em 22/11/2026:** Supabase existente, duas contas informadas e migration
 aplicada manualmente pelo usuário (não reaplicar). Auth respondeu 200 e SELECT anônimo foi
 negado com 42501; isso não é postflight. Conector não lista neox-drop-test; navegador indisponível.
-Atlas Cluster0/M0 respondeu ping autenticado; usuário ainda atlasAdmin, neox_drop_rw ausente,
-products ausente. URI configurada. Upstash e credenciais das contas NEOX_TEST ainda ausentes.
+Atlas Cluster0/M0 respondeu ping autenticado; único papel neox_drop_test@admin, sem atlasAdmin,
+com privilégios efetivos só em neox_drop_test. products criada VAZIA, strict/error e seis índices
+adicionais verificados. URI configurada. Upstash e credenciais das contas NEOX_TEST ainda ausentes.
 A aplicação principal :8000 mantém conexões false/503; :8001 é vitrine explícita com fixtures.
 
-**Autorização Mongo recebida em 22/11/2026:** criar a função personalizada neox_drop_rw
-herdando SOMENTE readWrite@neox_drop_test, substituir atlasAdmin do usuário da URI por essa
-função, restringir ao Cluster0 se disponível e, APÓS confirmar as permissões, criar products
-vazia com validator strict/error e os seis índices. Não autoriza inserts, seed, outros bancos,
-Supabase/Redis ou alterações de usuários Auth. Não é mais pendência de aprovação Mongo:
-falta acesso administrativo ao Atlas para confirmar projeto/cluster e aplicar o papel.
-A URI permite leitura do banco, não administração da conta Atlas. Não contornar esse limite.
+**Autorização Mongo executada parcialmente pelo usuário e concluída pelo agente:** o usuário
+criou no painel o papel **neox_drop_test** (não neox_drop_rw), herdando readWrite só no banco
+neox_drop_test, atribuiu como único papel ao usuário da aplicação e confirmou restrição a um
+cluster. Via URI Cluster0, o agente confirmou conta/permissões e criou products vazia com
+validator strict/error e os seis índices revisados. Nome do projeto e escopo de cluster foram
+confirmados visualmente pelo usuário; não pelo plano administrativo do agente.
+Não autoriza inserts, seed, outros bancos, Supabase/Redis ou usuários Auth.
 
 ## 1. Escolher recursos gratuitos e isolados
 
@@ -78,30 +79,28 @@ o responsável configura um contato autorizado no singleton; não se envia mensa
 ## 3. MongoDB Atlas: cluster, acesso e coleção
 
 1. Selecione o projeto EXISTENTE neox-drop-test e o Cluster0/M0. Não criar outro cluster.
-2. Em **Database & Network Access → Custom Roles**, criar neox_drop_rw se ausente:
-   Action or Role=readWrite (Database Actions and Roles), Database=neox_drop_test.
-   Não selecionar Apply to any database. Em **Database Users**, editar o usuário da URI
-   local: adicionar APENAS neox_drop_rw e remover atlasAdmin/outros privilégios; se disponível,
-   Restrict Access to Specific Clusters=ON, Grant Access To=Cluster0. Salvar sem trocar senha.
-   [Custom roles](https://www.mongodb.com/docs/atlas/security-add-mongodb-roles/) e
-   [usuários](https://www.mongodb.com/docs/atlas/security-add-mongodb-users/).
+2. Papel EXISTENTE **neox_drop_test@admin**, configurado pelo usuário e verificado via
+   connectionStatus: privilégios efetivos só no banco neox_drop_test, sem atlasAdmin/global.
+   Não criar neox_drop_rw nem renomear o papel validado. Restrição de cluster confirmada pelo
+   usuário no painel; sem acesso administrativo do agente para auditoria dessa opção.
 3. Em **Network Access**, permita somente o IP atual da máquina de teste, preferencialmente
    com entrada temporária. Não liberar `0.0.0.0/0`.
    [IP access list](https://www.mongodb.com/docs/atlas/security/ip-access-list/).
 4. Em **Connect → Drivers → Python**, copie a URI SRV para `MONGODB_URI` no `.env` local e
    preencha a senha ali. Caracteres reservados na senha precisam de percent-encoding;
    não coloque a URI preenchida em comando, Git ou mensagem. Preserve TLS/verificação de certificados.
-5. Defina `MONGODB_DATABASE=neox_drop_test`. Não crie uma coleção `products` vazia no painel:
+5. Preserve `MONGODB_DATABASE=neox_drop_test`. A coleção products já foi criada e verificada.
+   Não recriar no painel nem repetir a inicialização:
    o inicializador exige coleção nova para instalar o validator corretamente.
-6. Após confirmar esse destino e autorizar a inicialização de teste, use o script já preparado:
+6. Operação abaixo JÁ EXECUTADA com autorização, sem seed. Está registrada para rastreabilidade;
+   não repetir contra a coleção existente:
 
    ```sh
    APP_ENV=test TEST_CONNECTIONS_ENABLED=true MONGODB_DATABASE=neox_drop_test uv run --locked python -m scripts.seed_products --initialize --verify
    ```
 
 Isso é escrita remota de teste: cria coleção vazia e seis índices, sem inserir produtos.
-Não foi executado
-nesta rodada. O script recusa coleção existente, nome sem `_test` ou opt-in ausente. Se a
+Executada e verificada nesta rodada; contagem exata zero documentos. O script recusa coleção existente, nome sem `_test` ou opt-in ausente. Se a
 coleção já existir, interromper só a inicialização e revisar estado; não usar drop/collMod
 para contornar a recusa. `--seed` é opcional e não deve ser usado na demonstração de cadastro
 manual. Para conferir uma coleção já preparada sem alterá-la, use apenas `--verify`:

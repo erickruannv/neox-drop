@@ -18,12 +18,14 @@ Supabase Auth/PostgreSQL, MongoDB e Redis/Upstash. Não há pagamento ou reserva
 | Banco | Responsabilidade | Evidência atual |
 |---|---|---|
 | Supabase PostgreSQL/Auth | Identidade, perfis admin/RLS e contato WhatsApp privado | Auth 200; leitura anônima negada 42501. Postflight e duas sessões ainda pendentes. |
-| MongoDB Atlas | Produtos, preço em centavos, estoque e destaques autoritativos | Ping autenticado/TLS passou. Ainda atlasAdmin; função neox_drop_rw e coleção products ausentes. |
+| MongoDB Atlas | Produtos, preço em centavos, estoque e destaques autoritativos | Ping/TLS e papel neox_drop_test@admin restrito ao banco confirmados. products criada strict/error, seis índices adicionais e zero documentos; CRUD ainda não executado. |
 | Upstash Redis | Cinco recentes/TTL7dias e cache300s; nunca preço do checkout | Credenciais ausentes; integração real não executada. |
 
-Autorização Mongo explícita recebida: função neox_drop_rw com readWrite só no banco de teste,
-substituição de atlasAdmin, escopo Cluster0 e criação posterior de products vazia/índices.
-Execução bloqueada por falta de acesso ao plano administrativo Atlas; nenhuma escrita realizada.
+MongoDB concluído quanto à estrutura em 22/11/2026: papel personalizado **neox_drop_test**
+(nome escolhido no painel pelo usuário), sem atlasAdmin e com privilégios efetivos apenas no
+banco neox_drop_test. Coleção products VAZIA criada por autorização explícita, validator e
+seis índices do projeto verificados. Não repetir --initialize nem inserir seed. Inserções,
+login administrativo e CRUD real ainda não foram autorizados/executados nesta rodada.
 
 TEST_CONNECTIONS_ENABLED permanece false no .env. Não há autorização implícita para criar
 coleção, alterar papéis, promover admin ou escrever dados. O projeto Supabase correto não
