@@ -74,6 +74,16 @@
     <p class="mt-6 rounded-2xl bg-white p-6 text-muted">{% if serviceMessage is defined and serviceMessage %}Não foi possível consultar os lançamentos.{% else %}Nenhum lançamento disponível no momento.{% endif %} <a href="/tenis" class="font-bold text-ink underline">Ver catálogo</a></p>
     {% endif %}
   </section>
+  {% if recent and recent["items"] %}
+  <section data-recent-products aria-labelledby="recentes-titulo" class="mx-auto max-w-screen-2xl px-4 pt-12 sm:px-6 lg:px-10">
+    <h2 id="recentes-titulo" class="display-type text-2xl">Vistos recentemente</h2>
+    <ul class="mt-6 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+      {% for p in recent["items"] %}
+      <li>{{ product_card(p) }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
 </div>
 {% endblock %}
 

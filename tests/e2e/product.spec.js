@@ -45,3 +45,15 @@ for (const slug of ["nike-air-max-90-infrared", "adidas-samba-og"]) test(`detalh
   const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
   expect(violations.filter((v) => ["serious", "critical"].includes(v.impact)).map((v) => v.id)).toEqual([]);
 });
+
+test("detalhe registra visita uma vez com CSRF para alimentar recentes", async ({ page }) => {
+  const p = mock.details[0], visits = [];
+  await page.route('**/api/recent', async (route) => {
+    visits.push({ method: route.request().method(), data: route.request().postDataJSON(),
+      csrf: route.request().headers()['x-csrf-token'] });
+    await route.fulfill({ status: 204 });
+  });
+  await page.goto(`/tenis/${p.slug}/`);
+  await expect.poll(() => visits.length, { timeout: 3000 }).toBe(1);
+  expect(visits[0]).toEqual({ method: 'POST', data: { productId: p.id }, csrf: 'preview-csrf' });
+});

@@ -14,6 +14,14 @@ document.querySelectorAll("[data-gallery-thumb]").forEach((thumb, _, all) => {
 // 3D sob demanda no palco "Ver em 3D" (viewer3d.js); nada carrega antes do clique.
 const open = document.querySelector("[data-open-3d]");
 const data = JSON.parse(document.getElementById("product-data")?.textContent ?? "{}");
+const productId = document.querySelector("[data-add-to-cart]")?.dataset.productId;
+if (productId) {
+  fetch("/api/recent", {
+    method: "POST", credentials: "same-origin",
+    headers: { "Content-Type": "application/json", "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content ?? "" },
+    body: JSON.stringify({ productId }),
+  }).catch(() => {}); // Recentes indisponíveis não bloqueiam a página ou o carrinho.
+}
 open?.addEventListener("click", () => open3d(data, open));
 
 const qty = document.querySelector("[data-qty] input");

@@ -204,3 +204,23 @@ async def test_security_policy_allows_only_required_3d_hosts_and_survives_errors
             assert "frame-ancestors 'none'" in policy
             assert "'unsafe-eval'" not in policy
             assert response.headers["x-content-type-options"] == "nosniff"
+
+
+@pytest.mark.parametrize("history", [False, True])
+async def test_home_exposes_recent_history_only_when_provided(catalog_app, monkeypatch, history):
+    from unittest.mock import AsyncMock
+
+    # Teste local do loader/template; não é comprovação do Upstash real.
+    app, _, doc, cursor = catalog_app
+    cursor.to_list.return_value = [doc]
+    monkeypatch.setattr(
+        "app.api.pages.recent_ids", AsyncMock(return_value=[str(doc["_id"])] if history else [])
+    )
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.get("/")
+        assert response.status_code == 200
+        assert ("data-recent-products" in response.text) is history
+        if history:
+            section = response.text.split("data-recent-products", 1)[1].split("</section>", 1)[0]
+            assert "Vistos recentemente" in section
+            assert doc["slug"] in section
