@@ -11,9 +11,13 @@ Atlas Cluster0/M0 respondeu ping autenticado; usuário ainda atlasAdmin, neox_dr
 products ausente. URI configurada. Upstash e credenciais das contas NEOX_TEST ainda ausentes.
 A aplicação principal :8000 mantém conexões false/503; :8001 é vitrine explícita com fixtures.
 
-As operações remotas precisam de autorização específica. O agente já apresentou o ajuste
-somente readWrite@neox_drop_test e a criação de products vazia com os seis índices abaixo;
-não há aprovação presumida. Acesso ao banco não substitui acesso ao painel administrativo Atlas.
+**Autorização Mongo recebida em 22/11/2026:** criar a função personalizada neox_drop_rw
+herdando SOMENTE readWrite@neox_drop_test, substituir atlasAdmin do usuário da URI por essa
+função, restringir ao Cluster0 se disponível e, APÓS confirmar as permissões, criar products
+vazia com validator strict/error e os seis índices. Não autoriza inserts, seed, outros bancos,
+Supabase/Redis ou alterações de usuários Auth. Não é mais pendência de aprovação Mongo:
+falta acesso administrativo ao Atlas para confirmar projeto/cluster e aplicar o papel.
+A URI permite leitura do banco, não administração da conta Atlas. Não contornar esse limite.
 
 ## 1. Escolher recursos gratuitos e isolados
 
@@ -74,11 +78,13 @@ o responsável configura um contato autorizado no singleton; não se envia mensa
 ## 3. MongoDB Atlas: cluster, acesso e coleção
 
 1. Selecione o projeto EXISTENTE neox-drop-test e o Cluster0/M0. Não criar outro cluster.
-2. Em **Database Access**, use o usuário EXISTENTE indicado na URI local. Após autorização,
-   substitua atlasAdmin por SOMENTE `readWrite` em `neox_drop_test`, restrito ao Cluster0.
-   Não é necessário criar a função personalizada neox_drop_rw para usar esse papel nativo.
-   Não conceder administração de todos os bancos.
-   [Usuários de banco](https://www.mongodb.com/docs/atlas/security-add-mongodb-users/).
+2. Em **Database & Network Access → Custom Roles**, criar neox_drop_rw se ausente:
+   Action or Role=readWrite (Database Actions and Roles), Database=neox_drop_test.
+   Não selecionar Apply to any database. Em **Database Users**, editar o usuário da URI
+   local: adicionar APENAS neox_drop_rw e remover atlasAdmin/outros privilégios; se disponível,
+   Restrict Access to Specific Clusters=ON, Grant Access To=Cluster0. Salvar sem trocar senha.
+   [Custom roles](https://www.mongodb.com/docs/atlas/security-add-mongodb-roles/) e
+   [usuários](https://www.mongodb.com/docs/atlas/security-add-mongodb-users/).
 3. Em **Network Access**, permita somente o IP atual da máquina de teste, preferencialmente
    com entrada temporária. Não liberar `0.0.0.0/0`.
    [IP access list](https://www.mongodb.com/docs/atlas/security/ip-access-list/).

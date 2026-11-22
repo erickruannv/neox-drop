@@ -21,6 +21,10 @@ Supabase Auth/PostgreSQL, MongoDB e Redis/Upstash. Não há pagamento ou reserva
 | MongoDB Atlas | Produtos, preço em centavos, estoque e destaques autoritativos | Ping autenticado/TLS passou. Ainda atlasAdmin; função neox_drop_rw e coleção products ausentes. |
 | Upstash Redis | Cinco recentes/TTL7dias e cache300s; nunca preço do checkout | Credenciais ausentes; integração real não executada. |
 
+Autorização Mongo explícita recebida: função neox_drop_rw com readWrite só no banco de teste,
+substituição de atlasAdmin, escopo Cluster0 e criação posterior de products vazia/índices.
+Execução bloqueada por falta de acesso ao plano administrativo Atlas; nenhuma escrita realizada.
+
 TEST_CONNECTIONS_ENABLED permanece false no .env. Não há autorização implícita para criar
 coleção, alterar papéis, promover admin ou escrever dados. O projeto Supabase correto não
 aparece no conector atual e o controle de navegador está indisponível. Leituras não comprovam

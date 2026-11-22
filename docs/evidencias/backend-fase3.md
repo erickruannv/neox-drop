@@ -543,3 +543,45 @@ sem reaplicação ou reconciliação remota automática. .env preservado, conex�
 
 T008/T010/T014/T027/T029 continuam com aceite real pendente. Um teste de leitura e um ping não
 comprovam login, promoção, RLS de sessões, catálogo sincronizado, CRUD, Redis ou WhatsApp reais.
+
+
+## Autorização específica MongoDB recebida — 22/11/2026
+
+O usuário autorizou neox_drop_rw herdando readWrite exclusivamente em neox_drop_test,
+substituição de atlasAdmin do usuário da aplicação, restrição ao Cluster0 se disponível e,
+APÓS confirmação de permissões, criação de products VAZIA com validator strict/error e os
+seis índices já revisados. Não autorizou inserts/seed/CRUD de teste, exclusões, outros projetos,
+Supabase/Redis, promoção Auth, compras, push ou deploy. Aprovação permanece válida nesse escopo;
+não pedir aprovação repetida para a mesma operação. Esta instrução substitui a proposta anterior
+de atribuir diretamente o papel nativo readWrite: usar a função personalizada solicitada.
+
+Novas leituras reais:
+
+- Ping autenticado passou; banco configurado neox_drop_test, URI SRV/TLS validada pelo driver.
+- Usuário autenticado corresponde exatamente ao usuário da URI (comparação interna, sem
+  registrar nome/URI/senha); auth database=admin. Seed DNS começa em Cluster0, mas nome do
+  projeto e vínculo administrativo do cluster NÃO foram confirmados pelo plano de controle.
+- connectionStatus: atlasAdmin@admin ainda ativo, privilégios globais presentes.
+- rolesInfo: neox_drop_rw@admin ausente; products continua ausente.
+- Nenhuma credencial administrativa Atlas configurada foi detectada; CLI Atlas não instalado,
+  ferramenta administrativa Atlas não disponível e CUA voltou a informar host indisponível.
+  Não usamos createRole/updateUser via driver para contornar o plano de controle Atlas.
+- Supabase: Auth health 200; SELECT anônimo limit0 em admin_profiles 401/42501. Projeto correto
+  continua indisponível no conector; nenhum SQL ou sessão foi criado. Redis sem credenciais
+  locais; nenhum recurso ou chave foi criado. .env preservado, conexões false.
+
+Verificação local focada: 32 testes aprovados (test_seed_products e test_config, 0,25s).
+São testes locais com dublês para DDL, não prova de coleção/índices remotos. Scripts existentes
+foram revisados; initialize recusa coleção existente e instala somente schema e seis índices,
+sem seed quando chamado com --initialize --verify. Nenhuma operação de escrita foi executada,
+pois a identidade administrativa e o ajuste de permissões ainda não puderam ser concluídos.
+
+Ação humana mínima: no projeto neox-drop-test/Cluster0, criar o custom role restrito e atribuí-lo
+como único papel ao usuário existente, retirando atlasAdmin e limitando Cluster0. Não criar
+products manualmente. Depois confirmar conclusão; o agente revalidará por leitura e executará
+a criação já autorizada, sem solicitar aprovação outra vez e sem inserir documentos.
+Funções em Free podem levar até 30s para propagar, conforme [MongoDB](https://www.mongodb.com/docs/atlas/security-add-mongodb-roles/).
+
+Próximo bloqueio do login: acesso ao projeto Supabase correto para postflight, identificação do
+UUID da conta escolhida e autorização separada de promoção; disponibilidade local das contas NEOX_TEST_*. A autorização Mongo não concede autorização de promoção ou
+inserção de produtos, portanto cadastro real será uma etapa mutável separada.
