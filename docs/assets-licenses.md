@@ -66,6 +66,12 @@ vários ângulos, não só "carregou":
 | AM90 c375a769… e Samba 974e037f… (usados antes) | ❌ **removidos** | Sketchfab | **Editorial** | visual de jogo e licença não comercial |
 | New Balance 9060 | ❌ nenhum | busca Sketchfab | — | nenhum 9060 com licença livre |
 
+Licença do AM95 reconfirmada em 2026-11-22 pela API pública do Sketchfab
+(`/v3/models/c425a652…`): `CC Attribution` → https://creativecommons.org/licenses/by/4.0/,
+"Author must be credited. Commercial use is allowed.", autor Andre Bond Sr. (@leadblacktech).
+Aprovado pelo responsável como 3D principal. Crédito exibido no palco 3D, no hero e no produto;
+as alterações (captura, fundo removido) constam no crédito das imagens, como pede a CC BY 4.0.
+
 Observações:
 - A descrição do AM95 diz "Purchase on Sketchfab only", mas a página publica licença **CC BY** e
   download liberado. Usamos só o **embed** oficial com crédito; antes de baixar/hospedar o GLB,
@@ -91,6 +97,19 @@ explícita (Royalty Free / Standard) antes de comprar.
 | Samba OG | CGTrader Samba OG (colorway azul) | US$ 45 | colorway errada |
 | Qualquer um | **Escanear os pares do estoque** (fotogrametria por app de celular → GLB → Model Viewer) | grátis a ~US$ 15/mês de app | colorway exata e direito autoral próprio; qualidade boa, não de configurador |
 | Qualquer um | Encomendar modelagem/escaneamento profissional | orçamento | qualidade de configurador; custo alto |
+
+## Alternativas propostas (não incorporadas — aguardam aprovação)
+
+Sem foto utilizável para **Air Max 95 OG Neon** e **New Balance 9060 cinza** (buscados em
+Commons, Flickr via Openverse, Unsplash e Pexels em 2026-11-21/22). Fotos reais encontradas para
+substituir, se aprovado:
+
+| No lugar de | Alternativa | Fonte | Licença | Observação |
+|---|---|---|---|---|
+| New Balance 9060 cinza | New Balance 2002R (camurça lilás/cinza, par) | [Commons, LeDroider](https://commons.wikimedia.org/w/index.php?curid=149192395) | CC0 | 2335×2424, foto de produto nítida; mesmo autor da foto do Samba |
+| (extra) | Nike Dunk Low vermelho/cinza (par) | [Commons, William Mucci](https://commons.wikimedia.org/w/index.php?curid=99442772) | CC0 | 2963×3523, fundo claro liso |
+
+O Air Max 95 já tem o Dark Army (3D + capturas) como representante aprovado.
 
 ## Especificação técnica para novas fotos
 
