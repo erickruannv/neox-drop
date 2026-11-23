@@ -56,7 +56,8 @@ test("estado vazio e erro com nova tentativa", async ({ page }) => {
 
   await page.getByLabel("Busca", { exact: true }).fill("inexistente");
   await page.getByRole("button", { name: "Aplicar" }).click();
-  await expect(page.getByText("Nenhum tênis encontrado com esses filtros.")).toBeVisible();
+  await expect(page.getByText("Nenhum tênis encontrado", { exact: true })).toBeVisible();
+  await expect(page.locator("[data-catalog-empty]").getByRole("link", { name: "Ver todos os tênis" })).toHaveAttribute("href", "/tenis");
   await expect(cards(page)).toHaveCount(0);
 
   await page.getByLabel("Busca", { exact: true }).fill("erro");

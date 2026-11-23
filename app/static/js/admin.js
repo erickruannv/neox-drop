@@ -2,6 +2,9 @@
 // Sessão em cookies HttpOnly; o JS só envia o X-CSRF-Token da meta tag. Nenhum token/senha é guardado.
 
 const URL_RE = /^(?:\/static\/[^\s?#]+|https:\/\/[^\s]+)$/; // mesmo padrão do OpenAPI
+const SKETCHFAB_RE = /^https:\/\/sketchfab\.com\/models\/[0-9a-f]{32}\/embed$/; // mesmo formato aceito pelo backend
+// Créditos vão em ProductCreate.attributes (chaves lidas pela página do produto e pelo palco 3D).
+const CREDITS = [["imageCredit", "Crédito das imagens"], ["imageCreditUrl", "Fonte das imagens"], ["model3dCredit", "Crédito do modelo 3D"], ["model3dCreditUrl", "Fonte do modelo 3D"]];
 const csrf = () => document.querySelector('meta[name="csrf-token"]')?.content ?? "";
 
 async function api(path, body) {
@@ -108,8 +111,16 @@ function initProductForm(form) {
     if (gallery.some((u) => !URL_RE.test(u)))
       problems.push({ input: form.elements.galleryUrls, message: "Galeria: cada linha deve ser /static/… ou https." });
     const model = v("model3dUrl");
-    if (model && !URL_RE.test(model))
-      problems.push({ input: form.elements.model3dUrl, message: "Modelo 3D: caminho /static/… ou URL https." });
+    if (model && (!URL_RE.test(model) || (/^https:\/\/(www\.)?sketchfab\.com\//.test(model) && !SKETCHFAB_RE.test(model))))
+      problems.push({ input: form.elements.model3dUrl, message: "Modelo 3D: /static/….glb ou https://sketchfab.com/models/<id>/embed." });
+    const attributes = {};
+    for (const [key, label] of CREDITS) {
+      const value = v(key);
+      if (!value) continue;
+      if (key.endsWith("Url") && !/^https:\/\/[^\s\\]+$/.test(value))
+        problems.push({ input: form.elements[key], message: `${label}: URL https://…` });
+      attributes[key] = value;
+    }
 
     const sizes = [];
     const seen = new Set();
@@ -132,6 +143,7 @@ function initProductForm(form) {
       active: form.elements.active.checked, sizes,
     };
     if (model) payload.model3dUrl = model;
+    if (Object.keys(attributes).length) payload.attributes = attributes;
     if (form.elements.featuredEnabled.checked) {
       const order = Number(v("featuredOrder"));
       if (!Number.isInteger(order) || order < 1)
@@ -164,6 +176,7 @@ function initProductForm(form) {
     const head = field.split(/[.[]/)[0];
     const map = { priceCents: "price", sizes: null, featured: "featuredOrder" };
     if (head === "sizes") return rows.querySelector("input");
+    if (head === "attributes") return form.elements[field.split(".")[1]] ?? null;
     return form.elements[map[head] ?? head] ?? null;
   };
 

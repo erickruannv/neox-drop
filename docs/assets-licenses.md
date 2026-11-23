@@ -25,7 +25,7 @@ Ficam só produtos com fotografia real, nítida e do modelo/colorway exato:
 
 | Arquivo | Produto | Fonte | Autor | Licença | Alteração |
 |---|---|---|---|---|---|
-| `products/nike-air-max-90-infrared/main.webp` | Air Max 90 Infrared | [Commons](https://commons.wikimedia.org/wiki/File:Nike_Air_Max_90_Infrared_(4805905007).jpg) | Christian H. | CC BY 2.0 (crédito obrigatório) | fundo removido (BiRefNet), WebP 1600×1000 |
+| `products/nike-air-max-90-infrared/main.webp` | Air Max 90 Infrared | [Commons](https://commons.wikimedia.org/wiki/File:Nike_Air_Max_90_Infrared_(4805905007).jpg) | Christian H. | CC BY 2.0 (crédito obrigatório) | fundo removido (BiRefNet), WebP 1600×1000; em 2026-11-23 removido resto do 2º pé do par atrás do cano |
 | `products/adidas-samba-og/main.webp` | Samba OG | [Commons](https://commons.wikimedia.org/wiki/File:Adidas_Samba_OG.jpg) | LeDroider | CC0 | fundo e suporte removidos, WebP |
 | `products/adidas-samba-og/lateral.webp` | Samba OG (lateral) | [Unsplash fIflxqqzBQY](https://unsplash.com/photos/a-white-and-black-adidas-sneakers-on-a-wooden-floor-fIflxqqzBQY) | Cris (@cris_23) | Licença Unsplash (uso comercial, sem atribuição obrigatória) | fundo removido, WebP |
 | `products/nike-air-max-95-dark-army/{lateral,frente34,medial,tras34}.webp` | Air Max 95 Dark Army/Orange Blaze | [Sketchfab c425a652…](https://sketchfab.com/3d-models/c425a652fc59427ba1fcef48ea174c92) | Andre Bond Sr. | CC BY 4.0 (crédito obrigatório) | **capturas do scan 3D** (Viewer API, fundo transparente), sombra removida, brilho +12%, WebP 1600×1000 — identificadas como captura, não como foto |
@@ -99,6 +99,12 @@ explícita (Royalty Free / Standard) antes de comprar.
 | Qualquer um | Encomendar modelagem/escaneamento profissional | orçamento | qualidade de configurador; custo alto |
 
 ## Alternativas propostas (não incorporadas — aguardam aprovação)
+
+Arquivos já preparados (recorte BiRefNet, WebP 1600×1000, fundo transparente) mas **não ligados à
+vitrine**: `products/new-balance-2002r/main.webp` e `products/nike-dunk-low-vermelho-cinza/main.webp`.
+Licença CC0 reconfirmada na API do Commons em 2026-11-23. Dados prontos (ProductCreate) em
+`docs/catalogo-definitivo.json` → `alternativas_aguardando_aprovacao`. New Balance 9060: nova busca em
+2026-11-23 (Openverse/Flickr, categorias do Commons) sem resultado utilizável.
 
 Sem foto utilizável para **Air Max 95 OG Neon** e **New Balance 9060 cinza** (buscados em
 Commons, Flickr via Openverse, Unsplash e Pexels em 2026-11-21/22). Fotos reais encontradas para

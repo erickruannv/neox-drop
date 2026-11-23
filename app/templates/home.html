@@ -63,7 +63,7 @@
 
     {% set products = launches["items"] if launches and launches["items"] else [] %}
     {% if products %}
-    <ul class="mt-6 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+    <ul class="mt-6 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 {{ 'lg:grid-cols-3' if products|length <= 3 else 'lg:grid-cols-4' }} lg:gap-6">
       {% for p in products %}
       <li>
         {{ product_card(p) }}
