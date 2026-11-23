@@ -3,7 +3,7 @@ import fixture from "../fixtures/home.json" with { type: "json" };
 
 // Teste REAL (sem mock): abre "Ver em 3D", carrega o modelo do Sketchfab na GPU, arrasta com
 // mouse/toque e confere giro só em Y. Precisa de rede. SHOTS=dir grava as capturas.
-const items = fixture.featured.items;
+const items = fixture.featured.items.filter((i) => i.model3dUrl); // só destaques com 3D aprovado
 const SHOTS = process.env.SHOTS;
 const save = async (buf, name) => SHOTS && (await import("node:fs")).writeFileSync(`${SHOTS}/${name}.png`, buf);
 
@@ -88,7 +88,7 @@ test("sem reduced-motion o modelo gira sozinho até o usuário interagir", async
 
 test("produto: galeria real e 'Ver em 3D' com o modelo real", async ({ page, isMobile }, info) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  const item = items.find((i) => i.galleryUrls.length > 1) ?? items[0];
+  const item = items[0];
   await page.goto(`/tenis/${item.slug}/`);
   await page.waitForTimeout(600);
   await save(await page.screenshot(), `${info.project.name}-produto`);

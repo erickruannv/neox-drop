@@ -15,7 +15,8 @@ Ficam só produtos com fotografia real, nítida e do modelo/colorway exato:
 |---|---|---|
 | Nike Air Max 90 Infrared | ✅ | foto CC BY 2.0 correta |
 | adidas Samba OG branco/preto/gum | ✅ | 3 fotos (CC0 + Unsplash) corretas |
-| Nike Air Max 95 preto/cinza/lima | ❌ retirado | sem foto licenciada da colorway |
+| Nike Air Max 95 Dark Army/Orange Blaze | ✅ destaque 1 | scan 3D fotogramétrico CC BY; imagens = capturas do scan (ver abaixo) |
+| Nike Air Max 95 OG Neon preto/cinza/lima | ❌ sem foto | nenhuma foto/scan com licença comercial da colorway; o Dark Army é a alternativa apresentada |
 | New Balance 9060 cinza | ❌ retirado | sem foto licenciada nem 3D |
 | Nike Dunk Low (panda) | ❌ não incluído | só fotos de mão segurando o par (Unsplash), não de produto |
 | Produtos fictícios (Volt Runner etc.) e ilustrações SVG | ❌ retirados | ilustrações; SVGs ficam no repo só para testes do admin |
@@ -27,11 +28,17 @@ Ficam só produtos com fotografia real, nítida e do modelo/colorway exato:
 | `products/nike-air-max-90-infrared/main.webp` | Air Max 90 Infrared | [Commons](https://commons.wikimedia.org/wiki/File:Nike_Air_Max_90_Infrared_(4805905007).jpg) | Christian H. | CC BY 2.0 (crédito obrigatório) | fundo removido (BiRefNet), WebP 1600×1000 |
 | `products/adidas-samba-og/main.webp` | Samba OG | [Commons](https://commons.wikimedia.org/wiki/File:Adidas_Samba_OG.jpg) | LeDroider | CC0 | fundo e suporte removidos, WebP |
 | `products/adidas-samba-og/lateral.webp` | Samba OG (lateral) | [Unsplash fIflxqqzBQY](https://unsplash.com/photos/a-white-and-black-adidas-sneakers-on-a-wooden-floor-fIflxqqzBQY) | Cris (@cris_23) | Licença Unsplash (uso comercial, sem atribuição obrigatória) | fundo removido, WebP |
+| `products/nike-air-max-95-dark-army/{lateral,frente34,medial,tras34}.webp` | Air Max 95 Dark Army/Orange Blaze | [Sketchfab c425a652…](https://sketchfab.com/3d-models/c425a652fc59427ba1fcef48ea174c92) | Andre Bond Sr. | CC BY 4.0 (crédito obrigatório) | **capturas do scan 3D** (Viewer API, fundo transparente), sombra removida, brilho +12%, WebP 1600×1000 — identificadas como captura, não como foto |
 | `products/adidas-samba-og/par.webp` | Samba OG (par 3/4) | [Unsplash kpnkWLoM3cE](https://unsplash.com/photos/a-pair-of-white-and-black-shoes-on-a-wooden-floor-kpnkWLoM3cE) | Cris (@cris_23) | Licença Unsplash | fundo removido, WebP |
 
 Crédito exibido no hero (foto) e na página do produto (fotos e 3D), via `attributes.imageCredit`,
 `imageCreditUrl`, `model3dCredit`, `model3dCreditUrl`. Recorte offline com `rembg 2.0.67`
 (`birefnet-general`) via `uv run --with` no scratchpad; nenhuma dependência no projeto.
+
+Rejeitadas (2026-11-22): Flickr chrishimself 4805905873/4805905383 (AM90 Infrared, CC BY, mas
+detalhes desfocados dentro da caixa); Flickr PaFFaS "New Balance 9060 burgunderrot" (PDM, cor
+errada e conta de fetiche de pés); Commons Ksharks2 Samba (CC BY-SA, dispensável: Samba já tem 3
+fotos). Busca feita no Openverse (Flickr + Commons, `license_type=commercial`).
 
 Rejeitadas por modelo/cor errados: Commons `Air Max 95.jpg` (outro Air Max), `Nike Air Max 95.png`
 (Footshop, colorway Grape), `Air max 90.JPG` (branco/preto); Unsplash "air max 95" (azul/amarelo),
@@ -39,25 +46,34 @@ Rejeitadas por modelo/cor errados: Commons `Air Max 95.jpg` (outro Air Max), `Ni
 
 ## 3D
 
-O hero e a página do produto abrem com a **foto**; o 3D carrega só ao clicar "Ver em 3D"
-(palco `partials/viewer3d.html` + `static/js/viewer3d.js`). Dois motores, ambos com giro só em Y:
+O hero e a página do produto abrem com a **imagem**; o 3D carrega só ao clicar "Ver em 3D"
+(palco `partials/viewer3d.html` + `static/js/viewer3d.js`), giro só em Y (camada de arraste própria
+sobre o embed; GLB futuro via Model Viewer com phi fixo).
 
-- **GLB próprio/licenciado → Model Viewer** (phi fixo, sem zoom/pan, luz `neutral`, nosso fundo,
-  sem interface externa). É o caminho de qualidade final assim que houver GLB com licença comercial.
-- **Embed Sketchfab** (Viewer API 1.12.1): usado hoje para AM90 e Samba. Limites: o plano gratuito
-  não permite esconder o logo/dica do player nem ajustar luz; o giro Y é nossa camada de arraste.
+**Escolhido (2026-11-22): um único modelo, fotorrealista.** Avaliado no Chromium com GPU, em
+vários ângulos, não só "carregou":
 
-| Modelo | Estado | Fonte | Licença |
-|---|---|---|---|
-| Air Max 90 Infrared | 3D real via embed | [Sketchfab c375a769…](https://sketchfab.com/3d-models/c375a769712e4ddebb2f48f1f12b99a2), alitvinenkoo13 | **Editorial** |
-| Samba OG B75806 | 3D real via embed | [Sketchfab 974e037f…](https://sketchfab.com/3d-models/974e037fd4424961b1928f7fa1e72ceb), trargus | **Editorial** |
-| Air Max 95 NDSTRKT | embed existe, produto fora da vitrine (sem foto) | [Sketchfab 41c2a1ed…](https://sketchfab.com/3d-models/41c2a1ed281542c58529fe5593c97012), trargus | **Editorial** |
-| New Balance 9060 cinza | **sem 3D** | nenhum gratuito; "9060r" do Sketchfab é um 1906R | — |
+| Modelo | Decisão | Fonte | Licença | Motivo |
+|---|---|---|---|---|
+| Nike Air Max 95 Dark Army/Orange Blaze | ✅ **em uso** (destaque 1) | [Sketchfab c425a652…](https://sketchfab.com/3d-models/c425a652fc59427ba1fcef48ea174c92), Andre Bond Sr. | CC BY 4.0 | fotogrametria; camurça, malha, costura e bolhas de ar com aparência de foto |
+| Nike Air Max 90 Essentials Olive | reserva | [Sketchfab feaf8296…](https://sketchfab.com/3d-models/feaf82967c5f44bd94aa774228d76d21), Andre Bond Sr. | CC BY 4.0 | fotorrealista (250 fotos, Reality Capture), mas sem foto da colorway |
+| Nike Air Max 90 preto/branco/vermelho | reserva | [Sketchfab ce4a4e58…](https://sketchfab.com/3d-models/ce4a4e5847b34cd6b4ed0ecf134f556d), Thomson | CC BY 4.0 | scan KIRI bom, 12k vértices; não é a Infrared branca |
+| Nike Air Max 90 (Raw) — link do pedido | ❌ | [Sketchfab fe4211e3…](https://sketchfab.com/3d-models/fe4211e3fb0d43eab4bd29a6b1471243) | CC BY | scan cru: chão e suporte junto, sola derretida |
+| NIKE "Our first complete 3D scan" — link do pedido | ❌ | [Sketchfab ef0609eb…](https://sketchfab.com/3d-models/ef0609ebc279443bad0c07694c6790b2) | CC BY | bom scan, mas é um Air Force 1 Shadow (fora dos modelos) |
+| innerscene "running sneaker" — link do pedido | ❌ | [innerscene c7a5a7eb](https://www.innerscene.com/tools/library/3d-parts/running-sneaker-c7a5a7eb) | CC0 (GLB 11,9 MB grátis) | tênis genérico modelado (não scan), sem marca: mostrá-lo seria produto inventado |
+| Air Max 95 Animal / Air Max 95 David4K | ❌ | Sketchfab 638fc15f… / b2589d82… | CC BY | colorway animal; o outro é malha branca sem textura |
+| Old Adidas Samba (scan) | ❌ | Sketchfab b23ee595… | CC BY | Samba preto e gasto, fundo de ambiente junto |
+| AM90 c375a769… e Samba 974e037f… (usados antes) | ❌ **removidos** | Sketchfab | **Editorial** | visual de jogo e licença não comercial |
+| New Balance 9060 | ❌ nenhum | busca Sketchfab | — | nenhum 9060 com licença livre |
 
-**Risco a decidir:** a licença Editorial do Sketchfab proíbe uso comercial/promocional dos
-arquivos. O embed é exibido pelo player do próprio Sketchfab (não baixamos nada), mas uma loja
-que vende os pares é uso comercial; recomendamos substituir por GLB com licença comercial ou
-escaneamento próprio antes de publicar.
+Observações:
+- A descrição do AM95 diz "Purchase on Sketchfab only", mas a página publica licença **CC BY** e
+  download liberado. Usamos só o **embed** oficial com crédito; antes de baixar/hospedar o GLB,
+  confirmar com o autor.
+- Plano gratuito do Sketchfab: título, logo e dica "click & hold" do player continuam visíveis
+  (esconder exige Pro). Sem rotação nativa: o iframe é `inert`, o giro é nosso, só em Y.
+- Celular: na emulação headless as texturas HD saem salpicadas (o embed puro também); conferir em
+  aparelho real.
 
 ### Opções para aprovação (nada foi comprado)
 
