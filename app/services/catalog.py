@@ -250,7 +250,7 @@ logger = logging.getLogger("neox.catalog")
 async def invalidate_product(settings, product_id: str):
     try:
         async with redis_client(settings) as redis:
-            await redis.delete(f"cache:product:{product_id}")
+            await redis.delete(f"{settings.redis_key_prefix}cache:product:{product_id}")
     except Exception:
         logger.warning("event=cache_invalidation_unavailable")
 
@@ -260,7 +260,7 @@ async def product_detail(collection, slug: str, settings):
     probe = await collection.find_one(query, {"_id": 1, "active": 1, "updatedAt": 1})
     if not probe or probe.get("active") is not True:
         raise ApiFault(404, "PRODUCT_NOT_FOUND", "Produto não encontrado.")
-    key = f"cache:product:{probe['_id']}"
+    key = f"{settings.redis_key_prefix}cache:product:{probe['_id']}"
     try:
         async with redis_client(settings) as redis:
             cached = await redis.get(key)

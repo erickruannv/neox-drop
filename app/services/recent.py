@@ -29,7 +29,7 @@ async def register_visit(collection, product_id: str, visitor: str, settings):
         async with redis_client(settings) as redis:
             await redis.eval(
                 VISIT_SCRIPT,
-                keys=[f"recent:visitor:{visitor}"],
+                keys=[f"{settings.redis_key_prefix}recent:visitor:{visitor}"],
                 args=[str(identifier), str(settings.recent_ttl_seconds)],
             )
     except Exception:
@@ -41,7 +41,9 @@ async def recent_ids(visitor: str | None, settings) -> list[str]:
         return []
     try:
         async with redis_client(settings) as redis:
-            values = await redis.lrange(f"recent:visitor:{visitor}", 0, 4)
+            values = await redis.lrange(
+                f"{settings.redis_key_prefix}recent:visitor:{visitor}", 0, 4
+            )
         return list(
             dict.fromkeys(
                 str(ObjectId(value))

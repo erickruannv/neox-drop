@@ -2,13 +2,16 @@ from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, MagicMock
 
 import httpx
+import pytest
 from starlette.responses import Response
 
 from app.core.security import issue_csrf
 
 
-async def test_visit_atomic_script_and_safe_visitor_cookie(catalog_app, monkeypatch):
+@pytest.mark.parametrize("prefix", ["", "NEOX QA:"])
+async def test_visit_atomic_script_and_safe_visitor_cookie(catalog_app, monkeypatch, prefix):
     app, collection, doc, _ = catalog_app
+    app.state.settings = app.state.settings.model_copy(update={"redis_key_prefix": prefix})
     redis = AsyncMock()
 
     @asynccontextmanager
@@ -35,14 +38,16 @@ async def test_visit_atomic_script_and_safe_visitor_cookie(catalog_app, monkeypa
         assert "HttpOnly" in response.headers["set-cookie"]
         call = redis.eval.call_args
         assert all(command in call.args[0] for command in ("LREM", "LPUSH", "LTRIM", "EXPIRE"))
-        assert call.kwargs["keys"] == [f"recent:visitor:{visitor}"]
+        assert call.kwargs["keys"] == [f"{prefix}recent:visitor:{visitor}"]
         assert call.kwargs["args"] == [str(doc["_id"]), "604800"]
 
 
+@pytest.mark.parametrize("prefix", ["", "NEOX QA:"])
 async def test_recent_get_resolves_current_active_products_without_writing(
-    catalog_app, monkeypatch
+    catalog_app, monkeypatch, prefix
 ):
     app, collection, doc, cursor = catalog_app
+    app.state.settings = app.state.settings.model_copy(update={"redis_key_prefix": prefix})
     redis = AsyncMock()
     redis.lrange.return_value = [str(doc["_id"]), "bad", str(doc["_id"])]
     cursor.to_list.return_value = [doc]
@@ -68,6 +73,7 @@ async def test_recent_get_resolves_current_active_products_without_writing(
         assert response.status_code == 200
         assert [item["id"] for item in response.json()["items"]] == [str(doc["_id"])]
         assert "sizes" not in response.json()["items"][0]
+        redis.lrange.assert_awaited_once_with(f"{prefix}recent:visitor:{'a' * 32}", 0, 4)
         redis.eval.assert_not_awaited()
         redis.expire.assert_not_awaited()
         redis.lrange.side_effect = RuntimeError("secret://redis")

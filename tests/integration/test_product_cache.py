@@ -11,6 +11,7 @@ async def test_cache_revalidates_version_and_survives_invalidation_failure(
     catalog_app, monkeypatch
 ):
     app, collection, doc, _ = catalog_app
+    app.state.settings = app.state.settings.model_copy(update={"redis_key_prefix": "NEOX QA:"})
     payloads = {}
     cache = AsyncMock()
     cache.get.side_effect = lambda key: payloads.get(key)
@@ -33,6 +34,7 @@ async def test_cache_revalidates_version_and_survives_invalidation_failure(
         first = await client.get(f"/api/products/{doc['slug']}")
         assert first.status_code == 200
         assert payloads, "Cache must be populated"
+        assert list(payloads) == [f"NEOX QA:cache:product:{doc['_id']}"]
         calls = collection.find_one.await_count
         second = await client.get(f"/api/products/{doc['slug']}")
         assert second.json() == first.json()
@@ -47,6 +49,7 @@ async def test_cache_revalidates_version_and_survives_invalidation_failure(
         collection.find_one_and_update.return_value = changed
         await update_product(collection, str(doc["_id"]), {"priceCents": 20000}, app.state.settings)
         cache.delete.assert_awaited_once()
+        cache.delete.assert_awaited_with(f"NEOX QA:cache:product:{doc['_id']}")
         collection.find_one.return_value = changed
         third = await client.get(f"/api/products/{doc['slug']}")
         assert third.json()["priceCents"] == 20000

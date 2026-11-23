@@ -31,7 +31,7 @@ anteriores foram mantidas; a demonstração antiga :8001 foi encerrada. Não exe
 |---|---|---|
 | Supabase PostgreSQL/Auth | Identidade, perfil admin/RLS e contato WhatsApp privado | URL/Publishable configurados; admin real validado: login, painel, renovação, logout e RLS/revogação; segunda conta pendente |
 | MongoDB Atlas | Produtos, preço em centavos e estoque autoritativos | Cluster0, papel neox_drop_test@admin restrito ao banco neox_drop_test; products strict/error, seis índices adicionais; CRUD e persistência reais comprovados com um registro fictício, agora inativo |
-| Upstash Redis | Até 5 recentes, TTL 7 dias; cache 300s, sem governar preço | Upstash real validado: gravação/leitura, ordem, cinco únicos, TTL e expiração; demonstração UI positiva depende de produto ativo |
+| Upstash Redis | Até 5 recentes, TTL 7 dias; cache 300s, sem governar preço | Upstash real validado: gravação/leitura, ordem, cinco únicos, TTL e expiração; home/recentes e cache comprovados no FastAPI real durante ativação temporária QA |
 
 FastAPI principal :8000 utiliza Supabase e Atlas reais no mesmo processo. Cadastro pela UI,
 edição pela API, catálogo ativo, persistência após reiniciar e desativação foram comprovados.
@@ -41,17 +41,21 @@ continua bloqueado. Health retorna ok com os três serviços disponíveis. Não 
 Mongo/Supabase nem reaplicar a migration manual já executada.
 
 **Supabase + MongoDB: fluxo administrativo principal concluído com serviços reais.**
-Para demonstrar o novo frontend com dados, falta autorização específica para ativar e associar
-a mídia aprovada ao único registro de QA existente; nenhum produto foi alterado nesta integração.
-Pendência secundária: a segunda
-conta recebe invalid_credentials no Auth; a negação após um login válido dessa conta ainda
-não foi comprovada. Redis real e TTL foram validados; histórico visível com produto ativo e
-checkout WhatsApp ainda precisam de demonstração integrada. WhatsApp requer definir o número
-autorizado em `store_settings.whatsapp_e164_digits` e configurar `SUPABASE_SECRET_KEY` só
-no .env privado; nenhuma mensagem é enviada automaticamente.
+O único QA foi temporariamente atualizado/ativado com autorização: home/destaque, catálogo,
+detalhe com mídia e créditos, carrinho, 3D Sketchfab e recentes visíveis na home passaram com
+os três serviços reais. Ao final foi desativado; o documento e a mídia aprovada foram preservados.
+Preço/estoque fictícios e demais produtos não foram alterados. Chaves próprias de QA removidas.
+Pendência secundária: a segunda conta recebe invalid_credentials no Auth; a negação após login
+válido dessa conta ainda não foi comprovada. Checkout real chegou ao bloqueio explícito
+STORE_WHATSAPP_NOT_CONFIGURED, sem link/envio: definir número autorizado em
+`store_settings.whatsapp_e164_digits` e configurar `SUPABASE_SECRET_KEY` só no .env privado.
+Para produtos definitivos, escolher modelos/colorways, SKUs, preços/estoques verdadeiros e mídia
+licenciada. O painel cadastra; créditos em attributes são aceitos pela API, sem campos próprios
+no formulário atual. Não reaproveitar dados fictícios de QA como oferta real.
 
 O .env privado foi transferido para a pasta principal, sem sobrescrever arquivo existente.
 A origem pública `https://sketchfab.com` foi incluída em MEDIA_ALLOWED_ORIGINS para o embed aprovado.
+REDIS_KEY_PREFIX="NEOX QA:" isola as chaves locais; vazio mantém as chaves padrão.
 Credenciais ficam apenas no .env privado, conforme [.env.example](.env.example). Não enviar
 senhas/chaves/URIs no chat, vídeo ou Git. Upstash Free/REST URL/token já configurados localmente.
 Checkout requer contato autorizado em store_settings e SUPABASE_SECRET_KEY só no backend;

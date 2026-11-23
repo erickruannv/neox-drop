@@ -809,3 +809,42 @@ escrita de produto foi feita nesta integração. Detalhe positivo/3D e recentes 
 principal aguardam essa autorização. Checkout positivo externo também aguarda número na tabela
 store_settings e chave backend privada; não houve SQL de escrita, promoção ou envio WhatsApp.
 Conta não-admin continua invalid_credentials, sem reteste. Sem push ou deploy.
+
+
+## Ativação temporária QA e jornada real na main — 22/11/2026
+
+Usuário autorizou atualizar/ativar somente NEOX-QA-20261122-A01, id
+6b03966eeedeab94c79a56ed. Atualizado via PATCH autenticado com UUID admin aprovado, sem INSERT:
+nome TESTE ACADÊMICO — Air Max 95 — NÃO À VENDA, marca Nike/categoria Classics, colorway Dark
+Army/Orange Blaze, imagens/galeria, créditos CC BY 4.0 e embed c425a652fc59427ba1fcef48ea174c92
+exatamente da curadoria aprovada. Preço 17000 centavos e tamanhos/estoques fictícios preservados.
+
+Para respeitar o limite anterior de chaves de teste NEOX QA, acrescentado REDIS_KEY_PREFIX
+opcional, vazio por padrão, aplicado a todas as leituras/escritas/invalidações de cache e recentes.
+.env main usa NEOX QA:. Testes falharam antes do ajuste, passaram depois com prefixo e sem
+prefixo; API/contratos, frontend e dependências inalterados. Revisão independente sem bloqueios.
+
+FastAPI main :8000 reiniciado, sem mocks/interceptação. Chromium com GPU e rede real:
+21 verificações UI PASS — destaque/creditos na home; catálogo filtrado nike/classics; detalhe
+200; WebP carregada; visita automática 204; GET recentes encontra o mesmo id; segunda visita
+mantém um único item; carrinho 1→2→1, subtotais R$170→R$340→R$170; checkout chega a 503 com
+STORE_WHATSAPP_NOT_CONFIGURED, sem href/link wa.me e sem requisição/mensagem ao WhatsApp;
+Sketchfab pronto no detalhe, arraste horizontal muda o ângulo e vertical não o muda; recentes
+visíveis na home com o cookie da mesma visita. Não foi teste em celular físico.
+
+Leitura Redis pelo adaptador real, em cliente independente: lista com exatamente o id QA,
+TTL >0 e <=604800; cache com payload do mesmo id, TTL >0 e <=300. Snapshot dos demais produtos
+antes/depois idêntico. Foram 17 verificações de operação/armazenamento/limpeza PASS, além das
+21 UI. A primeira execução parou por seletor ad-hoc incorreto do diálogo 3D; após corrigir só
+o roteiro, a execução completa passou. Inspeção visual da captura confirmou o modelo renderizado.
+
+Finalmente DELETE da API desativou o QA: documento preservado active=false; detalhe público
+404 e recentes vazios mesmo com a chave ainda contendo o id. Chaves QA desta execução removidas,
+logout 204; nenhum outro produto ou chave preexistente alterado. Não houve SQL ou mudanças Auth.
+Capturas públicas, sem cookies/segredos: /tmp/neox-main-home-qa.png,
+/tmp/neox-main-detalhe-qa.png e /tmp/neox-main-3d-qa.png. Relatório sanitizado temporário:
+/tmp/neox-qa-activation-result.json; nenhum segredo registrado nos artefatos.
+
+Regressão: pytest 183 passed/6 skipped; Playwright UI com fixtures 122 passed/4 skipped; build
+vendor/Tailwind e ruff check passaram. WhatsApp positivo externo continua pendente de número em
+store_settings e chave privada backend. Segunda conta inválida não foi retestada. Sem push/deploy.

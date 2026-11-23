@@ -7,7 +7,7 @@ Não filmar .env, senhas, JWTs, chaves, URI Mongo ou painéis que revelem tokens
 | Tempo | Mostrar | Evidência obrigatória |
 |---|---|---|
 | 0:00–0:45 | Objetivo acadêmico e arquitetura FastAPI/Jinja2 | Python3.13, Tailwindv4/JS; três responsabilidades de bancos distintas |
-| 0:45–1:45 | Login admin pelo formulário | Supabase Auth real, cookie HttpOnly e perfil admin ativo sob RLS; segunda conta recebe acesso negado |
+| 0:45–1:45 | Login admin pelo formulário | Supabase Auth real, cookie HttpOnly e perfil admin ativo sob RLS; negação da segunda conta apenas após login válido (ainda pendente) |
 | 1:45–3:15 | Cadastrar tênis identificado TESTE ACADÊMICO | Preço/estoque fictícios e centavos inteiros; documento realmente presente em neox_drop_test.products |
 | 3:15–4:00 | Catálogo/detalhe e persistência | Produto aparece sem seed; reiniciar FastAPI e comprovar o mesmo documento/ID persistido |
 | 4:00–5:15 | Carrinho e checkout | Selecionar tamanho, alterar quantidade/subtotal; mudar preço via API admin e mostrar revalidação no checkout |
@@ -24,14 +24,16 @@ Não filmar .env, senhas, JWTs, chaves, URI Mongo ou painéis que revelem tokens
 
 ## Antes de gravar
 
-1. Confirmar projeto de teste, postflight e perfil admin autorizado, Atlas restrito e coleção/índices.
-2. Configurar Redis Free e contato autorizado para checkout; guardar credenciais apenas no .env.
-3. Executar a suíte real autorizada e o runner seguro do README. Não usar testes mock como prova.
+1. Usar os projetos de teste e o perfil já aprovados; não reaplicar migrations ou repetir o postflight.
+2. Finalizar contato autorizado do WhatsApp e chave privada backend; Redis real já validado.
+3. Usar as evidências reais registradas; novas escritas/ativações QA precisam da autorização correspondente.
 4. Usar apenas produtos QA explicitamente fictícios. Preservar documentos inativos como evidência.
 5. Abrir app.main:app, não a vitrine de fixtures :8001, para a prova de persistência real.
 6. Manter um worker; não fazer push/deploy ou exibir arquivos secretos durante a gravação.
 
-Se houver bloqueio externo, apresentar como pendência: atualmente o postflight/logins, CRUD e
-Redis reais ainda aguardam acessos/configuração/autorização. A leitura Auth/negação anônima e
-ping Atlas já têm evidência real, mas não substituem a jornada acima. Fotos/3D da vitrine e a
-visualização por fixtures não comprovam estoque. A tarefa dos quatro modelos 3D fica separada.
+Evidências atuais: administrador real/RLS, CRUD/persistência Atlas, carrinho, 3D aprovado e
+recentes Redis visíveis foram comprovados na main :8000. O único QA foi desativado ao final da
+ativação temporária autorizada; preparar a autorização dos registros da gravação antes de filmar.
+Faltam checkout WhatsApp positivo (número/chave privada), segunda conta com credenciais válidas
+e seleção dos dados definitivos. Não apresentar esses itens como concluídos. Fotos/3D não
+comprovam estoque real. Os quatro modelos 3D completos continuam fora desta validação.

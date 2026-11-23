@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     upstash_redis_rest_token: SecretStr | None = None
     request_timeout_seconds: float = Field(default=3.0, ge=0.001, le=30)
     redis_timeout_seconds: float = Field(default=1.0, gt=0, le=5)
+    redis_key_prefix: str = ""
     max_request_bytes: int = Field(default=65536, gt=0, le=1048576)
     rate_limit_requests: int = Field(default=60, gt=0)
     rate_limit_window_seconds: int = Field(default=60, gt=0)
