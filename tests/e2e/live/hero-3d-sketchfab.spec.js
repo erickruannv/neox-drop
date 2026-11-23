@@ -118,7 +118,9 @@ test("catálogo: só produtos com foto real", async ({ page }, info) => {
 });
 
 test("FastAPI integrado: navegação, mídia, CSP e carrinho sem liberar admin/checkout", async ({ page }) => {
-  test.skip(!process.env.NEOX_FASTAPI_URL, "Requer vitrine FastAPI explícita");
+  // Modo vitrine somente leitura (faixa de demonstração, checkout 403). O app completo com
+  // checkout real é coberto por delivery.spec.js.
+  test.skip(!process.env.NEOX_FASTAPI_URL || process.env.NEOX_READONLY_SHOWCASE !== "1", "Requer vitrine FastAPI somente leitura");
   await page.addInitScript(() => {
     window.cspViolations = [];
     document.addEventListener("securitypolicyviolation", (e) => window.cspViolations.push(e.violatedDirective));

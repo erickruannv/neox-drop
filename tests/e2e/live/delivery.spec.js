@@ -9,10 +9,11 @@ test('destaques reais excluem AM90 e preservam AM95 e o catálogo', async ({ pag
   const items = (await (await page.request.get('/api/featured')).json()).items;
   expect(items.some(p => p.sku === 'NEOX-AM90-INFRARED')).toBe(false);
   expect(items.some(p => p.sku === 'NEOX-AM95-DARKARMY')).toBe(true);
+  expect(items.map(p => p.sku)).toEqual(['NEOX-DEMO-206', 'NEOX-AM95-DARKARMY', 'NEOX-SAMBA-OG-BP', 'NEOX-DEMO-208', 'NEOX-DEMO-209']);
   await page.goto('/');
   await expect(page.locator('#hero h1')).toHaveText(items[0].name);
   await expect(page.locator('#hero [data-3d-toggle]')).toBeHidden();
-  expect(await page.locator('#hero img, #colecoes img').evaluateAll(images => images.every(i => !i.src.includes('nike-air-max-90-infrared')))).toBe(true);
+  expect(await page.locator('main img').evaluateAll(images => images.every(i => !i.src.includes('nike-air-max-90-infrared')))).toBe(true);
   expect((await page.request.get('/api/products/nike-air-max-90-infrared')).status()).toBe(200);
 });
 
@@ -26,7 +27,7 @@ test('entrega integrada: catálogo Atlas, navegação, foto/3D, carrinho, WhatsA
     document.addEventListener('securitypolicyviolation', e => window.cspViolations.push(e.violatedDirective));
   });
   const products = (await (await page.request.get('/api/products?limit=24')).json()).items;
-  expect(products.length).toBeGreaterThanOrEqual(3);
+  expect(products.length).toBe(9);
   const featured = (await (await page.request.get('/api/featured')).json()).items;
   const am95 = featured.find(p => p.sku === 'NEOX-AM95-DARKARMY');
   const am90 = products.find(p => p.sku === 'NEOX-AM90-INFRARED');
@@ -40,7 +41,8 @@ test('entrega integrada: catálogo Atlas, navegação, foto/3D, carrinho, WhatsA
   await active('Início');
   await expect(page.locator('#hero h1')).toHaveText(featured[0].name);
   await expect(page.locator('[data-sketchfab-frame]')).toHaveCount(0);
-  for (const product of products) await expect(page.locator('section[aria-labelledby="lancamentos-titulo"]')).toContainText(product.name);
+  for (const product of products.filter(p => p.sku !== 'NEOX-AM90-INFRARED').slice(0, 6)) await expect(page.locator('section[aria-labelledby="lancamentos-titulo"]')).toContainText(product.name);
+  await expect(page.locator('main')).not.toContainText(am90.name);
   const go = async name => {
     if (isMobile) await page.locator('header').getByLabel('Menu', { exact: true }).click();
     await nav.getByRole('link', { name, exact: true }).click();
@@ -82,7 +84,8 @@ test('entrega integrada: catálogo Atlas, navegação, foto/3D, carrinho, WhatsA
   await pad.focus();
   await page.keyboard.press('ArrowRight');
   await expect(pad).not.toHaveAttribute('aria-valuenow', yaw);
-  await expect(page.locator('[data-3d-demo]')).toContainText('Andre');
+  await expect(page.locator('[data-gallery]')).toContainText('Andre Bond Sr.', { timeout: 5000 });
+  await expect(page.locator('[data-gallery]')).toContainText('CC BY 4.0', { timeout: 5000 });
   await page.waitForTimeout(2500); // Aguarda as texturas finais antes da inspeção visual.
   await page.screenshot({ path: info.outputPath('demonstracao-3d.png') });
   await page.locator('[data-3d-demo] [data-3d-toggle]').click();
@@ -126,6 +129,10 @@ test('entrega integrada: catálogo Atlas, navegação, foto/3D, carrinho, WhatsA
   expect(visitors).toHaveLength(1);
   await test.info().attach('visitor-qa', { body: visitors[0].value, contentType: 'text/plain' });
   await page.keyboard.press('Escape');
+  await page.goto('/');
+  await expect(page.locator('main')).not.toContainText(am90.name);
+  expect(await page.locator('main img').evaluateAll(images => images.every(i => !i.src.includes('nike-air-max-90-infrared')))).toBe(true);
+  expect((await (await page.request.get('/api/recent')).json()).items[0].id).toBe(am90.id);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(await page.evaluate(() => window.cspViolations)).toEqual([]);
 

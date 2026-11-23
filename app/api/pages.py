@@ -16,6 +16,7 @@ from app.services.recent import recent_ids, resolve_recent
 router = APIRouter(include_in_schema=False)
 templates = Jinja2Templates(directory=Path(__file__).resolve().parents[1] / "templates")
 Collection = Annotated[object, Depends(products_collection)]
+HOME_EXCLUDED_SKUS = ("NEOX-AM90-INFRARED",)
 
 
 def render(request: Request, response: Response, name: str, *, status_code=200, **context):
@@ -65,13 +66,20 @@ def unavailable(request: Request):
 @router.get("/")
 async def home(request: Request, response: Response, collection: Collection):
     identifiers = await recent_ids(request.cookies.get("neox_visitor"), request.app.state.settings)
+    highlights = await featured(collection)
+    recent = await resolve_recent(collection, identifiers) if identifiers else {"items": []}
+    # Curadoria exclusiva da home: catálogo, detalhe e histórico Redis continuam completos.
+    for group in (highlights, recent):
+        group["items"] = [p for p in group["items"] if p["sku"] not in HOME_EXCLUDED_SKUS]
     return render(
         request,
         response,
         "home.html",
-        featured=await featured(collection),
-        launches=await list_products(collection, PublicFilters(limit=6), public=True),
-        recent=await resolve_recent(collection, identifiers) if identifiers else {"items": []},
+        featured=highlights,
+        launches=await list_products(
+            collection, PublicFilters(limit=6), public=True, excluded_skus=HOME_EXCLUDED_SKUS
+        ),
+        recent=recent,
     )
 
 

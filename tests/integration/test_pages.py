@@ -79,6 +79,33 @@ async def test_home_can_render_six_launches(catalog_app, page_templates):
         assert home.text == "6"
 
 
+async def test_home_excludes_am90_from_launches_and_recent_only(
+    catalog_app, page_templates, monkeypatch
+):
+    from unittest.mock import AsyncMock
+
+    app, collection, doc, cursor = catalog_app
+    cursor.to_list.return_value = [doc]
+    monkeypatch.setattr("app.api.pages.recent_ids", AsyncMock(return_value=[str(doc["_id"])]))
+    monkeypatch.setattr(
+        "app.api.pages.resolve_recent",
+        AsyncMock(return_value={"items": [{"sku": doc["sku"]}, {"sku": "NEOX-AM90-INFRARED"}]}),
+    )
+    templates.env.loader.mapping["home.html"] = (
+        '{{ recent["items"]|map(attribute="sku")|join(",") }}'
+    )
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        home = await client.get("/")
+        assert home.status_code == 200
+        assert home.text == doc["sku"]
+        assert collection.find.call_args_list[1].args[0]["sku"] == {"$nin": ["NEOX-AM90-INFRARED"]}
+        assert collection.count_documents.call_args.args[0]["sku"] == {
+            "$nin": ["NEOX-AM90-INFRARED"]
+        }
+        assert (await client.get("/api/products")).status_code == 200
+        assert "sku" not in collection.find.call_args.args[0]
+
+
 async def test_admin_html_requires_auth_before_mongodb(page_templates):
     app = create_app(Settings(_env_file=None, cookie_secret="local-test-" * 8))
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:

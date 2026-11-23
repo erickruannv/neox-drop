@@ -1,5 +1,5 @@
 {
-  "_leia": "Estado real: seis produtos ativos no MongoDB de teste; destaques AM95 Dark Army e Samba. AM90 Infrared continua ativo, fora dos destaques. Fonte: mongo/catalogo-academico.json. Os INSERTs 208/209/210 e qualquer alteração adicional de destaque dependem de aprovação específica. Fotos licenciadas não comprovam cadastro nem disponibilidade. Preços e estoques acadêmicos fictícios. Não executar upsert nem sobrescrever registros.",
+  "_leia": "Nove produtos acadêmicos ativos no MongoDB de teste, cadastrados com autorização específica em23/11/2026. Cinco destaques: Dunk, AM95, Samba, Gazelle, Cortez. AM90 permanece ativo no catálogo e é excluído de todo o conteúdo da home pelo loader FastAPI. Fonte: mongo/catalogo-academico.json. Preços e estoques fictícios. Não repetir INSERT, upsert ou sobrescrever produtos.",
   "aprovados": [
     {
       "sku": "NEOX-AM95-DARKARMY",
@@ -239,7 +239,13 @@
           "sizeBR": 43,
           "stock": 2
         }
-      ]
+      ],
+      "featured": {
+        "enabled": true,
+        "order": 1,
+        "backgroundHex": "#24272B",
+        "accentHex": "#FF4A4F"
+      }
     },
     {
       "sku": "NEOX-DEMO-207",
@@ -286,6 +292,156 @@
           "stock": 2
         }
       ]
+    },
+    {
+      "sku": "NEOX-DEMO-208",
+      "slug": "adidas-gazelle-indoor-azul",
+      "name": "adidas Gazelle Indoor",
+      "brand": "adidas",
+      "category": "Classics",
+      "priceCents": 64990,
+      "colorName": "Azul/Branco/Gum",
+      "description": "Camurça azul com as três listras em couro claro, letreiro dourado e sola de borracha translúcida cor de mel. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
+      "attributes": {
+        "imageCredit": "Foto: LeDroider, CC0, fundo removido",
+        "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Adidas_Gazelle_Indoor.jpg"
+      },
+      "featured": {
+        "enabled": true,
+        "order": 4,
+        "backgroundHex": "#0F2340",
+        "accentHex": "#5AA2FF"
+      },
+      "mainImageUrl": "/static/images/products/adidas-gazelle-indoor-azul/main.webp",
+      "galleryUrls": [
+        "/static/images/products/adidas-gazelle-indoor-azul/main.webp"
+      ],
+      "currency": "BRL",
+      "active": true,
+      "sizes": [
+        {
+          "sizeBR": 38,
+          "stock": 3
+        },
+        {
+          "sizeBR": 39,
+          "stock": 4
+        },
+        {
+          "sizeBR": 40,
+          "stock": 5
+        },
+        {
+          "sizeBR": 41,
+          "stock": 5
+        },
+        {
+          "sizeBR": 42,
+          "stock": 4
+        },
+        {
+          "sizeBR": 43,
+          "stock": 2
+        }
+      ]
+    },
+    {
+      "sku": "NEOX-DEMO-209",
+      "slug": "nike-cortez-branco-vermelho",
+      "name": "Nike Cortez",
+      "brand": "Nike",
+      "category": "Classics",
+      "priceCents": 54990,
+      "colorName": "Branco/Vermelho/Azul",
+      "description": "Couro branco com Swoosh vermelho e entressola com faixa azul. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
+      "attributes": {
+        "imageCredit": "Foto: LeDroider, CC0, fundo removido",
+        "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Nike_Cortez.jpg"
+      },
+      "featured": {
+        "enabled": true,
+        "order": 5,
+        "backgroundHex": "#1B2433",
+        "accentHex": "#FF4D5E"
+      },
+      "mainImageUrl": "/static/images/products/nike-cortez-branco-vermelho/main.webp",
+      "galleryUrls": [
+        "/static/images/products/nike-cortez-branco-vermelho/main.webp"
+      ],
+      "currency": "BRL",
+      "active": true,
+      "sizes": [
+        {
+          "sizeBR": 38,
+          "stock": 3
+        },
+        {
+          "sizeBR": 39,
+          "stock": 4
+        },
+        {
+          "sizeBR": 40,
+          "stock": 5
+        },
+        {
+          "sizeBR": 41,
+          "stock": 5
+        },
+        {
+          "sizeBR": 42,
+          "stock": 4
+        },
+        {
+          "sizeBR": 43,
+          "stock": 2
+        }
+      ]
+    },
+    {
+      "sku": "NEOX-DEMO-210",
+      "slug": "asics-gel-1130-branco-dourado",
+      "name": "ASICS GEL-1130",
+      "brand": "ASICS",
+      "category": "Performance",
+      "priceCents": 74990,
+      "colorName": "Branco/Dourado/Prata",
+      "description": "Malha branca com sobreposições prateadas e douradas, listras pretas e entressola creme. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
+      "attributes": {
+        "imageCredit": "Foto: LeDroider, CC0, fundo removido",
+        "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Asics_Gel-1130.jpg"
+      },
+      "mainImageUrl": "/static/images/products/asics-gel-1130-branco-dourado/main.webp",
+      "galleryUrls": [
+        "/static/images/products/asics-gel-1130-branco-dourado/main.webp"
+      ],
+      "currency": "BRL",
+      "active": true,
+      "sizes": [
+        {
+          "sizeBR": 38,
+          "stock": 3
+        },
+        {
+          "sizeBR": 39,
+          "stock": 4
+        },
+        {
+          "sizeBR": 40,
+          "stock": 5
+        },
+        {
+          "sizeBR": 41,
+          "stock": 5
+        },
+        {
+          "sizeBR": 42,
+          "stock": 4
+        },
+        {
+          "sizeBR": 43,
+          "stock": 2
+        }
+      ]
     }
   ],
   "pendente_sem_midia": [
@@ -295,24 +451,9 @@
       "motivo": "sem foto ou 3D com licença utilizável (Commons, Openverse/Flickr, Unsplash, Pexels; rechecado em 2026-11-23). Alternativas: New Balance 2002R ou New Balance 574 cinza."
     }
   ],
-  "mudancas_pedidas_nos_ativos": [
-    {
-      "slug": "nike-air-max-90-infrared",
-      "campo": "featured.order",
-      "de": 2,
-      "para": 1,
-      "motivo": "responsável pediu o Air Max 90 Infrared como primeiro destaque (2026-11-23)"
-    },
-    {
-      "slug": "nike-air-max-95-dark-army",
-      "campo": "featured.order",
-      "de": 1,
-      "para": 2,
-      "motivo": "cede a posição 1; 3D continua no slide e na página"
-    }
-  ],
+  "mudancas_pedidas_nos_ativos": [],
   "cadastro_pedido_2026_11_23": {
-    "_leia": "PROPOSTA PENDENTE DE APROVAÇÃO ESPECÍFICA: inserir somente 208/209/210. Nenhum desses três foi cadastrado. Alterações propostas a produtos existentes NÃO estão autorizadas. O resultado esperado abaixo é uma projeção, não o estado do banco.",
+    "_leia": "CADASTROS EXECUTADOS com autorização específica: 208/209/210. Campo featured do Dunk configurado conforme aprovação. Este bloco conserva os payloads históricos, NÃO é fila de INSERTs pendentes. Não repetir gravações.",
     "inserir": [
       {
         "sku": "NEOX-DEMO-208",
@@ -467,14 +608,15 @@
     ],
     "alterar_ativos": [],
     "ordem_final_destaques": [
-      "nike-air-max-95-dark-army (2, já ativo)",
-      "adidas-samba-og (3, já ativo)",
-      "adidas-gazelle-indoor-azul (4, somente se INSERT aprovado)",
-      "nike-cortez-branco-vermelho (5, somente se INSERT aprovado)"
+      "nike-dunk-low-vermelho-cinza (1)",
+      "nike-air-max-95-dark-army (2)",
+      "adidas-samba-og (3)",
+      "adidas-gazelle-indoor-azul (4)",
+      "nike-cortez-branco-vermelho (5)"
     ],
     "resultado_esperado": {
       "ativos": 9,
-      "destaques": 4,
+      "destaques": 5,
       "por_categoria": {
         "Street": 3,
         "Performance": 2,
@@ -490,20 +632,22 @@
     "ja_gravados_pelo_codex": [
       "NEOX-DEMO-205",
       "NEOX-DEMO-206",
-      "NEOX-DEMO-207"
+      "NEOX-DEMO-207",
+      "NEOX-DEMO-208",
+      "NEOX-DEMO-209",
+      "NEOX-DEMO-210"
     ],
-    "para_o_codex_reconciliar": [
-      "tests/integration/test_pages.py::test_integrated_home_shows_approved_collections_and_keeps_photo_credits espera 'Andre Bond Sr.'/'CC BY 4.0' na home; a imagem do AM95 saiu do banner Street (agora Dunk Low) e o crédito da home lista Dunk, Gazelle e AM90.",
-      "tests/integration/test_showcase.py::test_fastapi_showcase_keeps_curated_media_and_contracts_without_remote_writes espera o conjunto antigo de destaques das fixtures (com AM95); fixtures agora: AM90, Gazelle Indoor, Samba, Dunk Low, Cortez.",
-      "tests/e2e/live/delivery.spec.js (opt-in) exige AM95 no carrossel com 3D no hero; o player do Sketchfab agora fica só no bloco 'Demonstração 3D' de /tenis/nike-air-max-95-dark-army. Aceite novo em tests/e2e/live/catalogo-real.spec.js."
-    ],
-    "correcao_2026_11_23": "CORREÇÃO do responsável: o tênis a retirar dos destaques é o Nike Air Max 90 Infrared, não o Air Max 95 Dark Army. AM90 continua ativo no catálogo; AM95 volta aos destaques. Os três INSERTs (208/209/210) aguardam aprovação específica do responsável.",
+    "para_o_codex_reconciliar": [],
+    "correcao_2026_11_23": "AM90 fora de qualquer elemento da home, inclusive lançamentos/recentes; ativo e disponível no catálogo. AM95 ativo, segundo destaque, com demonstração3D preservada no detalhe.",
     "estado_real_confirmado": {
-      "ativos": 6,
-      "destaques": 2,
+      "ativos": 9,
+      "destaques": 5,
       "skus_destaques": [
+        "NEOX-DEMO-206",
         "NEOX-AM95-DARKARMY",
-        "NEOX-SAMBA-OG-BP"
+        "NEOX-SAMBA-OG-BP",
+        "NEOX-DEMO-208",
+        "NEOX-DEMO-209"
       ]
     }
   }

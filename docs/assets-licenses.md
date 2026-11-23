@@ -105,14 +105,14 @@ explícita (Royalty Free / Standard) antes de comprar.
 | Qualquer um | **Escanear os pares do estoque** (fotogrametria por app de celular → GLB → Model Viewer) | grátis a ~US$ 15/mês de app | colorway exata e direito autoral próprio; qualidade boa, não de configurador |
 | Qualquer um | Encomendar modelagem/escaneamento profissional | orçamento | qualidade de configurador; custo alto |
 
-## Mídias da expansão proposta (cadastros adicionais pendentes)
+## Mídias da expansão cadastrada com autorização
 
-Há nove conjuntos de mídia no projeto; isso não significa nove produtos cadastrados.
+Há nove produtos acadêmicos cadastrados e ativos, cada um com mídia documentada.
 As fotos adicionais abaixo usam recorte BiRefNet/WebP 1600×1000 e licença CC0, reconfirmada
-nas páginas do Commons em23/11/2026. Os SKUs205/206/207 estão cadastrados; 208/209/210
-(Gazelle, Cortez, GEL-1130) aguardam aprovação específica de INSERT. Dados ProductCreate em
-`mongo/catalogo-adicional.pending.json` e no manifesto visual do Claude. As fotografias dos
-banners de coleção não comprovam disponibilidade desses registros pendentes no Atlas.
+nas páginas do Commons em23/11/2026. Os SKUs205–210 estão cadastrados, incluindo Gazelle,
+Cortez e GEL-1130 após autorização específica. Fonte atual em mongo/catalogo-academico.json;
+o arquivo com sufixo pending conserva os payloads já inseridos, não uma fila de novos INSERTs.
+Preços e estoques são fictícios para demonstração acadêmica, não ofertas comerciais.
 
 | Arquivo | Produto | Fonte | Autor | Licença | Alteração |
 |---|---|---|---|---|---|

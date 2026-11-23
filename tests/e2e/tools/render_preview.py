@@ -6,8 +6,8 @@ Também grava as respostas fictícias da API em .preview/mock-api.json para os t
 
 import copy
 import json
-from types import SimpleNamespace
 from pathlib import Path
+from types import SimpleNamespace
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from jsonschema import Draft202012Validator
@@ -26,10 +26,23 @@ SCHEMA_FOR = {
     "products": "AdminProductList",
     "admin": "AdminProfile",
 }
-SUMMARY_KEYS = ["id", "sku", "slug", "name", "brand", "category", "priceCents", "mainImageUrl", "sizesAvailable", "active"]
+SUMMARY_KEYS = [
+    "id",
+    "sku",
+    "slug",
+    "name",
+    "brand",
+    "category",
+    "priceCents",
+    "mainImageUrl",
+    "sizesAvailable",
+    "active",
+]
 
 openapi = json.loads((ROOT / "docs/contracts/openapi.json").read_text())
-registry = Registry().with_resource("urn:openapi", Resource.from_contents(openapi, default_specification=DRAFT202012))
+registry = Registry().with_resource(
+    "urn:openapi", Resource.from_contents(openapi, default_specification=DRAFT202012)
+)
 
 
 def validate_as(name: str, value) -> None:
@@ -49,7 +62,9 @@ def summary(detail: dict) -> dict:
 
 def admin_product(detail: dict, n: int) -> dict:
     item = {k: v for k, v in detail.items() if k not in ("sizesAvailable",)}
-    item["sizes"] = [{"sizeBR": s, "stock": 2 + (s + n) % 4} for s in detail["sizesAvailable"]] or [{"sizeBR": 40, "stock": 0}]
+    item["sizes"] = [{"sizeBR": s, "stock": 2 + (s + n) % 4} for s in detail["sizesAvailable"]] or [
+        {"sizeBR": 40, "stock": 0}
+    ]
     item["createdAt"] = item["updatedAt"] = "2026-11-18T12:00:00Z"
     return item
 
@@ -58,12 +73,36 @@ def pages() -> tuple[dict[str, tuple[str, dict]], dict]:
     home = json.loads((FIXTURES / "home.json").read_text())
     extra = json.loads((FIXTURES / "products.json").read_text())
     details = home["featured"]["items"] + extra["extraDetails"]
-    catalog = {"items": [summary(d) for d in details], "page": 1, "limit": 12, "total": len(details)}
-    inactive = admin_product({**details[0], "id": "6740a1b2c3d4e5f6010000ff", "sku": "NEOX-DEMO-199", "slug": "arquivado-exemplo", "active": False}, 9)
+    catalog = {
+        "items": [summary(d) for d in details],
+        "page": 1,
+        "limit": 12,
+        "total": len(details),
+    }
+    inactive = admin_product(
+        {
+            **details[0],
+            "id": "6740a1b2c3d4e5f6010000ff",
+            "sku": "NEOX-DEMO-199",
+            "slug": "arquivado-exemplo",
+            "active": False,
+        },
+        9,
+    )
     # Só para testar o estado "esgotado": não entra no catálogo nem na vitrine.
-    sold_out = {**details[-1], "id": "6740a1b2c3d4e5f6010000fe", "sku": "NEOX-DEMO-198", "slug": "esgotado-exemplo", "sizesAvailable": []}
+    sold_out = {
+        **details[-1],
+        "id": "6740a1b2c3d4e5f6010000fe",
+        "sku": "NEOX-DEMO-198",
+        "slug": "esgotado-exemplo",
+        "sizesAvailable": [],
+    }
     admin_items = [admin_product(d, i) for i, d in enumerate(details)] + [inactive]
-    empty = {"featured": {"items": []}, "launches": {"items": [], "page": 1, "limit": 4, "total": 0}, "recent": {"items": []}}
+    empty = {
+        "featured": {"items": []},
+        "launches": {"items": [], "page": 1, "limit": 4, "total": 0},
+        "recent": {"items": []},
+    }
     model = copy.deepcopy(home)
     # GLB inexistente: exercita o caminho Model Viewer -> erro -> fallback 2D, sem ativo 3D.
     model["featured"]["items"][0]["model3dUrl"] = "/static/models/nao-existe.glb"
@@ -84,7 +123,18 @@ def pages() -> tuple[dict[str, tuple[str, dict]], dict]:
         "model": ("home.html", model),
         "tenis": ("catalog.html", {"catalog": catalog, "filters": {}}),
         "admin/login": ("admin/login.html", {}),
-        "admin/produtos": ("admin/products.html", {"products": {"items": admin_items, "page": 1, "limit": 24, "total": len(admin_items)}, "admin": extra["admin"]}),
+        "admin/produtos": (
+            "admin/products.html",
+            {
+                "products": {
+                    "items": admin_items,
+                    "page": 1,
+                    "limit": 24,
+                    "total": len(admin_items),
+                },
+                "admin": extra["admin"],
+            },
+        ),
     }
     for d in details + [sold_out]:
         out[f"tenis/{d['slug']}"] = ("product.html", {"product": d})
@@ -95,7 +145,9 @@ def pages() -> tuple[dict[str, tuple[str, dict]], dict]:
 
 
 def main() -> None:
-    env = Environment(loader=FileSystemLoader(ROOT / "app/templates"), autoescape=True, undefined=StrictUndefined)
+    env = Environment(
+        loader=FileSystemLoader(ROOT / "app/templates"), autoescape=True, undefined=StrictUndefined
+    )
     OUT.mkdir(parents=True, exist_ok=True)
     static = OUT / "static"
     if not static.exists():
@@ -103,7 +155,12 @@ def main() -> None:
     routes, mock = pages()
     for route, (template, ctx) in routes.items():
         validate(ctx)
-        html = env.get_template(template).render(request=SimpleNamespace(url=SimpleNamespace(path=f"/{route}")), csrfToken="preview-csrf", siteName="NEOX drop", **ctx)
+        html = env.get_template(template).render(
+            request=SimpleNamespace(url=SimpleNamespace(path=f"/{route}")),
+            csrfToken="preview-csrf",
+            siteName="NEOX drop",
+            **ctx,
+        )
         target = OUT / route / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(html)

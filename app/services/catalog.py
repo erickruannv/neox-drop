@@ -220,8 +220,10 @@ def catalog_filter(filters, public: bool):
     return query
 
 
-async def list_products(collection, filters, public: bool):
+async def list_products(collection, filters, public: bool, *, excluded_skus=()):
     query = catalog_filter(filters, public)
+    if excluded_skus:
+        query["sku"] = {"$nin": list(excluded_skus)}
     order = {
         "recent": [("createdAt", -1), ("_id", 1)],
         "price_asc": [("priceCents", 1), ("_id", 1)],

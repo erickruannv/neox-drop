@@ -9,6 +9,8 @@ test('correção real: AM90 fora dos destaques, catálogo preservado e 3D do AM9
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const products = (await (await page.request.get('/api/products?limit=24')).json()).items;
   const featured = (await (await page.request.get('/api/featured')).json()).items;
+  expect(products).toHaveLength(9);
+  expect(featured.map(p => p.sku)).toEqual(['NEOX-DEMO-206', 'NEOX-AM95-DARKARMY', 'NEOX-SAMBA-OG-BP', 'NEOX-DEMO-208', 'NEOX-DEMO-209']);
   for (const sku of ['NEOX-AM90-INFRARED', 'NEOX-AM95-DARKARMY', 'NEOX-SAMBA-OG-BP', 'NEOX-DEMO-205', 'NEOX-DEMO-206', 'NEOX-DEMO-207']) {
     expect(products.some(p => p.sku === sku)).toBe(true);
   }
@@ -30,7 +32,9 @@ test('correção real: AM90 fora dos destaques, catálogo preservado e 3D do AM9
     }
   } else await expect(page.locator('#hero [data-thumbs], #hero [data-step]')).toHaveCount(0);
   await expect(page.locator('#hero [data-3d-toggle]')).toBeHidden();
-  expect(await page.locator('#hero img, #colecoes img').evaluateAll(images => images.every(i => !i.src.includes('nike-air-max-90-infrared')))).toBe(true);
+  expect(await page.locator('main img').evaluateAll(images => images.every(i => !i.src.includes('nike-air-max-90-infrared')))).toBe(true);
+  await expect(page.locator('main')).not.toContainText('Nike Air Max 90 Infrared');
+  await expect(page.locator('#colecoes a[href="/tenis?category=Performance"] img')).toHaveAttribute('src', '/static/images/products/asics-gel-1130-branco-dourado/main.webp');
   for (const image of await page.locator('#hero img, #colecoes img').all()) {
     await image.scrollIntoViewIfNeeded();
     await expect.poll(() => image.evaluate(i => i.complete && i.naturalWidth > 0)).toBe(true);
@@ -56,16 +60,16 @@ test('correção real: AM90 fora dos destaques, catálogo preservado e 3D do AM9
     await image.scrollIntoViewIfNeeded();
     await expect.poll(() => image.evaluate(i => i.complete && i.naturalWidth > 0)).toBe(true);
   }
-  await mkdir('.gstack/urgent-am90', { recursive: true });
+  await mkdir('.gstack/final-nine', { recursive: true });
   await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
-  await page.screenshot({ path: `.gstack/urgent-am90/${info.project.name}-catalogo.png`, fullPage: true });
+  await page.screenshot({ path: `.gstack/final-nine/${info.project.name}-catalogo.png`, fullPage: true });
   await page.goto('/');
   for (const image of await page.locator('main img').all()) {
     await image.scrollIntoViewIfNeeded();
     await expect.poll(() => image.evaluate(i => i.complete && i.naturalWidth > 0)).toBe(true);
   }
   await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
-  await page.screenshot({ path: `.gstack/urgent-am90/${info.project.name}-home.png`, fullPage: true });
+  await page.screenshot({ path: `.gstack/final-nine/${info.project.name}-home.png`, fullPage: true });
   const am95 = products.find(p => p.sku === 'NEOX-AM95-DARKARMY');
   await page.goto(`/tenis/${am95.slug}`);
   await expect(page.getByRole('heading', { name: 'Demonstração 3D' })).toBeVisible();

@@ -65,8 +65,13 @@ async def test_main_catalog_matches_real_atlas_without_fixtures(real_settings):
             response = await client.get("/")
             assert response.status_code == 200
             html = unescape(response.text)
-            latest = sorted(documents, key=lambda d: str(d["_id"]))
+            latest = sorted(
+                (d for d in documents if d["sku"] != "NEOX-AM90-INFRARED"),
+                key=lambda d: str(d["_id"]),
+            )
             latest.sort(key=lambda d: d["createdAt"], reverse=True)
+            am90 = next(d for d in documents if d["sku"] == "NEOX-AM90-INFRARED")
+            assert am90["name"] not in html and am90["slug"] not in html
             for doc in latest[:6]:
                 assert doc["name"] in html
                 assert "/tenis/" + quote(doc["slug"], safe="") in html

@@ -37,11 +37,11 @@ anteriores foram mantidas; a demonstração antiga :8001 foi encerrada. Não exe
 | Serviço | Papel | Situação |
 |---|---|---|
 | Supabase PostgreSQL/Auth | Identidade, perfil admin/RLS e contato WhatsApp privado | URL/Publishable configurados; admin real validado: login, painel, renovação, logout e RLS/revogação; segunda conta pendente |
-| MongoDB Atlas | Produtos, preço em centavos e estoque autoritativos | Cluster0, papel neox_drop_test@admin restrito ao banco neox_drop_test; products strict/error, seis índices adicionais; seis produtos acadêmicos ativos, dois em destaque; QA inativo |
+| MongoDB Atlas | Produtos, preço em centavos e estoque autoritativos | Cluster0, papel neox_drop_test@admin restrito ao banco neox_drop_test; products strict/error, seis índices adicionais; nove produtos acadêmicos ativos, cinco em destaque; QA inativo |
 | Upstash Redis | Até 5 recentes, TTL 7 dias; cache 300s, sem governar preço | Upstash real validado: gravação/leitura, ordem, cinco únicos, TTL e expiração; home/recentes comprovados com os três produtos cadastrados no Atlas |
 
 FastAPI principal :8000 utiliza Supabase, Atlas e Upstash reais no mesmo processo.
-Catálogo acadêmico cadastrado e ativo (preços fictícios; somente AM95 e Samba em destaque):
+Catálogo acadêmico cadastrado e ativo (preços e estoques fictícios):
 
 | Produto | Preço | Categoria | Estoque |
 |---|---:|---|---:|
@@ -51,12 +51,15 @@ Catálogo acadêmico cadastrado e ativo (preços fictícios; somente AM95 e Samb
 | New Balance 2002R Lilás/Cinza | R$ 849,90 | Street | 23 |
 | Nike Dunk Low Vermelho/Cinza | R$ 799,90 | Street | 23 |
 | New Balance 574 Cinza | R$ 699,90 | Classics | 23 |
+| adidas Gazelle Indoor Azul | R$ 649,90 | Classics | 23 |
+| Nike Cortez Branco/Vermelho/Azul | R$ 549,90 | Classics | 23 |
+| ASICS GEL-1130 Branco/Dourado/Prata | R$ 749,90 | Performance | 23 |
 
 [mongo/catalogo-academico.json](mongo/catalogo-academico.json) é a fonte aprovada do cadastro;
-O manifesto `docs/catalogo-definitivo.json.aprovados` corresponde aos seis cadastros reais.
-2002R, Dunk e574 já foram cadastrados com autorização; não repetir INSERTs desses SKUs.
-`mongo/catalogo-adicional.pending.json` agora contém somente os três INSERTs ainda pendentes:
-Gazelle Indoor, Cortez e GEL-1130. Nove produtos nas fixtures não comprovam nove no Atlas.
+O manifesto `docs/catalogo-definitivo.json.aprovados` corresponde aos nove cadastros reais.
+Todos foram cadastrados com autorização; não repetir INSERTs desses SKUs.
+`mongo/catalogo-adicional.pending.json` conserva os payloads históricos de Gazelle/Cortez/GEL-1130:
+apesar do nome do arquivo, os três já foram inseridos. Não executar seed/upsert para repeti-los.
 O registro `NEOX-QA-20261122-A01` permanece inativo e intocado. Não executar seed/upsert para
 repetir o cadastro. Home, três Coleções, filtros, detalhes, imagens/créditos, 3D do AM95, carrinho,
 WhatsApp e recentes foram validados no navegador contra os serviços reais. Após reiniciar,
@@ -67,7 +70,7 @@ link e mensagem WhatsApp conferidos sem abrir o link/enviar mensagem. Redis pres
 deduplicação e TTL7dias dos recentes. Estoque não foi reservado/decrementado pelo checkout.
 O painel agora aceita créditos e fontes das imagens/modelo3D nos campos de attributes.
 
-Revisão final da interface: 184 testes backend aprovados/7 ignorados; 141 testes UI
+Revisão final da interface: 185 testes backend aprovados/7 ignorados; 141 testes UI
 aprovados/5 ignorados (fixtures/dublês, separados da integração real). O percurso real está
 em `tests/e2e/live/delivery.spec.js`: navegação, foto/3D, produtos do Atlas, carrinho,
 checkout sem envio, recentes e login/logout administrativo. Executar somente com credenciais
@@ -79,13 +82,13 @@ login válido dessa conta não foi comprovada. Restam vídeo5–10min e acesso d
 GitHub após autorização de publicação. Health retorna ok com os três serviços disponíveis.
 Não recriar bancos nem reaplicar migrations já aprovadas.
 
-CORREÇÃO autorizada: é o AM90 que sai dos destaques (featured.enabled=false), mantendo-se
-ativo no catálogo. AM95 restaurado (featured.enabled=true), sem perder documento/mídias/3D.
-Hero real: AM95 → Samba, dois slides e seis produtos ativos. Nenhum outro campo foi alterado.
-O frontend corrigido substitui também o banner Performance; AM90 pode continuar em
-Lançamentos e no catálogo. Filtros visuais incluem New Balance e ASICS; ASICS não possui
-produto cadastrado antes da aprovação pendente. Fotografias de Gazelle/GEL-1130 nos banners
-são ilustrativas das coleções; esses dois produtos ainda não estão disponíveis no catálogo.
+Ordem final autorizada: Dunk Low → AM95 Dark Army → Samba OG → Gazelle Indoor → Cortez.
+São cinco slides e nove produtos ativos no catálogo. O AM90 permanece ativo, disponível no
+catálogo/detalhe/carrinho, mas o loader da home o exclui de destaques, lançamentos e recentes.
+Essa curadoria não remove seu histórico Redis nem altera os contratos das APIs públicas.
+O banner Performance mostra o GEL-1130, agora cadastrado. New Balance e ASICS funcionam
+nos filtros. Campos comerciais dos seis produtos anteriores foram preservados; somente
+featured do Dunk foi adicionado conforme a autorização e o schema existente.
 Sketchfab fica identificado no bloco separado Demonstração3D do detalhe do AM95; não é
 um GLB nativo aprovado nem comprova conclusão do diferencial3D solicitado.
 
