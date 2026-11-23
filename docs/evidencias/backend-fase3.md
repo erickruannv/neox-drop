@@ -742,3 +742,32 @@ código/.env.example preservados. README com comando normal para subir :8000. Se
 aplicação/contrato/frontend alterado. Segunda conta invalid_credentials continua pendência
 secundária externa: não foi comprovada negação por perfil após login válido. Redis/checkout
 WhatsApp não testados nesta missão. Sem push, deploy ou modificações destrutivas.
+
+
+## Upstash Redis real e três serviços simultâneos — 22/11/2026
+
+Credenciais carregadas pelo Settings privado; ping pelo adaptador existente passou com timeout
+normal. Nenhuma funcionalidade de aplicação reescrita. Teste real existente ajustado somente
+para chave exclusiva NEOX QA:recent:visitor:<aleatório>, conforme autorização do usuário.
+Execução separada com opt-in real: test_real_atomic_recent_order_uniqueness_ttl PASS — Lua
+real da aplicação, concorrência, A/B/A, cinco únicos, TTL 604800 segundos. TTL da chave própria
+reduzido a 1s apenas no teste e ausência comprovada após expiração; limpeza somente da própria
+chave. Identificadores aleatórios de QA não foram apresentados como produtos existentes.
+
+Segunda chave exclusiva NEOX QA, criada com o id do produto de teste já inativo: gravação pelo
+mesmo Lua, leitura por novo cliente, TTL 7 dias e resolve_recent contra Mongo real retornando
+vazio para o inativo. Chave própria removida e ausência confirmada. Nenhuma chave preexistente
+sobrescrita ou removida, nenhum produto ativado/inserido/alterado.
+
+FastAPI principal :8000 reiniciado para ler as novas credenciais. 16 verificações integradas
+PASS: /health 200/status=ok, login Supabase UUID aprovado, consulta administrativa do produto
+inativo no Atlas, GET /api/recent 200 vazio sem cookie, POST de visita a inativo 404, home 200,
+logout 204 e perfil sem sessão 401. Snapshot Mongo antes/depois idêntico. Nenhuma mudança
+Auth/SQL/permissões. Sessão de teste encerrada; servidor principal mantido ativo.
+
+Regressão local: pytest 171 passed/6 skipped; ruff passou. Esses testes locais usam dublês;
+a prova externa é o teste Redis opt-in e as verificações integradas descritas acima. Falha do
+Redis é coberta localmente pela suíte de recentes, sem simular indisponibilidade do serviço
+externo. Não foi comprovada visita HTTP a um produto ativo nem seu card nos recentes da UI:
+não há produto ativo e o usuário proibiu alterar os existentes. Redis não valida estoque/preço.
+Sem alterações em templates/CSS/JS/contratos, sem push/deploy/custos adicionais.

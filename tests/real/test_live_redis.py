@@ -9,7 +9,7 @@ from app.services.recent import VISIT_SCRIPT
 
 async def test_real_atomic_recent_order_uniqueness_ttl(real_settings):
     visitor = secrets.token_hex(16)
-    key = f"recent:visitor:{visitor}"
+    key = f"NEOX QA:recent:visitor:{visitor}"
     identifiers = [str(ObjectId()) for _ in range(7)]
     settings = real_settings.model_copy(update={"redis_timeout_seconds": 5})
     created = False
