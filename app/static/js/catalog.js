@@ -87,6 +87,7 @@ function init(form) {
   function card(p) {
     const li = template.content.firstElementChild.cloneNode(true);
     const set = (name, fn) => fn(li.querySelector(`[data-card="${name}"]`));
+    set("root", (el) => (el.dataset.category = p.category));
     set("category", (el) => (el.textContent = p.category));
     set("image", (el) => (el.src = p.mainImageUrl));
     set("brand", (el) => (el.textContent = p.brand));

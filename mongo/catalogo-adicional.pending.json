@@ -1,23 +1,29 @@
 [
   {
-    "sku": "NEOX-DEMO-205",
-    "slug": "new-balance-2002r",
-    "name": "New Balance 2002R",
-    "brand": "New Balance",
-    "category": "Street",
-    "priceCents": 84990,
-    "mainImageUrl": "/static/images/products/new-balance-2002r/main.webp",
-    "description": "Cabedal em camurça e malha em tons de lilás e cinza, entressola clara. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
-    "currency": "BRL",
-    "galleryUrls": [
-      "/static/images/products/new-balance-2002r/main.webp"
-    ],
-    "colorName": "Lilás/Cinza",
-    "active": true,
+    "sku": "NEOX-DEMO-208",
+    "slug": "adidas-gazelle-indoor-azul",
+    "name": "adidas Gazelle Indoor",
+    "brand": "adidas",
+    "category": "Classics",
+    "priceCents": 64990,
+    "colorName": "Azul/Branco/Gum",
+    "description": "Camurça azul com as três listras em couro claro, letreiro dourado e sola de borracha translúcida cor de mel. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
     "attributes": {
       "imageCredit": "Foto: LeDroider, CC0, fundo removido",
-      "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:New_Balance_2002R.jpg"
+      "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Adidas_Gazelle_Indoor.jpg"
     },
+    "featured": {
+      "enabled": true,
+      "order": 2,
+      "backgroundHex": "#0F2340",
+      "accentHex": "#5AA2FF"
+    },
+    "mainImageUrl": "/static/images/products/adidas-gazelle-indoor-azul/main.webp",
+    "galleryUrls": [
+      "/static/images/products/adidas-gazelle-indoor-azul/main.webp"
+    ],
+    "currency": "BRL",
+    "active": true,
     "sizes": [
       {
         "sizeBR": 38,
@@ -46,24 +52,76 @@
     ]
   },
   {
-    "sku": "NEOX-DEMO-206",
-    "slug": "nike-dunk-low-vermelho-cinza",
-    "name": "Nike Dunk Low",
+    "sku": "NEOX-DEMO-209",
+    "slug": "nike-cortez-branco-vermelho",
+    "name": "Nike Cortez",
     "brand": "Nike",
-    "category": "Street",
-    "priceCents": 79990,
-    "mainImageUrl": "/static/images/products/nike-dunk-low-vermelho-cinza/main.webp",
-    "description": "Couro vermelho com sobreposições cinza e solado branco. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
-    "currency": "BRL",
-    "galleryUrls": [
-      "/static/images/products/nike-dunk-low-vermelho-cinza/main.webp"
-    ],
-    "colorName": "Vermelho/Cinza",
-    "active": true,
+    "category": "Classics",
+    "priceCents": 54990,
+    "colorName": "Branco/Vermelho/Azul",
+    "description": "Couro branco com Swoosh vermelho e entressola com faixa azul. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
     "attributes": {
-      "imageCredit": "Foto: William Mucci, CC0, fundo removido",
-      "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Nike_dunk_low.jpg"
+      "imageCredit": "Foto: LeDroider, CC0, fundo removido",
+      "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Nike_Cortez.jpg"
     },
+    "featured": {
+      "enabled": true,
+      "order": 5,
+      "backgroundHex": "#1B2433",
+      "accentHex": "#FF4D5E"
+    },
+    "mainImageUrl": "/static/images/products/nike-cortez-branco-vermelho/main.webp",
+    "galleryUrls": [
+      "/static/images/products/nike-cortez-branco-vermelho/main.webp"
+    ],
+    "currency": "BRL",
+    "active": true,
+    "sizes": [
+      {
+        "sizeBR": 38,
+        "stock": 3
+      },
+      {
+        "sizeBR": 39,
+        "stock": 4
+      },
+      {
+        "sizeBR": 40,
+        "stock": 5
+      },
+      {
+        "sizeBR": 41,
+        "stock": 5
+      },
+      {
+        "sizeBR": 42,
+        "stock": 4
+      },
+      {
+        "sizeBR": 43,
+        "stock": 2
+      }
+    ]
+  },
+  {
+    "sku": "NEOX-DEMO-210",
+    "slug": "asics-gel-1130-branco-dourado",
+    "name": "ASICS GEL-1130",
+    "brand": "ASICS",
+    "category": "Performance",
+    "priceCents": 74990,
+    "colorName": "Branco/Dourado/Prata",
+    "description": "Malha branca com sobreposições prateadas e douradas, listras pretas e entressola creme. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
+    "attributes": {
+      "imageCredit": "Foto: LeDroider, CC0, fundo removido",
+      "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Asics_Gel-1130.jpg"
+    },
+    "mainImageUrl": "/static/images/products/asics-gel-1130-branco-dourado/main.webp",
+    "galleryUrls": [
+      "/static/images/products/asics-gel-1130-branco-dourado/main.webp"
+    ],
+    "currency": "BRL",
+    "active": true,
     "sizes": [
       {
         "sizeBR": 38,

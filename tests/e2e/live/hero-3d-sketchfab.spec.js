@@ -1,22 +1,22 @@
 import { test, expect } from "@playwright/test";
-import fixture from "../fixtures/home.json" with { type: "json" };
+import home from "../fixtures/home.json" with { type: "json" };
+import extra from "../fixtures/products.json" with { type: "json" };
 
-// Teste REAL (sem mock): a foto vira o modelo do Sketchfab ao interagir (arrastar/tocar), na GPU;
-// arrasta com mouse/toque e confere giro só em Y. Precisa de rede. SHOTS=dir grava as capturas.
-const items = fixture.featured.items.filter((i) => i.model3dUrl); // só destaques com 3D aprovado
+// Teste REAL (sem mock), na GPU: o hero e a foto principal nunca embutem o player do Sketchfab;
+// o modelo aparece só no bloco "Demonstração 3D" do produto, ao interagir (arrastar/tocar), e gira
+// só em Y. Precisa de rede. SHOTS=dir grava as capturas.
+const items = [...home.featured.items, ...extra.extraDetails].filter((i) => i.model3dUrl);
 const SHOTS = process.env.SHOTS;
 if (SHOTS) await (await import("node:fs/promises")).mkdir(SHOTS, { recursive: true });
 const save = async (buf, name) => SHOTS && (await import("node:fs")).writeFileSync(`${SHOTS}/${name}.png`, buf);
 
-const HERO = "#hero [data-hero-media]";
-const PDP = "[data-3d-stage]";
-let stageSel = HERO;
-const stage = (page) => page.locator(stageSel);
+const stage = (page) => page.locator("[data-3d-demo]");
 const pad = (page) => stage(page).locator("[data-rotate-pad]");
 const yaw = async (page) => Number(await pad(page).getAttribute("aria-valuenow"));
 
 // Gesto real que revela o 3D: arraste horizontal (mouse) ou toque (celular) sobre a foto.
 async function activate(page, isMobile) {
+  await stage(page).scrollIntoViewIfNeeded();
   if (isMobile) return stage(page).tap();
   const b = await stage(page).boundingBox();
   await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
@@ -52,35 +52,33 @@ async function drag(page, dx, dy, isMobile) {
   await touch("touchEnd");
 }
 
-test.beforeEach(() => (stageSel = HERO));
-
-test("home abre com foto; cada destaque com 3D revela o seu modelo real ao interagir", async ({ page, isMobile }, info) => {
+test("home abre com foto e nenhum destaque embute o player do Sketchfab", async ({ page }, info) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await expect(page.locator("[data-sketchfab-frame]")).toHaveCount(0);
+  const featured = JSON.parse(await page.locator("#hero-data").textContent());
   await page.waitForTimeout(800);
   await save(await page.screenshot(), `${info.project.name}-home`);
-  for (const item of items) {
+  for (const item of featured) {
     await page.locator(`#hero [data-thumbs] button[data-id="${item.id}"]`).click();
     await expect(page.locator("#hero h1")).toHaveText(item.name);
-    await activate(page, isMobile);
-    await ready(page, item);
-    await save(await page.screenshot(), `${info.project.name}-3d-${item.slug}`);
-    await page.locator("#hero [data-3d-toggle]").click(); // "Ver foto"
-    await expect(stage(page)).toHaveAttribute("data-state3d", "idle");
+    await expect(page.locator("#hero [data-3d-toggle]")).toBeHidden();
   }
+  await page.locator("#hero [data-hero-media]").click();
+  await page.waitForTimeout(1500);
+  await expect(page.locator("[data-sketchfab-frame]")).toHaveCount(0);
 });
 
-async function heroWith3d(page, isMobile) {
-  await page.goto("/");
-  await page.locator(`#hero [data-thumbs] button[data-id="${items[0].id}"]`).click();
+async function demoReady(page, isMobile) {
+  await page.goto(`/tenis/${items[0].slug}/`);
+  await expect(page.locator("[data-sketchfab-frame]")).toHaveCount(0);
   await activate(page, isMobile);
   await ready(page, items[0]);
 }
 
-test("arraste horizontal gira em Y; arraste vertical não inclina", async ({ page, isMobile }) => {
+test("demonstração 3D: arraste horizontal gira em Y; arraste vertical não inclina", async ({ page, isMobile }, info) => {
   await page.emulateMedia({ reducedMotion: "reduce" }); // sem giro automático: mede só o gesto
-  await heroWith3d(page, isMobile);
+  await demoReady(page, isMobile);
+  await save(await stage(page).screenshot(), `${info.project.name}-demo-3d`);
 
   const y0 = await yaw(page);
   const before = await stage(page).screenshot();
@@ -97,31 +95,17 @@ test("arraste horizontal gira em Y; arraste vertical não inclina", async ({ pag
   await pad(page).focus();
   await page.keyboard.press("ArrowRight");
   await expect.poll(() => yaw(page)).toBe((y1 + 15) % 360);
+  await page.keyboard.press("Escape");
+  await expect(stage(page)).toHaveAttribute("data-state3d", "idle");
 });
 
 test("sem reduced-motion o modelo gira sozinho até o usuário interagir", async ({ page }) => {
-  await page.goto("/");
-  await page.locator(`#hero [data-thumbs] button[data-id="${items[0].id}"]`).click();
-  await page.locator("#hero [data-3d-toggle]").click();
+  await page.goto(`/tenis/${items[0].slug}/`);
+  await stage(page).scrollIntoViewIfNeeded();
+  await stage(page).locator("[data-3d-toggle]").click();
   await expect(pad(page)).toBeVisible();
   const a = await yaw(page);
   await expect.poll(() => yaw(page), { timeout: 10_000 }).not.toBe(a);
-});
-
-test("produto: galeria real e a foto vira o modelo real ao interagir", async ({ page, isMobile }, info) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  stageSel = PDP;
-  const item = items[0];
-  await page.goto(`/tenis/${item.slug}/`);
-  await page.waitForTimeout(600);
-  await save(await page.screenshot(), `${info.project.name}-produto`);
-  await activate(page, isMobile);
-  await ready(page, item);
-  const y0 = await yaw(page);
-  await drag(page, 140, 0, isMobile);
-  await expect.poll(() => yaw(page)).not.toBe(y0);
-  await page.waitForTimeout(800);
-  await save(await page.screenshot(), `${info.project.name}-produto-3d`);
 });
 
 test("catálogo: só produtos com foto real", async ({ page }, info) => {

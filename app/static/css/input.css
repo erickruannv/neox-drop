@@ -301,7 +301,7 @@
   }
 
   .product-card {
-    @apply relative flex flex-col rounded-2xl bg-white p-4 shadow-[0_1px_2px_rgb(0_0_0/0.04),0_8px_24px_rgb(0_0_0/0.06)] transition-[transform,box-shadow] duration-300 ease-out-soft sm:p-5;
+    @apply relative flex flex-col rounded-2xl bg-white p-3 shadow-[0_1px_2px_rgb(0_0_0/0.04),0_8px_24px_rgb(0_0_0/0.06)] transition-[transform,box-shadow] duration-300 ease-out-soft sm:p-5;
   }
   .product-card:hover,
   .product-card:focus-within {
@@ -309,6 +309,16 @@
   }
   .product-card:active {
     @apply translate-y-0 scale-[0.99];
+  }
+  /* Palco do card na cor da coleção (mesmas cores dos banners); o tênis sobe e gira de leve no hover. */
+  .card-stage {
+    @apply relative mb-4 aspect-[3/2] rounded-xl bg-paper sm:mb-5;
+  }
+  .product-card[data-category="Street"] .card-stage { background: linear-gradient(135deg, var(--color-raspberry), #c2305c); }
+  .product-card[data-category="Classics"] .card-stage { background: linear-gradient(135deg, var(--color-coral-deep), var(--color-coral)); }
+  .product-card[data-category="Performance"] .card-stage { background: linear-gradient(135deg, var(--color-deep-teal), #2a5560); }
+  .card-shoe {
+    @apply absolute inset-1 size-[calc(100%-0.5rem)] object-contain drop-shadow-[0_16px_14px_rgb(0_0_0/0.35)] transition-transform duration-500 ease-out-soft group-hover:-translate-y-2 group-hover:-rotate-3 motion-reduce:transition-none motion-reduce:group-hover:transform-none;
   }
 
   /* Filtros: resultados esmaecem durante a consulta; os cards trocados pelo filtro entram em sequência curta

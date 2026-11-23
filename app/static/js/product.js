@@ -5,10 +5,13 @@ import { inline3d } from "./viewer3d.js";
 
 const main = document.querySelector("[data-gallery-main]");
 const data = JSON.parse(document.getElementById("product-data")?.textContent ?? "{}");
-// Foto → 3D no lugar da foto principal (viewer3d.js); nada do 3D carrega antes da interação.
-const stage = document.querySelector("[data-3d-stage]");
+// Foto → 3D (viewer3d.js); nada do 3D carrega antes da interação. GLB nativo no lugar da foto;
+// player do Sketchfab só no bloco separado "Demonstração 3D".
+const stage = document.querySelector("[data-gallery] [data-3d-stage]");
 const viewer = stage && inline3d(stage, { zoom: 0.85 });
 viewer?.set(data);
+const demo = document.querySelector("[data-3d-demo]");
+if (demo) inline3d(demo, { zoom: 0.85, embed: true }).set(data);
 document.querySelectorAll("[data-gallery-thumb]").forEach((thumb, _, all) => {
   thumb.addEventListener("click", () => {
     viewer?.reset();

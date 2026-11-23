@@ -26,9 +26,13 @@ settings = Settings(
 app = create_app(settings)
 source = Path(__file__).resolve().parents[1] / "tests/e2e/fixtures/home.json"
 context = json.loads(source.read_text())
-items = [
+featured_items = [
     ProductDetail.model_validate(p).model_dump(exclude_unset=True)
     for p in context["featured"]["items"]
+]
+extra = json.loads((source.parent / "products.json").read_text())
+items = featured_items + [
+    ProductDetail.model_validate(p).model_dump(exclude_unset=True) for p in extra["extraDetails"]
 ]
 preview = APIRouter(include_in_schema=False)
 
@@ -85,7 +89,7 @@ async def catalog(request: Request, response: Response, filters: Annotated[Publi
 
 @preview.get("/api/featured")
 async def featured():
-    return {"items": items}
+    return {"items": featured_items}
 
 
 @preview.get("/api/products/{slug}")

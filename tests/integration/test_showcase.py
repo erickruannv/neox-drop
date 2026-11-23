@@ -1,8 +1,13 @@
 """Vitrine opt-in com fixtures; não comprova integração com bancos reais."""
 
+import json
+from pathlib import Path
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 from jsonschema import Draft202012Validator
+
+FIXTURE = json.loads((Path(__file__).resolve().parents[1] / "e2e/fixtures/home.json").read_text())
 
 
 async def test_fastapi_showcase_keeps_curated_media_and_contracts_without_remote_writes(contract):
@@ -16,11 +21,9 @@ async def test_fastapi_showcase_keeps_curated_media_and_contracts_without_remote
         assert "category=Performance" in home.text
         assert "nb9060-web.glb" not in home.text
         featured = (await c.get("/api/featured")).json()
-        assert {p["slug"] for p in featured["items"]} == {
-            "nike-air-max-95-dark-army",
-            "nike-air-max-90-infrared",
-            "adidas-samba-og",
-        }
+        assert [p["slug"] for p in featured["items"]] == [
+            p["slug"] for p in FIXTURE["featured"]["items"]
+        ]
         for product in featured["items"]:
             Draft202012Validator(
                 {"$ref": "#/components/schemas/ProductDetail", "components": contract["components"]}
@@ -36,7 +39,16 @@ async def test_fastapi_showcase_keeps_curated_media_and_contracts_without_remote
                 assert image.status_code == 200 and image.headers["content-type"] == "image/webp"
         assert (await c.get("/tenis?category=Street")).status_code == 200
         listing = (await c.get("/api/products?category=Street")).json()
-        assert listing["total"] == 1 and listing["items"][0]["slug"] == "nike-air-max-95-dark-army"
+        assert listing["total"] == 3
+        assert {p["slug"] for p in listing["items"]} == {
+            "nike-air-max-95-dark-army",
+            "nike-dunk-low-vermelho-cinza",
+            "new-balance-2002r",
+        }
+        am95 = await c.get("/tenis/nike-air-max-95-dark-army")
+        assert am95.status_code == 200
+        assert "data-3d-demo" in am95.text
+        assert "Andre Bond Sr." in am95.text and "CC BY 4.0" in am95.text
         assert (await c.get("/tenis/inexistente")).status_code == 404
         assert (await c.get("/api/admin/products")).status_code == 401
         assert (await c.get("/admin/produtos")).status_code == 303

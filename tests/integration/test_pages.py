@@ -208,10 +208,10 @@ async def test_integrated_home_shows_approved_collections_and_keeps_photo_credit
         page = await client.get("/")
         for category in ("Street", "Classics", "Performance"):
             assert f"/tenis?category={category}" in page.text
-        assert "/static/images/products/nike-air-max-90-infrared/main.webp" in page.text
-        assert "Christian H." in page.text
-        assert "CC BY 2.0" in page.text
-        assert "Andre Bond Sr." in page.text and "CC BY 4.0" in page.text
+        assert "/static/images/products/nike-dunk-low-vermelho-cinza/main.webp" in page.text
+        assert "/static/images/products/adidas-gazelle-indoor-azul/main.webp" in page.text
+        assert "William Mucci" in page.text and "LeDroider" in page.text
+        assert "CC0" in page.text
 
 
 async def test_security_policy_allows_only_required_3d_hosts_and_survives_errors():
