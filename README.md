@@ -25,7 +25,7 @@ Só usar os projetos de TESTE já conferidos. Um worker até existir rate limit 
 
 | Serviço | Papel | Situação |
 |---|---|---|
-| Supabase PostgreSQL/Auth | Identidade, perfil admin/RLS e contato WhatsApp privado | URL/Publishable configurados; admin ativado conforme confirmação do usuário; login/RLS de sessão reais pendentes |
+| Supabase PostgreSQL/Auth | Identidade, perfil admin/RLS e contato WhatsApp privado | URL/Publishable configurados; admin real validado: login, painel, renovação, logout e RLS/revogação; segunda conta pendente |
 | MongoDB Atlas | Produtos, preço em centavos e estoque autoritativos | Cluster0, papel neox_drop_test@admin restrito ao banco neox_drop_test; products strict/error, seis índices adicionais, zero documentos |
 | Upstash Redis | Até 5 recentes, TTL 7 dias; cache 300s, sem governar preço | Credenciais ausentes; registro de visita e seção recentes ligados à UI, ainda sem prova externa |
 
@@ -34,12 +34,12 @@ fixtures ou produtos inventados. Admin sem sessão continua bloqueado. Health re
 sem Redis; isso não comprova o fluxo completo. A vitrine :8001 é demonstração e não vale como
 prova de persistência. Não recriar Mongo/Supabase nem reaplicar a migration manual já executada.
 
-**Única ação manual atual:** preencher no `.env` privado as quatro variáveis já previstas:
-`NEOX_TEST_ADMIN_EMAIL`, `NEOX_TEST_ADMIN_PASSWORD`, `NEOX_TEST_NONADMIN_EMAIL` e
-`NEOX_TEST_NONADMIN_PASSWORD`, usando as duas contas existentes. O UUID administrativo
-confirmado é `4d03df16-ce24-4633-b45a-ce1bcdc6ac06`; não promover outra conta nem repetir SQL.
-Avisar apenas quando estiver salvo; não enviar os valores no chat. O próximo teste será login,
-perfil sob RLS, logout/revogação e negação de acesso à segunda conta, sem alterar os perfis.
+**Única ação manual atual:** conferir/corrigir no `.env` privado o par
+`NEOX_TEST_NONADMIN_EMAIL` e `NEOX_TEST_NONADMIN_PASSWORD` da segunda conta existente.
+O Supabase devolveu `invalid_credentials` (HTTP 400), antes da autorização; isso não comprova
+bloqueio por falta de privilégio. Não enviar os valores no chat e não alterar a conta admin.
+Login administrativo real, painel, cookies HttpOnly/SameSite, renovação, CSRF, logout e
+revogação por RLS já passaram; não repetir migrations ou SQL aprovados.
 
 Credenciais ficam apenas no .env privado, conforme [.env.example](.env.example). Não enviar
 senhas/chaves/URIs no chat, vídeo ou Git. Redis ainda requer instância Free/REST URL/token.

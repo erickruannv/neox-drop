@@ -670,3 +670,22 @@ Contato WhatsApp continua não configurado conforme confirmação anterior; chec
 não comprovado. Nenhum documento inserido/alterado ou outro serviço remoto modificado.
 Próxima e única ação solicitada: preencher as quatro credenciais de teste já previstas no
 .env privado; não enviar valores no chat. README atualizado para não pedir SQL novamente.
+
+
+## Autenticação real após configuração local das contas — 22/11/2026
+
+Opt-in somente no processo, sem alteração do .env. Executados apenas os dois testes reais
+de contas em test_live_admin_rls.py (anon já comprovado foi excluído): admin/RLS/revogação
+PASS; não-admin FAILURE no login, antes de authorize. Diagnóstico direto confirmou contas
+distintas e AuthApiError HTTP 400/code invalid_credentials na segunda conta; valores omitidos.
+Não é prova de negação por privilégio. Não houve reset de senha, promoção ou SQL.
+
+FastAPI em processo descartável real, sem mocks: 14 verificações PASS — página de login,
+login admin HTTP, UUID aprovado, cookies HttpOnly/SameSite, painel 200, perfil 200,
+listagem administrativa 200, logout sem CSRF 403 preservando sessão, renovação via refresh,
+logout 204, remoção de cookies, API 401 e painel 303 após logout. Sessões de teste encerradas;
+processo descartável encerrado, servidor principal preservado. Sem escrita de produtos.
+Teste de sessão renovada remove apenas o cookie de acesso local, sem esperar expirar o JWT.
+Único bloqueio solicitado agora: corrigir o par local da segunda conta; Redis ainda sem
+credenciais, criação não executada. Relatórios brutos pytest capturados em diretório temporário
+privado e removidos; nenhuma senha, token ou e-mail completo registrado nesta evidência.
