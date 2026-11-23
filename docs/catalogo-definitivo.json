@@ -191,7 +191,7 @@
         },
         "featured": {
           "enabled": true,
-          "order": 2,
+          "order": 4,
           "backgroundHex": "#0F2340",
           "accentHex": "#5AA2FF"
         },
@@ -329,24 +329,51 @@
     ],
     "alterar_ativos": [
       {
+        "slug": "nike-air-max-90-infrared",
+        "campo": "featured.enabled",
+        "de": true,
+        "para": false,
+        "motivo": "responsável pediu o AM90 fora dos destaques da home; produto continua ativo"
+      },
+      {
         "slug": "nike-dunk-low-vermelho-cinza",
         "campo": "featured",
         "de": null,
         "para": {
           "enabled": true,
-          "order": 4,
+          "order": 1,
           "backgroundHex": "#24272B",
           "accentHex": "#FF4A4F"
         },
-        "motivo": "vitrine mais chamativa: Dunk vermelho no carrossel"
+        "motivo": "novo primeiro destaque: foto CC0 do par vermelho, já ativo no Atlas"
+      },
+      {
+        "slug": "nike-air-max-95-dark-army",
+        "campo": "featured.enabled + featured.order",
+        "de": [
+          false,
+          2
+        ],
+        "para": [
+          true,
+          2
+        ],
+        "motivo": "retirado por engano; volta como destaque 2 (3D segue na página do produto)"
+      },
+      {
+        "slug": "adidas-samba-og",
+        "campo": "featured.order",
+        "de": 3,
+        "para": 3,
+        "motivo": "sem mudança"
       }
     ],
     "ordem_final_destaques": [
-      "nike-air-max-90-infrared (1, já)",
-      "adidas-gazelle-indoor-azul (2, novo)",
-      "adidas-samba-og (3, já)",
-      "nike-dunk-low-vermelho-cinza (4)",
-      "nike-cortez-branco-vermelho (5, novo)"
+      "nike-dunk-low-vermelho-cinza (1)",
+      "nike-air-max-95-dark-army (2)",
+      "adidas-samba-og (3)",
+      "adidas-gazelle-indoor-azul (4, só após aprovar o INSERT 208)",
+      "nike-cortez-branco-vermelho (5, só após aprovar o INSERT 209)"
     ],
     "resultado_esperado": {
       "ativos": 9,
@@ -372,6 +399,7 @@
       "tests/integration/test_pages.py::test_integrated_home_shows_approved_collections_and_keeps_photo_credits espera 'Andre Bond Sr.'/'CC BY 4.0' na home; a imagem do AM95 saiu do banner Street (agora Dunk Low) e o crédito da home lista Dunk, Gazelle e AM90.",
       "tests/integration/test_showcase.py::test_fastapi_showcase_keeps_curated_media_and_contracts_without_remote_writes espera o conjunto antigo de destaques das fixtures (com AM95); fixtures agora: AM90, Gazelle Indoor, Samba, Dunk Low, Cortez.",
       "tests/e2e/live/delivery.spec.js (opt-in) exige AM95 no carrossel com 3D no hero; o player do Sketchfab agora fica só no bloco 'Demonstração 3D' de /tenis/nike-air-max-95-dark-army. Aceite novo em tests/e2e/live/catalogo-real.spec.js."
-    ]
+    ],
+    "correcao_2026_11_23": "CORREÇÃO do responsável: o tênis a retirar dos destaques é o Nike Air Max 90 Infrared, não o Air Max 95 Dark Army. AM90 continua ativo no catálogo; AM95 volta aos destaques. Os três INSERTs (208/209/210) aguardam aprovação específica do responsável."
   }
 }

@@ -53,7 +53,8 @@ async function drag(page, dx, dy) {
 }
 
 test("hero nunca embute o player do Sketchfab, nem com o AM95 em destaque", async ({ page }) => {
-  await page.goto("/am95-destaque/");
+  await page.goto("/");
+  await page.locator(`#hero [data-thumbs] button[data-id="${with3d.id}"]`).click();
   await expect(page.locator("#hero h1")).toHaveText(with3d.name);
   await expect(page.locator("#hero [data-3d-toggle]")).toBeHidden();
   await page.locator("#hero [data-hero-media]").click();

@@ -15,11 +15,22 @@ test("home renderiza marca, hero e lançamentos a partir do contexto", async ({ 
     await expect(cards.nth(i)).toContainText(brl(p.priceCents).replace(/\s/, " "));
     await expect(cards.nth(i).getByRole("link")).toHaveAttribute("href", `/tenis/${p.slug}`);
   }
-  for (const [category, image] of [["Street", "nike-dunk-low-vermelho-cinza/main.webp"], ["Classics", "adidas-gazelle-indoor-azul/main.webp"], ["Performance", "nike-air-max-90-infrared/main.webp"]]) {
+  for (const [category, image] of [["Street", "nike-dunk-low-vermelho-cinza/main.webp"], ["Classics", "adidas-gazelle-indoor-azul/main.webp"], ["Performance", "asics-gel-1130-branco-dourado/main.webp"]]) {
     const collection = page.locator(`#colecoes a[href="/tenis?category=${category}"]`);
     await expect(collection).toBeVisible();
     await expect(collection.locator("img")).toHaveAttribute("src", `/static/images/products/${image}`);
   }
+});
+
+test("Air Max 90 Infrared fora dos destaques e dos banners, mas no catálogo", async ({ page }) => {
+  await page.goto("/");
+  const featured = JSON.parse(await page.locator("#hero-data").textContent());
+  expect(featured.map((p) => p.slug)).not.toContain("nike-air-max-90-infrared");
+  await expect(page.locator('#hero img[src*="nike-air-max-90"], #colecoes img[src*="nike-air-max-90"]')).toHaveCount(0);
+  await expect(page.locator("#hero [data-thumbs] button")).toHaveCount(featured.length);
+  await expect(page.locator("#hero [data-progress] > *")).toHaveCount(featured.length);
+  await page.goto("/tenis/");
+  await expect(page.locator('[data-catalog-list] a[href="/tenis/nike-air-max-90-infrared"]')).toHaveCount(1);
 });
 
 test("sem claims comerciais não comprovados (cap. 05)", async ({ page }) => {
