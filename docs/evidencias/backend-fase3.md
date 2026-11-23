@@ -701,3 +701,44 @@ valores, e-mails ou tokens; nenhuma sessão foi criada. Tentativas encerradas, s
 SQL, testes do administrador ou escrita em outro banco. Login válido da segunda conta e negação
 por privilégio continuam pendentes; criação do Redis não iniciada. Próxima ação: conferir no
 Auth/Users o e-mail exato da segunda conta e salvar no .env o par dessa mesma conta.
+
+
+## Fluxo integrado Supabase/Atlas concluído — 22/11/2026
+
+Autorização explícita do usuário limitada ao SKU NEOX-QA-20261122-A01. Antes do INSERT,
+consulta de leitura confirmou SKU/slug ausentes. Usados somente neox_drop_test.products e o
+administrador aprovado, sem migrations, DDL, alterações Auth ou acesso a outro banco.
+
+FastAPI PRINCIPAL http://127.0.0.1:8000, Supabase e Atlas reais, sem interceptações/mocks:
+
+- Playwright Chromium headless: login UI com UUID aprovado, cadastro pelo formulário 201,
+  card visível no catálogo e detalhe com nome exato. Nome TESTE ACADÊMICO — NÃO À VENDA,
+  marca NEOX QA, categoria Teste, imagem SVG demonstrativa já existente; sem marca real.
+- Cliente Mongo independente confirmou documento 6b03966eeedeab94c79a56ed, preço inicial
+  15990 centavos e tamanho 40/estoque fictício 3. Apenas um documento com o SKU autorizado.
+- POST de preço negativo 422 e repetição do mesmo SKU/slug 409; nenhum segundo documento.
+  Filtros marca/categoria/tamanho passaram; filtro de outra marca excluiu o produto.
+- PATCH autenticado 200: nome com (EDITADO), 17000 centavos, tamanhos 40/estoque 2 e
+  42/estoque 1. Leitura direta Atlas e API pública/HTML confirmaram todos os campos.
+- Servidor principal reiniciado de PID 89324 para outro PID, na MESMA porta 8000, usando
+  o .env local. Após o reinício, mesmo id, nome, preço, tamanhos e card ativo preservados.
+- DELETE da API é desativação: 204; documento preservado com active=false. Lista/API/HTML
+  públicos deixaram de exibir o produto; detalhe API e página passaram a 404; consulta admin
+  de inativos encontrou o documento. Logout 204, API admin 401 e painel 303 depois.
+- Snapshot dos demais documentos antes/depois idêntico. Nenhum registro preexistente alterado
+  ou excluído. Apenas UM registro fictício, final inativo, permanece como evidência.
+- Conferência final no navegador: catálogo filtrado 200 sem o card; detalhe inativo 404.
+
+Execução: quatro verificações UI de cadastro + 30 verificações do fluxo HTTP/Atlas, todas
+passaram; conferência final UI passou. A tentativa inicial de UI falhou antes do INSERT, sem
+status suficiente para concluir a causa; diagnóstico HTTP de login passou e repetição da UI
+passou. Nenhuma correção de código foi inferida desse evento. Sessões de teste encerradas.
+Regressão da missão: pytest 171 passed/6 skipped (suíte local, sem prova externa), build
+vendor/Tailwind e ruff passaram. Não executados os demais testes reais de escrita, pois
+criariam outros registros fora da autorização. Sem screenshot/trace/vídeo ou saída de segredos.
+
+Configuração local .env: APP_ENV=test, TEST_CONNECTIONS_ENABLED=true, modo 0600; padrões do
+código/.env.example preservados. README com comando normal para subir :8000. Sem código de
+aplicação/contrato/frontend alterado. Segunda conta invalid_credentials continua pendência
+secundária externa: não foi comprovada negação por perfil após login válido. Redis/checkout
+WhatsApp não testados nesta missão. Sem push, deploy ou modificações destrutivas.
