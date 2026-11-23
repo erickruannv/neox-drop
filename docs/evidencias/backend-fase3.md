@@ -1150,3 +1150,59 @@ hero e AM95 ausente dos destaques. Ambos os percursos passaram; capturas inspeci
 .gstack/backend-expansion (ignoradas). Conferência independente de todos os campos da
 fonte local versus seis documentos Atlas passou; nenhuma nova alteração remota nesse teste.
 Ainda não existem oito documentos ativos nem novo commit visual entregue para integrar.
+
+## Correção urgente: alvo AM90 Infrared, preservação do AM95 — 23/11/2026
+
+O responsável corrigiu a identificação: retirar AM90 Infrared dos destaques, não AM95.
+Conferidos main df5be07 e frontend e99538d, worktrees sem alterações nossas pendentes.
+Correção remota restrita a featured.enabled: AM90 true→false e AM95 false→true, para
+restaurar o destaque retirado por engano. Atualizações condicionais por _id/SKU/flag anterior
+e updatedAt; matched2/modified2. Snapshot BSON de TODOS os documentos confirmou apenas esses
+dois flags, inclusive updatedAt, preços, imagens, estoque, status active e créditos intactos.
+Não houve INSERT, exclusão, mudança de conta/permissão ou configuração de Supabase/Redis.
+Resultado real:6ativos,2destaques (AM95 Dark Army e Samba). QA continua inativo.
+
+Integrado e99538d com histórico preservado no merge27a8ba6. O Claude então entregou88b29c0:
+AM90 também removido do banner Performance (agora foto GEL-1130), navegação de slide único
+condicional; incorporado sequencialmente sem tocar sua worktree nem arquivos temporários.
+Nenhuma modificação visual própria do Codex. Sem GLB nativo novo: embed do AM95 preservado
+em Demonstração3D no detalhe, fora do hero/galeria; não declarar 3D nativo concluído.
+
+Regressões diagnosticadas: testes backend ainda esperavam créditos/banners e destaques antigos;
+ajustados para mídias atuais, preservando verificação CC BY4.0/Andre Bond Sr. no detalhe AM95.
+O preview antigo tratava destaques como catálogo inteiro, omitindo produtos não destacados.
+Separados featured_items e catálogo completo de fixtures; isto não altera o FastAPI real.
+Teste que falhava com Street=1 agora confere três produtos Street e acesso/créditos do AM95.
+Asserção explícita impede retorno da imagem AM90 ao banner estático de home indisponível.
+Aceites reais antigos que exigiam AM90 primeiro/AM95 ausente foram alinhados à correção;
+nenhum teste foi desabilitado para esconder falhas. Fixtures contêm nove, banco continua seis.
+
+Verificação: backend184passed/7skipped; ruff check/format aprovados; UI141passed/5skipped
+(fixtures/dublês), pnpm build aprovado. Após último reforço de asserção,19testes locais de
+pages/showcase aprovados. Teste real independente de catálogo API/home/filtros vs Atlas:1pass.
+Chromium desktop e celular emulado no FastAPI principal :8000:2percursos reais aprovados
+em33,7s, seis produtos e dois slides contados separadamente, AM90 ausente de hero/banners,
+AM90 e todos os outros cinco ainda no catálogo; imagens, New Balance/Performance, Marcas e
+Coleções validados. Demo3D AM95 carregada, giro horizontal por teclado conferido. Visitas
+normais ao detalhe podem gravar cache/recentes QA; nenhum documento de produto foi escrito
+pelos testes de navegação. Supabase/Auth e checkout não foram reconfigurados.
+
+Capturas reais inspecionadas: .gstack/urgent-am90/{desktop,mobile-360}-{home,catalogo}.png,
+ignoradas no Git; carregadas também as imagens lazy antes das capturas, scroll restaurado
+ao topo para evitar artefato de header sticky no meio da imagem. Celular é emulação.
+
+Três cadastros preparados em mongo/catalogo-adicional.pending.json, SEM INSERT:
+208 Gazelle Indoor Azul/Branco/Gum, Classics,64990centavos;
+209 Cortez Branco/Vermelho/Azul, Classics,54990;
+210 GEL-1130 Branco/Dourado/Prata, Performance,74990.
+BR38–43, estoques3/4/5/5/4/2 (23fictícios cada), imagens WebP locais inspecionadas,
+autoria LeDroider/CC0 reconfirmada nas páginas oficiais do Commons (fontes em assets-licenses).
+ProductCreate/backend/BSON e ausência de colisões SKU/slug conferidos em leitura Atlas.
+Proposta final de INSERT inclui Gazelle destaque4, Cortez5, GEL sem destaque; autorização específica
+solicitada, ainda pendente. Nenhuma alteração adicional para o Dunk autorizada/executada.
+Se aprovada somente essa proposta, serão9ativos/4slides; não é o estado atual. Manifesto e
+documentação corrigidos para não confundir mídia licenciada, fixtures e cadastros aprovados.
+Gazelle/GEL nos banners ainda ilustram coleções sem terem documento no catálogo; limitação
+declarada, aguardando autorização. Não há evidência de nove produtos reais nesta etapa.
+Conferência final: fonte local dos seis produtos e Atlas idênticos, três novos SKUs ausentes.
+Não houve push/deploy nem exclusão. Worktree do Claude preservada.

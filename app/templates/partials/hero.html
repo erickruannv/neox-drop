@@ -5,8 +5,9 @@
 {%- if items %}
 {%- set first = items[0] -%}
 {%- set fx = first.featured if first.featured else {} -%}
+{%- set many = items|length > 1 -%}
 <section id="hero" class="hero relative overflow-hidden text-white"
-         aria-roledescription="carrossel" aria-label="Destaques NEOX drop"
+         {% if many %}aria-roledescription="carrossel" {% endif %}aria-label="Destaques NEOX drop"
          data-selected="{{ first.id }}"
          style="--hero-bg: {{ fx.backgroundHex|default('#1A1D17') }}; --hero-accent: {{ fx.accentHex|default('#BDF400') }};">
   {# Arcos decorativos (ref. 04), tingidos pelo accentHex. #}
@@ -49,6 +50,8 @@
       Comprar agora {{ icon("arrow-right", "size-5") }}
     </a>
 
+    {# Navegação só com 2+ destaques; com um só, nada de miniatura, contador ou setas soltas. #}
+    {% if many %}
     {# Miniaturas: rolagem horizontal no celular, pílula central no desktop. #}
     <div class="order-3 lg:absolute lg:bottom-6 lg:left-1/2 lg:-translate-x-1/2">
       <ul class="-mx-4 flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:scroll-px-0 sm:px-0 lg:rounded-full lg:bg-black/30 lg:p-1.5 lg:backdrop-blur" aria-label="Escolher destaque" data-thumbs>
@@ -76,10 +79,13 @@
         <button type="button" class="icon-btn bg-white/10 hover:bg-white/20" data-step="1" aria-label="Próximo destaque">{{ icon("arrow-right", "size-5") }}</button>
       </div>
     </div>
+    {% endif %}
   </div>
 
+  {% if many %}
   <button type="button" class="icon-btn absolute left-6 top-1/2 z-20 hidden size-12 -translate-y-1/2 bg-white/10 hover:bg-white/20 lg:inline-flex" data-step="-1" aria-label="Destaque anterior">{{ icon("arrow-left") }}</button>
   <button type="button" class="icon-btn absolute right-6 top-1/2 z-20 hidden size-12 -translate-y-1/2 bg-white/10 hover:bg-white/20 lg:inline-flex" data-step="1" aria-label="Próximo destaque">{{ icon("arrow-right") }}</button>
+  {% endif %}
 
   <p class="sr-only" aria-live="polite" data-live></p>
   <script type="application/json" id="hero-data">{{ items|tojson }}</script>

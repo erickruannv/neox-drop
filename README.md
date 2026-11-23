@@ -29,7 +29,7 @@ painel protegido: `/admin/produtos`. O carrinho é aberto pelo botão do cabeça
 O .env local foi configurado com APP_ENV=test e TEST_CONNECTIONS_ENABLED=true;
 o .env.example e os padrões do código continuam com conexões desabilitadas.
 Só usar os projetos de TESTE já conferidos. Um worker até existir rate limit compartilhado.
-A main reúne backend validado e frontend `ccd55e1`, preservando os históricos. Worktrees
+A main reúne backend validado e frontend corrigido `88b29c0`, preservando os históricos. Worktrees
 anteriores foram mantidas; a demonstração antiga :8001 foi encerrada. Não executar duas lojas.
 
 ## Estado real
@@ -41,21 +41,22 @@ anteriores foram mantidas; a demonstração antiga :8001 foi encerrada. Não exe
 | Upstash Redis | Até 5 recentes, TTL 7 dias; cache 300s, sem governar preço | Upstash real validado: gravação/leitura, ordem, cinco únicos, TTL e expiração; home/recentes comprovados com os três produtos cadastrados no Atlas |
 
 FastAPI principal :8000 utiliza Supabase, Atlas e Upstash reais no mesmo processo.
-Catálogo acadêmico cadastrado e ativo (preços fictícios; somente AM90 e Samba em destaque):
+Catálogo acadêmico cadastrado e ativo (preços fictícios; somente AM95 e Samba em destaque):
 
 | Produto | Preço | Categoria | Estoque |
 |---|---:|---|---:|
-| Nike Air Max 95 Dark Army/Orange Blaze (fora dos destaques) | R$ 899,90 | Street | 9 |
-| Nike Air Max 90 Infrared | R$ 749,90 | Performance | 10 |
+| Nike Air Max 95 Dark Army/Orange Blaze | R$ 899,90 | Street | 9 |
+| Nike Air Max 90 Infrared (fora dos destaques) | R$ 749,90 | Performance | 10 |
 | Adidas Samba OG Branco/Preto | R$ 599,90 | Classics | 10 |
 | New Balance 2002R Lilás/Cinza | R$ 849,90 | Street | 23 |
 | Nike Dunk Low Vermelho/Cinza | R$ 799,90 | Street | 23 |
 | New Balance 574 Cinza | R$ 699,90 | Classics | 23 |
 
 [mongo/catalogo-academico.json](mongo/catalogo-academico.json) é a fonte aprovada do cadastro;
-O manifesto visual `docs/catalogo-definitivo.json` aguarda a atualização final do Claude.
-Os dois candidatos de `mongo/catalogo-adicional.pending.json` e o 574 do manifesto do Claude
-já foram cadastrados com autorização; não repetir INSERTs desses SKUs.
+O manifesto `docs/catalogo-definitivo.json.aprovados` corresponde aos seis cadastros reais.
+2002R, Dunk e574 já foram cadastrados com autorização; não repetir INSERTs desses SKUs.
+`mongo/catalogo-adicional.pending.json` agora contém somente os três INSERTs ainda pendentes:
+Gazelle Indoor, Cortez e GEL-1130. Nove produtos nas fixtures não comprovam nove no Atlas.
 O registro `NEOX-QA-20261122-A01` permanece inativo e intocado. Não executar seed/upsert para
 repetir o cadastro. Home, três Coleções, filtros, detalhes, imagens/créditos, 3D do AM95, carrinho,
 WhatsApp e recentes foram validados no navegador contra os serviços reais. Após reiniciar,
@@ -66,7 +67,7 @@ link e mensagem WhatsApp conferidos sem abrir o link/enviar mensagem. Redis pres
 deduplicação e TTL7dias dos recentes. Estoque não foi reservado/decrementado pelo checkout.
 O painel agora aceita créditos e fontes das imagens/modelo3D nos campos de attributes.
 
-Revisão final da interface: 184 testes backend aprovados/7 ignorados; 137 testes UI
+Revisão final da interface: 184 testes backend aprovados/7 ignorados; 141 testes UI
 aprovados/5 ignorados (fixtures/dublês, separados da integração real). O percurso real está
 em `tests/e2e/live/delivery.spec.js`: navegação, foto/3D, produtos do Atlas, carrinho,
 checkout sem envio, recentes e login/logout administrativo. Executar somente com credenciais
@@ -78,11 +79,15 @@ login válido dessa conta não foi comprovada. Restam vídeo5–10min e acesso d
 GitHub após autorização de publicação. Health retorna ok com os três serviços disponíveis.
 Não recriar bancos nem reaplicar migrations já aprovadas.
 
-Atualização autorizada: AM95 retirado dos destaques somente com featured.enabled=false;
-continua ativo no catálogo, com mídias e demais campos preservados. Hero real: AM90 → Samba.
-Seis produtos reais conferidos; ainda faltam dois produtos com manifesto/mídias aprovados
-e o commit final do Claude para atingir a meta de oito e concluir a integração visual.
-Filtros backend aceitam New Balance; inclusão da marca nos controles visuais cabe ao Claude.
+CORREÇÃO autorizada: é o AM90 que sai dos destaques (featured.enabled=false), mantendo-se
+ativo no catálogo. AM95 restaurado (featured.enabled=true), sem perder documento/mídias/3D.
+Hero real: AM95 → Samba, dois slides e seis produtos ativos. Nenhum outro campo foi alterado.
+O frontend corrigido substitui também o banner Performance; AM90 pode continuar em
+Lançamentos e no catálogo. Filtros visuais incluem New Balance e ASICS; ASICS não possui
+produto cadastrado antes da aprovação pendente. Fotografias de Gazelle/GEL-1130 nos banners
+são ilustrativas das coleções; esses dois produtos ainda não estão disponíveis no catálogo.
+Sketchfab fica identificado no bloco separado Demonstração3D do detalhe do AM95; não é
+um GLB nativo aprovado nem comprova conclusão do diferencial3D solicitado.
 
 O servidor lê `/Users/dg/Documents/NeoxDrop/.env` (main). A chave privada de contato foi
 transferida localmente do .env da worktree backend após conferir o mesmo projeto Supabase;

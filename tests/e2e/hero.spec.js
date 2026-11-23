@@ -155,3 +155,10 @@ test.describe("3D no lugar da foto com GLB (fictício, sem ativo licenciado)", (
     await expect(media(page)).toHaveAttribute("data-state3d", "idle");
   });
 });
+
+test("um único destaque: sem miniaturas, contador, pontos nem setas", async ({ page }) => {
+  await page.goto("/um-destaque/");
+  await expect(page.locator("#hero h1")).toHaveText(items[0].name);
+  await expect(page.locator("#hero")).not.toHaveAttribute("aria-roledescription", "carrossel");
+  await expect(page.locator("#hero [data-thumbs], #hero [data-step], #hero [data-progress], #hero [data-field=counter]")).toHaveCount(0);
+});

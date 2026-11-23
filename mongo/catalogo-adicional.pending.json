@@ -14,7 +14,7 @@
     },
     "featured": {
       "enabled": true,
-      "order": 2,
+      "order": 4,
       "backgroundHex": "#0F2340",
       "accentHex": "#5AA2FF"
     },

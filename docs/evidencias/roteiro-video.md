@@ -7,7 +7,7 @@ Não filmar .env, senhas, JWTs, chaves, URI Mongo ou painéis que revelem tokens
 
 | Tempo | Mostrar | Evidência obrigatória |
 |---|---|---|
-| 0:00–0:45 | Home real, AM90 primeiro; selecionar AM95 e revelar seu 3D | Python 3.13/FastAPI/Jinja2/Tailwind; Supabase=identidade, Mongo=produtos, Redis=recentes |
+| 0:00–0:45 | Home real: dois destaques AM95/Samba, AM90 fora; seis produtos no catálogo | Python 3.13/FastAPI/Jinja2/Tailwind; Supabase=identidade, Mongo=produtos, Redis=recentes |
 | 0:45–1:45 | Login admin pelo formulário | Supabase Auth real, cookie HttpOnly e perfil admin ativo sob RLS; negação da segunda conta apenas após login válido (ainda pendente) |
 | 1:45–3:15 | Com autorização prévia, cadastrar e editar um único tênis TESTE ACADÊMICO | Preço fictício em centavos; conferir documento no Atlas e alteração imediata no catálogo |
 | 3:15–4:00 | Catálogo/detalhe e persistência | Produto aparece sem seed; reiniciar FastAPI e comprovar o mesmo documento/ID persistido |
@@ -40,7 +40,9 @@ Checkout WhatsApp positivo passou em 23/11/2026, incluindo link e mensagem, sem 
 Os três produtos definitivos acadêmicos foram cadastrados e permanecem ativos; fonte em
 mongo/catalogo-academico.json. Falta validar a segunda conta com credenciais válidas. Fotos/3D não
 comprovam estoque real. Os quatro modelos 3D completos continuam fora desta validação.
-O carrossel real agora abre com AM90, seguido de AM95 com foto→3D e Samba. Não filmar o 3D
-emulando celular como prova de aparelho físico; preferir desktop e informar essa limitação.
+Correção vigente: AM90 continua no catálogo, fora do hero/banners. AM95 e Samba são os dois
+destaques reais. Há seis produtos ativos; Gazelle/Cortez/GEL-1130 ainda aguardam autorização.
+O3D do AM95 fica em Demonstração3D, no detalhe, separado da galeria fotográfica; não afirmar
+GLB nativo concluído. Não filmar emulação como prova de aparelho físico.
 Após gravar: conferir duração de 5–10 minutos, legibilidade, ausência de segredos, acesso ao vídeo e
 acesso do professor ao GitHub. Publicação/push dependem da autorização do responsável.

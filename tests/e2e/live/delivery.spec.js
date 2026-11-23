@@ -5,37 +5,15 @@ import { test, expect } from '@playwright/test';
 test.skip(process.env.NEOX_DELIVERY_QA !== '1' || !process.env.NEOX_FASTAPI_URL,
   'Exige servidor real e opt-in NEOX_DELIVERY_QA=1.');
 
-test('ordem autorizada AM90 AM95 Samba e foto para 3D do mesmo AM95', async ({ page }, info) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  const response = await page.goto('/');
-  expect(response.status()).toBe(200);
-  const items = await page.locator('#hero-data').evaluate(el => JSON.parse(el.textContent));
-  expect(items.slice(0, 3).map(p => p.sku)).toEqual([
-    'NEOX-AM90-INFRARED', 'NEOX-AM95-DARKARMY', 'NEOX-SAMBA-OG-BP',
-  ]);
+test('destaques reais excluem AM90 e preservam AM95 e o catálogo', async ({ page }) => {
+  const items = (await (await page.request.get('/api/featured')).json()).items;
+  expect(items.some(p => p.sku === 'NEOX-AM90-INFRARED')).toBe(false);
+  expect(items.some(p => p.sku === 'NEOX-AM95-DARKARMY')).toBe(true);
+  await page.goto('/');
   await expect(page.locator('#hero h1')).toHaveText(items[0].name);
-  await expect(page.locator('#hero [data-3d-photo]')).toHaveAttribute('src', items[0].mainImageUrl);
-  await expect(page.locator('[data-sketchfab-frame]')).toHaveCount(0);
-  await page.screenshot({ path: info.outputPath('ordem-inicial.png') });
-  const am95 = items[1];
-  expect(am95.model3dUrl).toBe('https://sketchfab.com/models/c425a652fc59427ba1fcef48ea174c92/embed');
-  await page.locator(`#hero [data-thumbs] button[data-id="${am95.id}"]`).click();
-  await expect(page.locator('#hero h1')).toHaveText(am95.name);
-  await expect(page.locator('#hero [data-3d-photo]')).toHaveAttribute('src', am95.mainImageUrl);
-  await expect(page.locator('[data-sketchfab-frame]')).toHaveCount(0);
-  await page.locator('#hero [data-3d-toggle]').click();
-  await expect(page.locator('#hero [data-hero-media]')).toHaveAttribute('data-state3d', 'ready');
-  const pad = page.locator('#hero [data-rotate-pad]');
-  const yaw = await pad.getAttribute('aria-valuenow');
-  await pad.focus();
-  await page.keyboard.press('ArrowRight');
-  await expect(pad).not.toHaveAttribute('aria-valuenow', yaw);
-  await expect(page.locator('#hero [data-field=credit]')).toContainText('Andre');
-  await page.waitForTimeout(2500); // Texturas finais para inspeção visual.
-  await page.screenshot({ path: info.outputPath('am95-3d.png') });
-  await page.locator('#hero [data-3d-toggle]').click();
-  await expect(page.locator('#hero [data-hero-media]')).toHaveAttribute('data-state3d', 'idle');
-  await expect(page.locator('#hero [data-3d-photo]')).toHaveCSS('opacity', '1');
+  await expect(page.locator('#hero [data-3d-toggle]')).toBeHidden();
+  expect(await page.locator('#hero img, #colecoes img').evaluateAll(images => images.every(i => !i.src.includes('nike-air-max-90-infrared')))).toBe(true);
+  expect((await page.request.get('/api/products/nike-air-max-90-infrared')).status()).toBe(200);
 });
 
 test('entrega integrada: catálogo Atlas, navegação, foto/3D, carrinho, WhatsApp, recentes e admin', async ({ page, isMobile }, info) => {
@@ -93,22 +71,23 @@ test('entrega integrada: catálogo Atlas, navegação, foto/3D, carrinho, WhatsA
   await expect(page.locator('#hero h1')).toHaveText(am95.name);
   await expect(page.locator('#hero [data-3d-photo]')).toHaveAttribute('src', am95.mainImageUrl);
   await expect(page.locator('[data-sketchfab-frame]')).toHaveCount(0);
-  await page.locator('#hero [data-3d-toggle]').click();
-  await expect(page.locator('#hero [data-hero-media]')).toHaveAttribute('data-state3d', 'ready');
+  await page.goto(`/tenis/${am95.slug}`);
+  await page.locator('[data-3d-demo] [data-3d-toggle]').click();
+  await expect(page.locator('[data-3d-demo]')).toHaveAttribute('data-state3d', 'ready');
   const frame = page.frames().find(f => f.url().includes('sketchfab.com/models/'));
   const frameBox = await page.locator('[data-sketchfab-frame]').boundingBox();
   expect(Math.abs(await frame.evaluate(() => innerWidth) - frameBox.width)).toBeLessThan(2);
-  const pad = page.locator('#hero [data-rotate-pad]');
+  const pad = page.locator('[data-3d-demo] [data-rotate-pad]');
   const yaw = await pad.getAttribute('aria-valuenow');
   await pad.focus();
   await page.keyboard.press('ArrowRight');
   await expect(pad).not.toHaveAttribute('aria-valuenow', yaw);
-  await expect(page.locator('#hero [data-field=credit]')).toContainText('Andre');
+  await expect(page.locator('[data-3d-demo]')).toContainText('Andre');
   await page.waitForTimeout(2500); // Aguarda as texturas finais antes da inspeção visual.
-  await page.screenshot({ path: info.outputPath('home-3d.png') });
-  await page.locator('#hero [data-3d-toggle]').click();
-  await expect(page.locator('#hero [data-hero-media]')).toHaveAttribute('data-state3d', 'idle');
-  await expect(page.locator('#hero [data-3d-photo]')).toHaveCSS('opacity', '1');
+  await page.screenshot({ path: info.outputPath('demonstracao-3d.png') });
+  await page.locator('[data-3d-demo] [data-3d-toggle]').click();
+  await expect(page.locator('[data-3d-demo]')).toHaveAttribute('data-state3d', 'idle');
+  await expect(page.locator('[data-3d-demo] [data-3d-photo]')).toHaveCSS('opacity', '1');
 
   for (const product of products) {
     await page.goto(`/tenis/${product.slug}`);

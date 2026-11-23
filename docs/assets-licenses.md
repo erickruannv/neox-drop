@@ -105,11 +105,14 @@ explícita (Royalty Free / Standard) antes de comprar.
 | Qualquer um | **Escanear os pares do estoque** (fotogrametria por app de celular → GLB → Model Viewer) | grátis a ~US$ 15/mês de app | colorway exata e direito autoral próprio; qualidade boa, não de configurador |
 | Qualquer um | Encomendar modelagem/escaneamento profissional | orçamento | qualidade de configurador; custo alto |
 
-## Expansão do catálogo (aprovada pelo responsável em 2026-11-23)
+## Mídias da expansão proposta (cadastros adicionais pendentes)
 
-Nove tênis com foto real e licença livre. Recorte BiRefNet, WebP 1600×1000, fundo transparente.
-Licença CC0 reconfirmada na API do Commons em 2026-11-23. Dados (ProductCreate) em
-`docs/catalogo-definitivo.json` → `cadastro_pedido_2026_11_23`; 205/206/207 já gravados pelo Codex.
+Há nove conjuntos de mídia no projeto; isso não significa nove produtos cadastrados.
+As fotos adicionais abaixo usam recorte BiRefNet/WebP 1600×1000 e licença CC0, reconfirmada
+nas páginas do Commons em23/11/2026. Os SKUs205/206/207 estão cadastrados; 208/209/210
+(Gazelle, Cortez, GEL-1130) aguardam aprovação específica de INSERT. Dados ProductCreate em
+`mongo/catalogo-adicional.pending.json` e no manifesto visual do Claude. As fotografias dos
+banners de coleção não comprovam disponibilidade desses registros pendentes no Atlas.
 
 | Arquivo | Produto | Fonte | Autor | Licença | Alteração |
 |---|---|---|---|---|---|
