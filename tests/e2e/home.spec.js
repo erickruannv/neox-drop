@@ -53,3 +53,27 @@ test("sem destaques/lançamentos: hero da marca e estado vazio, sem preço", asy
   await expect(page.getByText("Nenhum lançamento disponível no momento.")).toBeVisible();
   await expect(page.locator("main")).not.toContainText("R$");
 });
+
+test("navegação: Marcas e Coleções levam a destinos visíveis; menu do celular fecha ao escolher", async ({ page, isMobile }) => {
+  await page.goto("/");
+  const header = page.locator("header");
+  const go = async (name) => {
+    if (isMobile) {
+      await header.getByLabel("Menu", { exact: true }).click();
+      await header.getByRole("navigation", { name: "Principal (menu)" }).getByRole("link", { name }).click();
+      await expect(header.locator("[data-nav-menu]")).not.toHaveAttribute("open");
+    } else await header.getByRole("navigation", { name: "Principal" }).getByRole("link", { name }).click();
+  };
+  await go("Coleções");
+  await expect(page.locator("#colecoes")).toBeInViewport();
+  await expect(page.locator("#colecoes a[href^='/tenis?category=']")).toHaveCount(3);
+
+  await go("Marcas");
+  await expect(page).toHaveURL(/\/tenis\/?#marcas$/);
+  await expect(page.locator("#marcas")).toBeInViewport();
+  await expect(page.locator("#marcas").getByRole("link", { name: "Nike" })).toHaveAttribute("href", "/tenis?brand=Nike");
+
+  // nenhum link falso na página (href="#" ou vazio)
+  for (const href of await page.locator("a[href]").evaluateAll((els) => els.map((a) => a.getAttribute("href"))))
+    expect(href === "#" || href === "").toBe(false);
+});

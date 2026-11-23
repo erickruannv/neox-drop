@@ -48,18 +48,18 @@ test("estado vazio e erro com nova tentativa", async ({ page }) => {
   let fail = true;
   await page.route("**/api/products?*", (route) => {
     const params = new URL(route.request().url()).searchParams;
-    if (params.get("brand") === "erro" && fail) return route.fulfill({ status: 503, json: errorBody("DEPENDENCY_UNAVAILABLE", "Catálogo indisponível no momento.") });
+    if (params.get("q") === "erro" && fail) return route.fulfill({ status: 503, json: errorBody("DEPENDENCY_UNAVAILABLE", "Catálogo indisponível no momento.") });
     route.fulfill({ json: productList(params) });
   });
   await page.goto("/tenis/");
   await openFilters(page);
 
-  await page.getByLabel("Marca").fill("inexistente");
+  await page.getByLabel("Busca", { exact: true }).fill("inexistente");
   await page.getByRole("button", { name: "Aplicar" }).click();
   await expect(page.getByText("Nenhum tênis encontrado com esses filtros.")).toBeVisible();
   await expect(cards(page)).toHaveCount(0);
 
-  await page.getByLabel("Marca").fill("erro");
+  await page.getByLabel("Busca", { exact: true }).fill("erro");
   await page.getByRole("button", { name: "Aplicar" }).click();
   await expect(page.getByRole("alert")).toContainText("Catálogo indisponível no momento.");
   fail = false;
@@ -100,4 +100,17 @@ test("menu marca Tênis como página atual", async ({ page, isMobile }) => {
   test.skip(isMobile, "menu principal visível só no desktop");
   await page.goto("/tenis/");
   await expect(page.getByRole("navigation", { name: "Principal", exact: true }).getByRole("link", { name: "Tênis" })).toHaveAttribute("aria-current", "page");
+});
+
+test("Marcas/Coleções: faixa de exploração filtra de verdade e acompanha o filtro aplicado", async ({ page }) => {
+  await page.route("**/api/products?*", (r) => r.fulfill({ json: productList(new URL(r.request().url()).searchParams) }));
+  await page.goto("/tenis/");
+  const explore = page.getByRole("navigation", { name: "Explorar por marca e coleção" });
+  for (const a of await explore.getByRole("link").all()) expect(await a.getAttribute("href")).toMatch(/^\/tenis(\?(brand|category)=[A-Za-z+%0-9]+)?$/);
+  await expect(explore.locator("#marcas")).toBeVisible(); // âncora do menu "Marcas" fora do painel recolhível
+  await openFilters(page);
+  await page.getByLabel("Marca", { exact: true }).selectOption("adidas");
+  await expect(page).toHaveURL(/brand=adidas/);
+  await expect(explore.locator("#marcas").getByRole("link", { name: "adidas" })).toHaveAttribute("aria-current", "true");
+  await expect(explore.locator("#marcas").getByRole("link", { name: "Todas" })).not.toHaveAttribute("aria-current");
 });

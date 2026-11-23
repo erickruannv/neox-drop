@@ -55,7 +55,7 @@
           <span data-cart-count hidden class="absolute right-0.5 top-0.5 grid min-w-5 place-items-center rounded-full bg-coral px-1 text-[11px] font-bold text-white"></span>
         </button>
 
-        <details class="group relative lg:hidden">
+        <details class="group relative lg:hidden" data-nav-menu>
           <summary class="icon-btn cursor-pointer list-none hover:bg-white/10 [&::-webkit-details-marker]:hidden" aria-label="Menu">{{ icon("menu") }}</summary>
           <div class="absolute right-0 top-14 w-[min(20rem,calc(100vw-2rem))] rounded-2xl bg-ink-soft p-4 shadow-2xl ring-1 ring-white/10">
             <form action="/tenis" method="get" role="search" class="mb-3 md:hidden">
@@ -94,6 +94,7 @@
       <nav aria-label="Rodapé">
         <ul class="grid gap-2 text-sm font-semibold">
           <li><a class="hover:text-lime" href="/tenis">Todos os tênis</a></li>
+          <li><a class="hover:text-lime" href="/tenis#marcas">Marcas</a></li>
           <li><a class="hover:text-lime" href="/#colecoes">Coleções</a></li>
           <li><a class="hover:text-lime" href="/admin/login">Área administrativa</a></li>
         </ul>
@@ -104,6 +105,7 @@
   {% include "partials/cart.html" %}
   <script type="module" src="/static/js/cart.js"></script>
   {% endblock %}
+  <script type="module" src="/static/js/nav.js"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

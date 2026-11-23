@@ -4,6 +4,9 @@
     (q, brand, category, sizeBR, sort, page, limit). Funciona sem JS (form GET);
     catalog.js troca resultados via /api/products sem recarregar. -#}
 {%- set f = filters if filters else {} -%}
+{#- Marcas e coleções exploráveis: listas fixas como as categorias do contrato (sem endpoint de marcas). -#}
+{%- set brands = ["Nike", "adidas", "New Balance"] -%}
+{%- set collections = ["Street", "Classics", "Performance"] -%}
 {%- set items = catalog["items"] if catalog else [] -%}
 {%- set page = catalog.page if catalog else 1 -%}
 {%- set limit = catalog.limit if catalog else 12 -%}
@@ -26,6 +29,20 @@
     </p>
   </div>
 
+  {# Exploração por marca/coleção: links GET reais (funcionam sem JS); destino do menu "Marcas". #}
+  <nav aria-label="Explorar por marca e coleção" class="mt-6 grid gap-3 rounded-2xl bg-white p-4 shadow-[0_8px_24px_rgb(0_0_0/0.06)] sm:p-5">
+    {% for key, label, anchor, values in [("brand", "Marcas", "marcas", brands), ("category", "Coleções", "colecoes", collections)] %}
+    <div id="{{ anchor }}" class="flex scroll-mt-28 flex-wrap items-center gap-2">
+      <span class="w-full shrink-0 text-xs font-bold uppercase tracking-wider text-muted sm:mr-1 sm:w-20">{{ label }}</span>
+      {% set active = f[key]|default('', true)|lower %}
+      <a href="/tenis" class="chip" data-chip="{{ key }}=" {% if not active %}aria-current="true"{% endif %}>Todas</a>
+      {% for v in values %}
+      <a href="/tenis?{{ {key: v}|urlencode }}" class="chip" data-chip="{{ key }}={{ v }}" {% if active == v|lower %}aria-current="true"{% endif %}>{{ v }}</a>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </nav>
+
   <div class="mt-6 grid gap-6 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10">
     <details class="group rounded-2xl bg-white p-4 shadow-[0_8px_24px_rgb(0_0_0/0.06)] lg:sticky lg:top-28 lg:self-start lg:p-6" data-filters-panel open>
       <summary class="flex cursor-pointer list-none items-center justify-between font-bold lg:pointer-events-none [&::-webkit-details-marker]:hidden">
@@ -38,16 +55,20 @@
           <input id="f-q" name="q" type="search" maxlength="100" value="{{ f.q|default('', true) }}" placeholder="Nome ou modelo"
                  class="h-11 w-full rounded-xl border border-ink/20 bg-paper px-3 focus:border-ink focus:outline-none">
         </div>
-        <div id="marcas" class="scroll-mt-28">
+        <div>
           <label for="f-brand" class="mb-1 block text-sm font-semibold">Marca</label>
-          <input id="f-brand" name="brand" type="text" maxlength="120" value="{{ f.brand|default('', true) }}" placeholder="Todas"
-                 class="h-11 w-full rounded-xl border border-ink/20 bg-paper px-3 focus:border-ink focus:outline-none">
+          {%- set fb = f.brand|default('', true) %}
+          <select id="f-brand" name="brand" class="h-11 w-full rounded-xl border border-ink/20 bg-paper px-3 focus:border-ink focus:outline-none">
+            <option value="">Todas</option>
+            {% for b in brands %}<option value="{{ b }}" {% if fb|lower == b|lower %}selected{% endif %}>{{ b }}</option>{% endfor %}
+            {% if fb and fb|lower not in brands|map('lower')|list %}<option value="{{ fb }}" selected>{{ fb }}</option>{% endif %}
+          </select>
         </div>
         <div>
           <label for="f-category" class="mb-1 block text-sm font-semibold">Categoria</label>
           <select id="f-category" name="category" class="h-11 w-full rounded-xl border border-ink/20 bg-paper px-3 focus:border-ink focus:outline-none">
             <option value="">Todas</option>
-            {% for c in ["Street", "Classics", "Performance"] %}
+            {% for c in collections %}
             <option value="{{ c }}" {% if f.category|default('') == c %}selected{% endif %}>{{ c }}</option>
             {% endfor %}
           </select>
