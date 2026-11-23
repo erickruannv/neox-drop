@@ -242,13 +242,85 @@
           "stock": 2
         }
       ]
+    },
+    {
+      "sku": "NEOX-DEMO-207",
+      "slug": "new-balance-574-cinza",
+      "name": "New Balance 574",
+      "brand": "New Balance",
+      "category": "Classics",
+      "priceCents": 69990,
+      "mainImageUrl": "/static/images/products/new-balance-574-cinza/main.webp",
+      "description": "Cabedal em camurça e malha cinza com o N reflexivo e entressola clara. Preço demonstrativo.",
+      "currency": "BRL",
+      "galleryUrls": [
+        "/static/images/products/new-balance-574-cinza/main.webp"
+      ],
+      "colorName": "Cinza",
+      "active": true,
+      "attributes": {
+        "imageCredit": "Foto: LeDroider, CC0, fundo removido",
+        "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:New_Balance_574.jpg"
+      },
+      "sizes": [
+        {
+          "sizeBR": 38,
+          "stock": 3
+        },
+        {
+          "sizeBR": 39,
+          "stock": 4
+        },
+        {
+          "sizeBR": 40,
+          "stock": 5
+        },
+        {
+          "sizeBR": 41,
+          "stock": 5
+        },
+        {
+          "sizeBR": 42,
+          "stock": 4
+        },
+        {
+          "sizeBR": 43,
+          "stock": 2
+        }
+      ]
     }
   ],
   "pendente_sem_midia": [
     {
       "name": "New Balance 9060",
       "colorName": "Cinza",
-      "motivo": "sem foto ou 3D com licença utilizável (Commons, Openverse/Flickr, Unsplash, Pexels; rechecado em 2026-11-23). Alternativa: New Balance 2002R."
+      "motivo": "sem foto ou 3D com licença utilizável (Commons, Openverse/Flickr, Unsplash, Pexels; rechecado em 2026-11-23). Alternativas: New Balance 2002R ou New Balance 574 cinza."
+    }
+  ],
+  "mudancas_pedidas_nos_ativos": [
+    {
+      "slug": "nike-air-max-90-infrared",
+      "campo": "featured.order",
+      "de": 2,
+      "para": 1,
+      "motivo": "responsável pediu o Air Max 90 Infrared como primeiro destaque (2026-11-23)"
+    },
+    {
+      "slug": "nike-air-max-95-dark-army",
+      "campo": "featured.order",
+      "de": 1,
+      "para": 2,
+      "motivo": "cede a posição 1; 3D continua no slide e na página"
+    }
+  ],
+  "reserva_nao_preparada": [
+    {
+      "name": "adidas Gazelle Indoor",
+      "colorName": "Azul/Branco/Gum",
+      "fonte": "https://commons.wikimedia.org/w/index.php?curid=148699790",
+      "autor": "LeDroider",
+      "licenca": "CC0",
+      "observacao": "par em vista lateral sobre madeira; preparar recorte só se aprovado"
     }
   ]
 }

@@ -46,9 +46,10 @@ Rejeitadas por modelo/cor errados: Commons `Air Max 95.jpg` (outro Air Max), `Ni
 
 ## 3D
 
-O hero e a página do produto abrem com a **imagem**; o 3D carrega só ao clicar "Ver em 3D"
-(palco `partials/viewer3d.html` + `static/js/viewer3d.js`), giro só em Y (camada de arraste própria
-sobre o embed; GLB futuro via Model Viewer com phi fixo).
+O hero e a página do produto abrem com a **foto**; o 3D do mesmo produto só carrega quando a pessoa
+interage com a foto (arraste horizontal, toque ou pílula "Girar 360°") e aparece no lugar dela quando
+fica pronto (`static/js/viewer3d.js`, `partials/rotate3d.html`). Giro só em Y (camada de arraste própria
+sobre o embed; GLB futuro via Model Viewer com phi fixo). Produto sem `model3dUrl` não mostra convite.
 
 **Escolhido (2026-11-22): um único modelo, fotorrealista.** Avaliado no Chromium com GPU, em
 vários ângulos, não só "carregou":
@@ -101,7 +102,8 @@ explícita (Royalty Free / Standard) antes de comprar.
 ## Alternativas propostas (não incorporadas — aguardam aprovação)
 
 Arquivos já preparados (recorte BiRefNet, WebP 1600×1000, fundo transparente) mas **não ligados à
-vitrine**: `products/new-balance-2002r/main.webp` e `products/nike-dunk-low-vermelho-cinza/main.webp`.
+vitrine**: `products/new-balance-2002r/main.webp`, `products/nike-dunk-low-vermelho-cinza/main.webp` e
+`products/new-balance-574-cinza/main.webp`.
 Licença CC0 reconfirmada na API do Commons em 2026-11-23. Dados prontos (ProductCreate) em
 `docs/catalogo-definitivo.json` → `alternativas_aguardando_aprovacao`. New Balance 9060: nova busca em
 2026-11-23 (Openverse/Flickr, categorias do Commons) sem resultado utilizável.
@@ -114,6 +116,8 @@ substituir, se aprovado:
 |---|---|---|---|---|
 | New Balance 9060 cinza | New Balance 2002R (camurça lilás/cinza, par) | [Commons, LeDroider](https://commons.wikimedia.org/w/index.php?curid=149192395) | CC0 | 2335×2424, foto de produto nítida; mesmo autor da foto do Samba |
 | (extra) | Nike Dunk Low vermelho/cinza (par) | [Commons, William Mucci](https://commons.wikimedia.org/w/index.php?curid=99442772) | CC0 | 2963×3523, fundo claro liso |
+| (extra) | New Balance 574 cinza (pé único, lateral) | [Commons, LeDroider](https://commons.wikimedia.org/w/index.php?curid=153859594) | CC0 | 3136×1826, vitrine de loja; recorte em `products/new-balance-574-cinza/main.webp` (2026-11-23) |
+| (reserva, sem recorte) | adidas Gazelle Indoor azul (par) | [Commons, LeDroider](https://commons.wikimedia.org/w/index.php?curid=148699790) | CC0 | 3688×2725, par lateral sobre madeira |
 
 O Air Max 95 já tem o Dark Army (3D + capturas) como representante aprovado.
 

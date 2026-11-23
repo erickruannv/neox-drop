@@ -22,7 +22,7 @@ painel protegido: `/admin/produtos`. O carrinho é aberto pelo botão do cabeça
 O .env local foi configurado com APP_ENV=test e TEST_CONNECTIONS_ENABLED=true;
 o .env.example e os padrões do código continuam com conexões desabilitadas.
 Só usar os projetos de TESTE já conferidos. Um worker até existir rate limit compartilhado.
-A main reúne backend validado e frontend `9ccf0bd`, preservando os históricos. Worktrees
+A main reúne backend validado e frontend `ccd55e1`, preservando os históricos. Worktrees
 anteriores foram mantidas; a demonstração antiga :8001 foi encerrada. Não executar duas lojas.
 
 ## Estado real
@@ -54,10 +54,23 @@ link e mensagem WhatsApp conferidos sem abrir o link/enviar mensagem. Redis pres
 deduplicação e TTL7dias dos recentes. Estoque não foi reservado/decrementado pelo checkout.
 O painel agora aceita créditos e fontes das imagens/modelo3D nos campos de attributes.
 
+Revisão final da interface: 184 testes backend aprovados/7 ignorados; 137 testes UI
+aprovados/5 ignorados (fixtures/dublês, separados da integração real). O percurso real está
+em `tests/e2e/live/delivery.spec.js`: navegação, foto/3D, produtos do Atlas, carrinho,
+checkout sem envio, recentes e login/logout administrativo. Executar somente com credenciais
+no ambiente privado e saída protegida; não habilita escrita de produtos. Celular foi emulado,
+não houve teste em aparelho físico. O arquivo de evidências registra os resultados e falhas.
+
 Pendência secundária: segunda conta ainda recebe invalid_credentials no Auth; a negação após
 login válido dessa conta não foi comprovada. Restam vídeo5–10min e acesso do professor ao
 GitHub após autorização de publicação. Health retorna ok com os três serviços disponíveis.
 Não recriar bancos nem reaplicar migrations já aprovadas.
+
+Na revisão final, Atlas mantém AM95 → AM90 → Samba no carrossel. A troca solicitada para
+AM90 → AM95 → Samba exige autorização específica de escrita; nenhuma ordem foi alterada
+automaticamente. New Balance 2002R e Nike Dunk Low continuam apenas preparados em
+`mongo/catalogo-adicional.pending.json`, sem cadastro autorizado. A foto do AM95 abre o
+próprio 3D apenas ao interagir; crédito CC BY preservado e fallback fotográfico disponível.
 
 O servidor lê `/Users/dg/Documents/NeoxDrop/.env` (main). A chave privada de contato foi
 transferida localmente do .env da worktree backend após conferir o mesmo projeto Supabase;

@@ -64,30 +64,44 @@ test("anuncia a troca em região aria-live", async ({ page }) => {
   await expect(hero(page).locator("[data-live]")).toContainText(`Destaque ${items.length} de ${items.length}: ${items[last].name}`);
 });
 
-test("abre com a foto; sem model3dUrl não há botão 3D nem promessa de giro", async ({ page }) => {
+const media = (page) => hero(page).locator("[data-hero-media]");
+const pill = (page) => hero(page).locator("[data-3d-toggle]");
+
+// Arraste horizontal curto sobre a foto: é o gesto que revela o 3D.
+async function dragPhoto(page, dx, dy = 0) {
+  const b = await media(page).boundingBox();
+  const [x, y] = [b.x + b.width / 2, b.y + b.height / 2];
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + dx, y + dy, { steps: 6 });
+  await page.mouse.up();
+}
+
+test("abre com a foto; sem model3dUrl não há convite para girar nem 3D", async ({ page }) => {
   await page.goto("/sem-3d/");
   await expect(hero(page).locator('img[data-field="image"]')).toBeVisible();
-  await expect(hero(page).getByRole("button", { name: /em 3D/ })).toBeHidden();
+  await expect(pill(page)).toBeHidden();
+  await media(page).click();
+  await page.waitForTimeout(200);
   await expect(page.locator("model-viewer, [data-sketchfab-frame]")).toHaveCount(0);
-  await expect(hero(page)).not.toContainText(/girar/i);
+  await expect(hero(page).getByText(/girar/i)).toBeHidden();
 });
 
-test("com model3dUrl: foto primeiro, nada de 3D carregado até o clique", async ({ page }) => {
-  await page.goto("/");
+test("com model3dUrl: foto primeiro, pílula discreta e nada de 3D até interagir", async ({ page }) => {
+  await page.goto("/model/");
   await expect(hero(page).locator('img[data-field="image"]')).toBeVisible();
-  await expect(hero(page).getByRole("button", { name: `Ver ${items[0].name} em 3D` })).toBeVisible();
+  await expect(pill(page)).toBeVisible();
+  await expect(pill(page)).toHaveText("Girar 360°");
+  await expect(pill(page)).toHaveAccessibleName(`Girar ${items[0].name} em 360 graus`);
   await expect(page.locator("model-viewer, [data-sketchfab-frame]")).toHaveCount(0);
 });
 
-const open3d = (page) => hero(page).getByRole("button", { name: /em 3D/ }).click();
-const dialog = (page) => page.getByRole("dialog");
-
-test.describe("Ver em 3D com GLB (fictício, sem ativo licenciado)", () => {
-  test("Model Viewer travado em Y: phi igual em min/max, sem zoom/pan; foto visível enquanto carrega", async ({ page }) => {
+test.describe("3D no lugar da foto com GLB (fictício, sem ativo licenciado)", () => {
+  test("arraste horizontal na foto ativa o Model Viewer travado em Y; a foto fica enquanto carrega", async ({ page }) => {
     await page.route("**/*.glb", () => {}); // nunca responde: simula carregamento lento
     await page.goto("/model/");
-    await open3d(page);
-    const mv = dialog(page).locator("model-viewer");
+    await dragPhoto(page, 80);
+    const mv = media(page).locator("model-viewer");
     await expect(mv).toHaveCount(1);
     const orbit = (attr) => mv.getAttribute(attr).then((v) => v.split(/\s+/));
     const [minTheta, minPhi] = await orbit("min-camera-orbit");
@@ -100,28 +114,44 @@ test.describe("Ver em 3D com GLB (fictício, sem ativo licenciado)", () => {
     await expect(mv).toHaveAttribute("disable-pan", "");
     await expect(mv).toHaveAttribute("touch-action", "pan-y");
     await expect(mv).toHaveAttribute("auto-rotate", "");
-    await expect(dialog(page).locator("[data-viewer-poster]")).toBeVisible();
-    await expect(dialog(page).locator("[data-viewer-hint]")).toHaveText("Carregando modelo 3D…");
+    await expect(media(page)).toHaveAttribute("data-state3d", "loading");
+    await expect(pill(page)).toHaveText("Carregando 3D…");
+    await expect(hero(page).locator("[data-3d-photo]")).toHaveCSS("opacity", "1");
   });
 
-  test("reduced-motion: sem auto-rotate", async ({ page }) => {
+  test("arraste vertical não ativa (a página rola); toque/clique ativa; reduced-motion sem auto-rotate", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.route("**/*.glb", () => {});
     await page.goto("/model/");
-    await open3d(page);
-    await expect(dialog(page).locator("model-viewer")).not.toHaveAttribute("auto-rotate");
+    await dragPhoto(page, 0, 80);
+    await page.waitForTimeout(200);
+    await expect(page.locator("model-viewer")).toHaveCount(0);
+    await media(page).click();
+    await expect(media(page).locator("model-viewer")).not.toHaveAttribute("auto-rotate");
   });
 
-  test("falha do GLB: avisa no palco; fechar devolve o foco e o carrossel segue", async ({ page }) => {
+  test("teclado: Enter na pílula ativa; Esc volta à foto e devolve o foco", async ({ page }) => {
+    await page.route("**/*.glb", () => {});
+    await page.goto("/model/");
+    await pill(page).focus();
+    await page.keyboard.press("Enter");
+    await expect(media(page)).toHaveAttribute("data-state3d", "loading");
+    await page.keyboard.press("Escape");
+    await expect(media(page)).toHaveAttribute("data-state3d", "idle");
+    await expect(pill(page)).toBeFocused();
+    await expect(page.locator("model-viewer")).toHaveCount(0);
+  });
+
+  test("falha do GLB: volta à foto com aviso; trocar de destaque reseta", async ({ page }) => {
     await page.route("**/*.glb", (route) => route.abort());
     await page.goto("/model/");
-    await open3d(page);
-    await expect(dialog(page).locator("[data-viewer-hint]")).toContainText("indisponível", { timeout: 10_000 });
-    await dialog(page).getByRole("button", { name: "Fechar visualização 3D" }).click();
-    await expect(dialog(page)).toBeHidden();
-    await expect(hero(page).getByRole("button", { name: /em 3D/ })).toBeFocused();
+    await pill(page).click();
+    await expect(pill(page)).toHaveText("3D indisponível", { timeout: 10_000 });
+    await expect(hero(page).locator("[data-3d-status]")).toContainText("indisponível");
+    await expect(hero(page).locator("[data-3d-photo]")).toHaveCSS("opacity", "1");
     await expect(page.locator("model-viewer")).toHaveCount(0);
     await hero(page).locator(`[data-thumbs] button[data-id="${items[1].id}"]`).click();
     await expectSelected(page, 1);
+    await expect(media(page)).toHaveAttribute("data-state3d", "idle");
   });
 });

@@ -31,3 +31,24 @@ function unmiss(img) {
   }
 }
 for (const img of document.querySelectorAll("main img[src]")) if (img.complete && !img.naturalWidth && img.getAttribute("src")) missing(img);
+
+// Item ativo do menu (indicador verde + aria-current): Marcas = /tenis#marcas ou filtro brand;
+// Coleções = /#colecoes ou filtro category; Tênis = catálogo/produto; Início = home.
+export function activeNav({ pathname, search, hash }) {
+  const path = pathname.replace(/\/+$/, "") || "/";
+  const q = new URLSearchParams(search);
+  if (path === "/") return hash === "#colecoes" ? "colecoes" : "inicio";
+  if (path === "/tenis") return hash === "#marcas" || q.get("brand") ? "marcas" : q.get("category") ? "colecoes" : "tenis";
+  return path.startsWith("/tenis/") ? "tenis" : "";
+}
+function syncNav() {
+  const key = activeNav(location);
+  for (const a of document.querySelectorAll("[data-nav]")) {
+    if (a.dataset.nav === key) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
+  }
+}
+syncNav();
+addEventListener("hashchange", syncNav);
+addEventListener("popstate", syncNav);
+addEventListener("neox:navchange", syncNav); // catalog.js após aplicar filtros (replaceState)

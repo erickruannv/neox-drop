@@ -1009,3 +1009,58 @@ Verificação final: ruff check e format aprovados; suíte local 184 passed / 7 
 teste real somente de leitura acima executado separadamente: 1 passed, exit 0.
 Revisão independente confirmou ausência de escritas; alinhada a ordenação do teste à API
 (createdAt decrescente, desempate por id crescente).
+
+## Interface final ccd55e1 e estabilização da entrega — 23/11/2026
+
+Inspecionadas as três worktrees, todas limpas antes da integração. Main 56f9e97 e
+feature/frontend ccd55e1 divergem em um commit cada, sobre a mesma base; merge sem conflitos,
+sem reset/force, sem modificar a worktree frontend. Preservado o limite de seis lançamentos.
+Revisão independente não encontrou regressões concretas de auth/CSRF/atribuição de mídia;
+restaurada em docs/catalogo-definitivo.json a ordem realmente autorizada, igual à fonte
+mongo/catalogo-academico.json. A proposta visual do Claude não autoriza UPDATE remoto.
+
+Atlas consultado: somente AM95 Dark Army, AM90 Infrared e Samba ativos/em destaque;
+QA continua inativo. New Balance 2002R e Dunk Low ausentes, payloads ainda pendentes.
+Ordem remota AM95=1, AM90=2, Samba=3: solicitada autorização específica para trocar somente
+featured.order dos dois Nike pela API (inclui updatedAt e invalidação de seus caches).
+Nenhuma escrita de produto executada nesta integração.
+
+Build aprovado; backend 184 passed / 7 skipped, ruff check/format aprovados.
+UI 137 passed / 5 skipped, com fixtures/dublês. Teste adicional reproduziu sobreposição
+Lançamentos/Ver todos em 360px; somente flex-wrap no cabeçalho da seção corrigiu a falha.
+Consulta independente real tests/real/test_live_catalog_readonly.py passou na main :8000.
+
+Novo tests/e2e/live/delivery.spec.js sem mocks/fixtures nem escrita de produtos. Primeira
+rodada: dois percursos reais aprovados (desktop e celular emulado), login/painel/logout
+admin real no desktop, navegação/indicadores Início/Tênis/Marcas/Coleções, Performance com
+foto/AM90, detalhes e imagens dos três produtos, recentes, carrinho e link WhatsApp.
+AM90 tamanho38 x2: total149980 centavos, wa.me com contato configurado e mensagem correta;
+nenhuma mensagem enviada. Leituras diretas Upstash conferiram três IDs únicos e TTL até7dias
+nos dois visitantes QA. Snapshot BSON de TODOS os documentos Mongo idêntico antes/depois.
+
+Capturas revelaram recorte GPU artificial em DPR1: iframe interno 1437px em palco719px.
+Com DPR2 Retina, iframe719px e modelo completo. Corrigida somente configuração de teste
+playwright.live.config.js; incluída asserção de tamanho do iframe. Desktop inspecionado
+com imagem do modelo completo; nenhum ajuste no visualizador runtime. Celular continua
+emulação, não comprova aparência/desempenho em aparelho físico. Fotos/3D e créditos são
+do mesmo documento; ausência/falha de 3D preserva foto (falhas cobertas pela suíte UI).
+
+Na segunda rodada, desktop passou; celular encontrou503 real ao abrir Performance.
+Estado de indisponibilidade explícito, sem produto simulado. Seis GETs Performance seguintes
+e quatro consultas Mongo com nova conexão TLS passaram (0,74–0,98s). Causa exata da ocorrência
+isolada não comprovada; nenhum timeout/controle de segurança alterado para escondê-la.
+
+Rodada final após correção responsiva/configuração Retina: desktop e mobile-360 passaram,
+2 passed / 0 failed / 0 flaky em63,3s. Redis real novamente conferido para os dois visitantes;
+snapshot completo dos documentos Mongo novamente idêntico. Capturas públicas inspecionadas
+em test-results/delivery (ignoradas no Git). Desktop3D enquadrado/texturas nítidas;
+emulação móvel ainda apresenta granulação nas texturas do Sketchfab, como já documentado:
+interação/enquadramento comprovados, qualidade visual móvel exige aparelho real.
+
+Revisão Git: .env ignorado, sem entrada no histórico; somente .env.example rastreado.
+757 blobs históricos de texto (<2MB) conferidos contra segredos locais e padrões de
+Secret/JWT/URI autenticada: nenhuma correspondência. Não substitui auditoria exaustiva.
+Cinco caminhos HTTP privados (.env/.git/código/traversal) retornaram404; health200.
+Licenças/créditos preservados, inclusive CC BY4.0 do embed AM95; nenhum GLB experimental.
+Não houve push/deploy. Roteiro8min existente preservado; segunda conta com credenciais
+inválidas continua pendência secundária, não comprovada por negação após login válido.

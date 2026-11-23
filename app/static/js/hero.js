@@ -1,6 +1,6 @@
 // Hero NEOX drop: carrossel de destaques (FeaturedList) com troca conjunta de nome, preço,
-// descrição, foto, cores e CTA. O 3D real abre sob demanda em "Ver em 3D" (viewer3d.js).
-import { open3d } from "./viewer3d.js";
+// descrição, foto, cores e CTA. Foto primeiro; o 3D do mesmo produto abre no lugar da foto ao interagir (viewer3d.js).
+import { inline3d } from "./viewer3d.js";
 const SWAP_MS = 280;
 
 const root = document.getElementById("hero");
@@ -82,20 +82,19 @@ function init(root, items) {
     thumbs[indexOf(selected)]?.focus();
   });
 
-  // ---- Foto primeiro; 3D só por clique em "Ver em 3D" (palco em viewer3d.js) ----
-  const open = root.querySelector("[data-open-3d]");
+  // ---- Foto primeiro; o 3D do item selecionado só carrega ao interagir (viewer3d.js) ----
   const credit = root.querySelector('[data-field="credit"]');
-
-  function syncModel(item) {
-    const a = item.attributes ?? {};
-    credit.textContent = a.imageCredit ?? "";
-    if (a.imageCreditUrl) credit.href = a.imageCreditUrl;
+  const showCredit = (item, state) => {
+    const a = item?.attributes ?? {};
+    // com o 3D na tela, o crédito exibido é o do modelo (CC BY exige atribuição)
+    const [text, url] = state === "ready" && a.model3dCredit ? [a.model3dCredit, a.model3dCreditUrl] : [a.imageCredit, a.imageCreditUrl];
+    credit.textContent = text ?? "";
+    if (url) credit.href = url;
     else credit.removeAttribute("href");
-    open.hidden = !item.model3dUrl;
-    open.setAttribute("aria-label", `Ver ${item.name} em 3D`);
-  }
+  };
+  const viewer = inline3d(media, { zoom: 0.55, onState: (state, item) => showCredit(item, state) });
+  const syncModel = (item) => viewer.set(item);
 
-  open.addEventListener("click", () => open3d(items[indexOf(selected)], open));
   applyColors(items[indexOf(selected)] ?? items[0]);
   syncModel(items[indexOf(selected)] ?? items[0]);
 }

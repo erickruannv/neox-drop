@@ -1,5 +1,14 @@
 {% from "partials/macros.html" import icon, brand %}
 {%- set current_path = request.url.path if request else "/" -%}
+{#- Item ativo do menu: rota + filtros (brand → Marcas, category → Coleções). Âncoras
+    (#marcas, #colecoes) e filtros aplicados sem recarregar são ajustados por nav.js. -#}
+{%- set nq = filters if filters is defined and filters else {} -%}
+{%- set np = (current_path|default("/")).rstrip("/") or "/" -%}
+{%- if np == "/" %}{% set nav_active = "inicio" %}
+{%- elif np == "/tenis" and nq["brand"] is defined and nq["brand"] %}{% set nav_active = "marcas" %}
+{%- elif np == "/tenis" and nq["category"] is defined and nq["category"] %}{% set nav_active = "colecoes" %}
+{%- elif np.startswith("/tenis") %}{% set nav_active = "tenis" %}
+{%- else %}{% set nav_active = "" %}{% endif -%}
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -29,10 +38,10 @@
       {% block header_nav %}
       <nav class="hidden lg:block" aria-label="Principal">
         <ul class="flex items-center gap-9">
-          <li><a class="nav-link" href="/" {% if current_path == "/" %}aria-current="page"{% endif %}>Início</a></li>
-          <li><a class="nav-link" href="/tenis" {% if current_path.startswith("/tenis") %}aria-current="page"{% endif %}>Tênis</a></li>
-          <li><a class="nav-link" href="/tenis#marcas">Marcas</a></li>
-          <li><a class="nav-link" href="/#colecoes">Coleções</a></li>
+          <li><a class="nav-link" href="/" data-nav="inicio" {% if nav_active == "inicio" %}aria-current="page"{% endif %}>Início</a></li>
+          <li><a class="nav-link" href="/tenis" data-nav="tenis" {% if nav_active == "tenis" %}aria-current="page"{% endif %}>Tênis</a></li>
+          <li><a class="nav-link" href="/tenis#marcas" data-nav="marcas" {% if nav_active == "marcas" %}aria-current="page"{% endif %}>Marcas</a></li>
+          <li><a class="nav-link" href="/#colecoes" data-nav="colecoes" {% if nav_active == "colecoes" %}aria-current="page"{% endif %}>Coleções</a></li>
         </ul>
       </nav>
 
@@ -68,10 +77,10 @@
             </form>
             <nav aria-label="Principal (menu)">
               <ul class="grid gap-1 text-base font-semibold">
-                <li><a class="block rounded-lg px-3 py-3 hover:bg-white/10" href="/" {% if current_path == "/" %}aria-current="page"{% endif %}>Início</a></li>
-                <li><a class="block rounded-lg px-3 py-3 hover:bg-white/10" href="/tenis">Tênis</a></li>
-                <li><a class="block rounded-lg px-3 py-3 hover:bg-white/10" href="/tenis#marcas">Marcas</a></li>
-                <li><a class="block rounded-lg px-3 py-3 hover:bg-white/10" href="/#colecoes">Coleções</a></li>
+                <li><a class="menu-link" href="/" data-nav="inicio" {% if nav_active == "inicio" %}aria-current="page"{% endif %}>Início</a></li>
+                <li><a class="menu-link" href="/tenis" data-nav="tenis" {% if nav_active == "tenis" %}aria-current="page"{% endif %}>Tênis</a></li>
+                <li><a class="menu-link" href="/tenis#marcas" data-nav="marcas" {% if nav_active == "marcas" %}aria-current="page"{% endif %}>Marcas</a></li>
+                <li><a class="menu-link" href="/#colecoes" data-nav="colecoes" {% if nav_active == "colecoes" %}aria-current="page"{% endif %}>Coleções</a></li>
               </ul>
             </nav>
           </div>

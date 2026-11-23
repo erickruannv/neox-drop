@@ -18,12 +18,11 @@ export default defineConfig({
     reuseExistingServer: true,
     timeout: 120_000,
   },
-  // UA real da máquina no desktop: o Sketchfab escolhe o formato de textura pela UA, e uma UA
-  // falsa (ex.: Windows) gera texturas corrompidas na GPU do Mac. No celular emulado a UA móvel
-  // e o DPR > 1 também distorcem o render (canto do canvas, granulado): o projeto mobile prova
-  // gesto/toque e troca de modelo; a aparência no celular precisa de aparelho real.
+  // Mac Retina: DPR 1 forçado produz viewport interno 2x maior no iframe GPU e corta o modelo.
+  // DPR 2 mantém iframe/canvas alinhados. UA nativa no desktop preserva texturas do Sketchfab.
+  // Mobile continua emulação; não comprova aparência/desempenho em aparelho físico.
   projects: [
-    { name: "desktop", use: { channel: "chromium", viewport: { width: 1440, height: 900 } } },
-    { name: "mobile-360", use: { ...devices["Pixel 7"], channel: "chromium", viewport: { width: 360, height: 780 }, deviceScaleFactor: 1 } },
+    { name: "desktop", use: { channel: "chromium", viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 } },
+    { name: "mobile-360", use: { ...devices["Pixel 7"], channel: "chromium", viewport: { width: 360, height: 780 }, deviceScaleFactor: 2 } },
   ],
 });

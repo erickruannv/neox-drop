@@ -1,0 +1,8 @@
+{% from "partials/macros.html" import icon %}
+{#- Pílula discreta "Girar 360°" sobre a foto (viewer3d.js). Escondida até o JS confirmar que o
+    produto tem 3D; nada do 3D é baixado antes da interação. Na página do produto, o palco leva
+    data-open-3d (SSR) quando há model3dUrl, marca usada pelos testes de integração do backend. -#}
+<button type="button" class="rotate-hint" data-3d-toggle hidden>
+  <span class="grid" data-3d-icon>{{ icon("rotate", "size-4") }}</span><span data-3d-label>Girar 360°</span>
+</button>
+<p class="sr-only" aria-live="polite" data-3d-status></p>

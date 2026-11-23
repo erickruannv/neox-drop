@@ -1,22 +1,36 @@
 import { test, expect } from "@playwright/test";
 import fixture from "../fixtures/home.json" with { type: "json" };
 
-// Teste REAL (sem mock): abre "Ver em 3D", carrega o modelo do Sketchfab na GPU, arrasta com
-// mouse/toque e confere giro só em Y. Precisa de rede. SHOTS=dir grava as capturas.
+// Teste REAL (sem mock): a foto vira o modelo do Sketchfab ao interagir (arrastar/tocar), na GPU;
+// arrasta com mouse/toque e confere giro só em Y. Precisa de rede. SHOTS=dir grava as capturas.
 const items = fixture.featured.items.filter((i) => i.model3dUrl); // só destaques com 3D aprovado
 const SHOTS = process.env.SHOTS;
 if (SHOTS) await (await import("node:fs/promises")).mkdir(SHOTS, { recursive: true });
 const save = async (buf, name) => SHOTS && (await import("node:fs")).writeFileSync(`${SHOTS}/${name}.png`, buf);
 
-const dialog = (page) => page.getByRole("dialog");
-const pad = (page) => dialog(page).locator("[data-rotate-pad]");
+const HERO = "#hero [data-hero-media]";
+const PDP = "[data-3d-stage]";
+let stageSel = HERO;
+const stage = (page) => page.locator(stageSel);
+const pad = (page) => stage(page).locator("[data-rotate-pad]");
 const yaw = async (page) => Number(await pad(page).getAttribute("aria-valuenow"));
+
+// Gesto real que revela o 3D: arraste horizontal (mouse) ou toque (celular) sobre a foto.
+async function activate(page, isMobile) {
+  if (isMobile) return stage(page).tap();
+  const b = await stage(page).boundingBox();
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(b.x + b.width / 2 + 60, b.y + b.height / 2, { steps: 6 });
+  await page.mouse.up();
+}
 
 async function ready(page, item) {
   await expect(pad(page)).toBeVisible();
   await expect(pad(page)).toHaveAttribute("aria-label", new RegExp(item.name));
-  await expect(dialog(page).locator("[data-viewer-poster]")).toBeHidden();
-  await expect(dialog(page).locator("[data-viewer-hint]")).toHaveText("Arraste na horizontal para girar 360°");
+  await expect(stage(page)).toHaveAttribute("data-state3d", "ready");
+  await expect(stage(page).locator("[data-3d-photo]")).toHaveCSS("opacity", "0");
+  await expect(stage(page).locator("[data-3d-status]")).toContainText("Arraste na horizontal");
   await page.waitForTimeout(2500); // texturas finais e UI do player some
 }
 
@@ -38,7 +52,9 @@ async function drag(page, dx, dy, isMobile) {
   await touch("touchEnd");
 }
 
-test("home abre com foto; cada destaque abre seu modelo 3D real", async ({ page }, info) => {
+test.beforeEach(() => (stageSel = HERO));
+
+test("home abre com foto; cada destaque com 3D revela o seu modelo real ao interagir", async ({ page, isMobile }, info) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await expect(page.locator("[data-sketchfab-frame]")).toHaveCount(0);
@@ -47,27 +63,31 @@ test("home abre com foto; cada destaque abre seu modelo 3D real", async ({ page 
   for (const item of items) {
     await page.locator(`#hero [data-thumbs] button[data-id="${item.id}"]`).click();
     await expect(page.locator("#hero h1")).toHaveText(item.name);
-    await page.locator("#hero").getByRole("button", { name: `Ver ${item.name} em 3D` }).click();
+    await activate(page, isMobile);
     await ready(page, item);
     await save(await page.screenshot(), `${info.project.name}-3d-${item.slug}`);
-    await page.keyboard.press("Escape");
-    await expect(dialog(page)).toBeHidden();
+    await page.locator("#hero [data-3d-toggle]").click(); // "Ver foto"
+    await expect(stage(page)).toHaveAttribute("data-state3d", "idle");
   }
 });
 
+async function heroWith3d(page, isMobile) {
+  await page.goto("/");
+  await page.locator(`#hero [data-thumbs] button[data-id="${items[0].id}"]`).click();
+  await activate(page, isMobile);
+  await ready(page, items[0]);
+}
+
 test("arraste horizontal gira em Y; arraste vertical não inclina", async ({ page, isMobile }) => {
   await page.emulateMedia({ reducedMotion: "reduce" }); // sem giro automático: mede só o gesto
-  await page.goto("/");
-  await page.locator("#hero").getByRole("button", { name: /em 3D/ }).click();
-  await ready(page, items[0]);
+  await heroWith3d(page, isMobile);
 
   const y0 = await yaw(page);
-  const stage = dialog(page).locator("[data-viewer-stage]");
-  const before = await stage.screenshot();
+  const before = await stage(page).screenshot();
   await drag(page, 160, 0, isMobile);
   await expect.poll(() => yaw(page)).not.toBe(y0);
   await page.waitForTimeout(800);
-  expect(Buffer.compare(before, await stage.screenshot())).not.toBe(0);
+  expect(Buffer.compare(before, await stage(page).screenshot())).not.toBe(0);
 
   const y1 = await yaw(page);
   await drag(page, 0, isMobile ? 120 : -160, isMobile);
@@ -81,19 +101,21 @@ test("arraste horizontal gira em Y; arraste vertical não inclina", async ({ pag
 
 test("sem reduced-motion o modelo gira sozinho até o usuário interagir", async ({ page }) => {
   await page.goto("/");
-  await page.locator("#hero").getByRole("button", { name: /em 3D/ }).click();
+  await page.locator(`#hero [data-thumbs] button[data-id="${items[0].id}"]`).click();
+  await page.locator("#hero [data-3d-toggle]").click();
   await expect(pad(page)).toBeVisible();
   const a = await yaw(page);
   await expect.poll(() => yaw(page), { timeout: 10_000 }).not.toBe(a);
 });
 
-test("produto: galeria real e 'Ver em 3D' com o modelo real", async ({ page, isMobile }, info) => {
+test("produto: galeria real e a foto vira o modelo real ao interagir", async ({ page, isMobile }, info) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  stageSel = PDP;
   const item = items[0];
   await page.goto(`/tenis/${item.slug}/`);
   await page.waitForTimeout(600);
   await save(await page.screenshot(), `${info.project.name}-produto`);
-  await page.getByRole("button", { name: `Ver ${item.name} em 3D` }).click();
+  await activate(page, isMobile);
   await ready(page, item);
   const y0 = await yaw(page);
   await drag(page, 140, 0, isMobile);

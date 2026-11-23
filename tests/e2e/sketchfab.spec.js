@@ -26,10 +26,21 @@ test.beforeEach(async ({ page }) => {
 });
 
 const sf = (page) => page.evaluate(() => window.__sf ?? { inits: [], looks: [] });
-const dialog = (page) => page.getByRole("dialog");
-const pad = (page) => dialog(page).locator("[data-rotate-pad]");
-const open = (page) => page.locator("#hero").getByRole("button", { name: /em 3D/ }).click();
-const ZOOM = 0.8; // viewer3d.js: aproximação do palco
+const with3d = items.find(uidOf);
+const without = items.find((i) => !uidOf(i));
+const media = (page) => page.locator("#hero [data-hero-media]");
+const pill = (page) => page.locator("#hero [data-3d-toggle]");
+const pad = (page) => media(page).locator("[data-rotate-pad]");
+const thumb = (page, it) => page.locator(`#hero [data-thumbs] button[data-id="${it.id}"]`);
+const credit = (page) => page.locator('#hero [data-field="credit"]');
+const ZOOM = 0.55; // hero.js: aproximação do 3D no hero (mesmo tamanho da foto)
+
+async function heroWith3d(page) {
+  await page.goto("/");
+  await thumb(page, with3d).click();
+  await expect(page.locator("#hero h1")).toHaveText(with3d.name);
+}
+const open = (page) => pill(page).click();
 
 async function drag(page, dx, dy) {
   const b = await pad(page).boundingBox();
@@ -41,30 +52,46 @@ async function drag(page, dx, dy) {
   await page.waitForTimeout(100);
 }
 
-test("hero: nada do Sketchfab carrega antes do clique em 'Ver em 3D'", async ({ page }) => {
+test("hero: nada do Sketchfab carrega antes da interação; o destaque sem 3D não convida a girar", async ({ page }) => {
   await page.goto("/");
+  await expect(page.locator("#hero h1")).toHaveText(items[0].name);
+  if (!uidOf(items[0])) {
+    await expect(pill(page)).toBeHidden();
+    await media(page).click(); // tocar na foto do item sem 3D não abre o 3D de outro tênis
+  }
+  await thumb(page, with3d).click();
+  await expect(pill(page)).toBeVisible();
   await page.waitForTimeout(300);
   expect((await sf(page)).inits).toEqual([]);
-  await expect(dialog(page)).toBeHidden();
+  await expect(page.locator("[data-sketchfab-frame]")).toHaveCount(0);
+});
+
+test("toque na foto revela o 3D do mesmo produto (celular)", async ({ page, isMobile }) => {
+  test.skip(!isMobile, "toque");
+  await heroWith3d(page);
+  await media(page).tap(); // contêiner: a foto do hero flutua (animação) e nunca fica "estável"
+  await expect(pad(page)).toBeVisible();
+  expect((await sf(page)).inits.map((i) => i.uid)).toEqual([uidOf(with3d)]);
 });
 
 test("palco 3D: arraste horizontal gira só em Y; vertical não move a câmera", async ({ page, isMobile }) => {
   test.skip(isMobile, "toque real coberto em test:3d");
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
+  await heroWith3d(page);
   await open(page);
   await expect(pad(page)).toBeVisible();
-  await expect(dialog(page).locator("[data-viewer-poster]")).toBeHidden();
-  await expect(dialog(page).locator("[data-viewer-title]")).toHaveText(items[0].name);
-  await expect(dialog(page).locator("[data-viewer-credit]")).toHaveText(items[0].attributes.model3dCredit);
+  await expect(media(page)).toHaveAttribute("data-state3d", "ready");
+  await expect(media(page).locator("[data-3d-photo]")).toHaveCSS("opacity", "0");
+  await expect(pill(page)).toHaveText("Ver foto");
+  await expect(credit(page)).toHaveText(with3d.attributes.model3dCredit);
   const { inits } = await sf(page);
-  expect(inits.map((i) => i.uid)).toEqual([uidOf(items[0])]);
+  expect(inits.map((i) => i.uid)).toEqual([uidOf(with3d)]);
   expect(inits[0].o).toMatchObject({ autostart: 1, preload: 1, transparent: 1 });
 
   await drag(page, 200, 0);
   const looks = (await sf(page)).looks;
   expect(looks.length).toBeGreaterThan(1);
-  // Câmera do dublê: olho (0,-8,2.5), alvo (0,0,0.2); o palco aproxima ZOOM.
+  // Câmera do dublê: olho (0,-8,2.5), alvo (0,0,0.2); o hero aproxima ZOOM.
   for (const [x, y, z] of looks) {
     expect(z).toBeCloseTo(0.2 + 2.3 * ZOOM, 9); // altura fixa: sem inclinação
     expect(Math.hypot(x, y)).toBeCloseTo(8 * ZOOM, 9); // distância fixa: sem zoom
@@ -83,7 +110,7 @@ test("palco 3D: arraste horizontal gira só em Y; vertical não move a câmera",
 test("palco 3D: reduced-motion não gira sozinho; sem ele gira até o primeiro gesto", async ({ page, isMobile }) => {
   test.skip(isMobile, "mesma lógica do desktop");
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
+  await heroWith3d(page);
   await open(page);
   await expect(pad(page)).toBeVisible();
   const still = (await sf(page)).looks.length;
@@ -91,7 +118,7 @@ test("palco 3D: reduced-motion não gira sozinho; sem ele gira até o primeiro g
   expect((await sf(page)).looks.length).toBe(still);
 
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.reload();
+  await heroWith3d(page);
   await open(page);
   await expect(pad(page)).toBeVisible();
   await expect.poll(async () => (await sf(page)).looks.length).toBeGreaterThan(5);
@@ -101,59 +128,81 @@ test("palco 3D: reduced-motion não gira sozinho; sem ele gira até o primeiro g
   expect((await sf(page)).looks.length).toBe(after);
 });
 
-test("palco 3D: Esc fecha, devolve o foco; destaque sem 3D esconde o botão; voltar reabre o modelo certo", async ({ page }) => {
-  const [with3d, without] = [items.find(uidOf), items.find((i) => !uidOf(i))];
-  const thumb = (it) => page.locator(`#hero [data-thumbs] button[data-id="${it.id}"]`);
-  await page.goto("/");
-  await thumb(with3d).click();
+test("teclado: pílula ativa e leva o foco ao giro; Esc volta à foto; trocar de destaque reseta e reabre o modelo certo", async ({ page }) => {
+  await heroWith3d(page);
+  await pill(page).focus();
+  await page.keyboard.press("Enter");
+  await expect(pad(page)).toBeFocused();
+  await expect(pad(page)).toHaveAttribute("aria-label", new RegExp(with3d.name));
+  await page.keyboard.press("Escape");
+  await expect(media(page)).toHaveAttribute("data-state3d", "idle");
+  await expect(pill(page)).toBeFocused();
+  await expect(media(page).locator("[data-3d-photo]")).toHaveCSS("opacity", "1");
+  await expect(credit(page)).toHaveText(with3d.attributes.imageCredit);
+
   await open(page);
   await expect(pad(page)).toBeVisible();
-  await page.keyboard.press("Escape");
-  await expect(dialog(page)).toBeHidden();
-  await expect(page.locator("#hero").getByRole("button", { name: /em 3D/ })).toBeFocused();
-
-  await thumb(without).click();
+  await thumb(page, without).click();
   await expect(page.locator("#hero h1")).toHaveText(without.name);
-  await expect(page.locator("#hero").getByRole("button", { name: /em 3D/ })).toBeHidden(); // nunca outro tênis no lugar
+  await expect(pill(page)).toBeHidden(); // nunca o 3D de outro tênis no lugar
+  await expect(pad(page)).toBeHidden();
 
-  await thumb(with3d).click();
+  await thumb(page, with3d).click();
+  await expect(pill(page)).toHaveText("Girar 360°");
   await open(page);
   await expect(pad(page)).toBeVisible();
   expect((await sf(page)).inits.at(-1).uid).toBe(uidOf(with3d));
-  await expect(pad(page)).toHaveAttribute("aria-label", new RegExp(with3d.name));
-  await expect(dialog(page).locator("[data-viewer-poster]")).toBeHidden();
 });
 
-test("palco 3D: falha ao carregar a Viewer API mostra aviso e mantém a foto", async ({ page }) => {
+test("falha ao carregar a Viewer API: aviso e a foto continua", async ({ page }) => {
   await page.unroute("https://static.sketchfab.com/**");
   await page.route("https://static.sketchfab.com/**", (r) => r.abort());
-  await page.goto("/");
+  await heroWith3d(page);
   await open(page);
-  await expect(dialog(page).locator("[data-viewer-hint]")).toContainText("indisponível");
-  await expect(dialog(page).locator("[data-viewer-poster]")).toBeVisible();
+  await expect(pill(page)).toHaveText("3D indisponível");
+  await expect(page.locator("#hero [data-3d-status]")).toContainText("indisponível");
+  await expect(media(page).locator("[data-3d-photo]")).toHaveCSS("opacity", "1");
   await expect(pad(page)).toBeHidden();
 });
 
-test("palco 3D: script carrega mas o modelo nunca fica pronto → aviso e foto após o timeout", async ({ page }) => {
+test("script carrega mas o modelo nunca fica pronto → aviso e foto após o timeout", async ({ page }) => {
   await page.unroute("https://static.sketchfab.com/**");
   const NEVER = FAKE.replace('if (ev === "viewerready") setTimeout(cb, 20);', "");
   await page.route("https://static.sketchfab.com/**", (r) => r.fulfill({ contentType: "application/javascript", body: NEVER }));
   await page.addInitScript(() => (window.__sfTimeoutMs = 400));
-  await page.goto("/");
+  await heroWith3d(page);
   await open(page);
-  await expect(dialog(page).locator("[data-viewer-hint]")).toContainText("indisponível");
-  await expect(dialog(page).locator("[data-viewer-poster]")).toBeVisible();
+  await expect(media(page)).toHaveAttribute("data-state3d", "loading");
+  await expect(media(page).locator("[data-3d-photo]")).toHaveCSS("opacity", "1"); // foto durante o carregamento
+  await expect(pill(page)).toHaveText("3D indisponível");
   await expect(pad(page)).toBeHidden();
 });
 
-test("produto: 'Ver em 3D' abre o mesmo palco com o modelo do produto", async ({ page }) => {
-  const item = items.find(uidOf);
-  await page.goto(`/tenis/${item.slug}/`);
+test("produto: arrastar a foto revela o 3D do próprio produto; Esc volta à foto", async ({ page, isMobile }) => {
+  const stage = page.locator("[data-3d-stage]");
+  await page.goto(`/tenis/${with3d.slug}/`);
   await expect(page.locator("[data-sketchfab-frame]")).toHaveCount(0);
-  await page.getByRole("button", { name: `Ver ${item.name} em 3D` }).click();
-  await expect(pad(page)).toBeVisible();
-  expect((await sf(page)).inits.at(-1).uid).toBe(uidOf(item));
+  await expect(page.getByRole("button", { name: /em 3D/ })).toHaveCount(0); // sem botão grande
+  if (isMobile) await stage.locator("[data-3d-photo]").tap();
+  else {
+    const b = await stage.boundingBox();
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(b.x + b.width / 2 + 60, b.y + b.height / 2, { steps: 5 });
+    await page.mouse.up();
+  }
+  await expect(stage.locator("[data-rotate-pad]")).toBeVisible();
+  expect((await sf(page)).inits.at(-1).uid).toBe(uidOf(with3d));
+  await stage.locator("[data-rotate-pad]").focus();
   await page.keyboard.press("Escape");
-  await expect(dialog(page)).toBeHidden();
-  await expect(page.getByRole("link", { name: item.attributes.imageCredit })).toHaveAttribute("href", item.attributes.imageCreditUrl);
+  await expect(stage).toHaveAttribute("data-state3d", "idle");
+  await expect(page.getByRole("link", { name: with3d.attributes.imageCredit })).toHaveAttribute("href", with3d.attributes.imageCreditUrl);
+});
+
+test("produto sem 3D: sem pílula e sem 3D", async ({ page }) => {
+  await page.goto(`/tenis/${without.slug}/`);
+  await expect(page.locator("[data-3d-toggle]")).toBeHidden();
+  await page.locator("[data-3d-stage]").click();
+  await page.waitForTimeout(200);
+  await expect(page.locator("[data-sketchfab-frame], model-viewer")).toHaveCount(0);
 });
