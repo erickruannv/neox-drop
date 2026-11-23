@@ -46,14 +46,17 @@ detalhe com mídia e créditos, carrinho, 3D Sketchfab e recentes visíveis na h
 os três serviços reais. Ao final foi desativado; o documento e a mídia aprovada foram preservados.
 Preço/estoque fictícios e demais produtos não foram alterados. Chaves próprias de QA removidas.
 Pendência secundária: a segunda conta recebe invalid_credentials no Auth; a negação após login
-válido dessa conta ainda não foi comprovada. Checkout real chegou ao bloqueio explícito
-STORE_WHATSAPP_NOT_CONFIGURED, sem link/envio: definir número autorizado em
-`store_settings.whatsapp_e164_digits` e configurar `SUPABASE_SECRET_KEY` só no .env privado.
+válido dessa conta ainda não foi comprovada. Checkout WhatsApp concluído com serviços reais:
+contato lido do Supabase, preços/estoques revalidados no Atlas, carrinho e link/mensagem
+conferidos na API e no navegador. O teste não abriu o link nem enviou mensagens. O QA voltou
+a active=false; não houve alteração de preço/estoque/mídia ou de outros produtos.
 Para produtos definitivos, escolher modelos/colorways, SKUs, preços/estoques verdadeiros e mídia
 licenciada. O painel cadastra; créditos em attributes são aceitos pela API, sem campos próprios
 no formulário atual. Não reaproveitar dados fictícios de QA como oferta real.
 
-O .env privado foi transferido para a pasta principal, sem sobrescrever arquivo existente.
+O servidor lê `/Users/dg/Documents/NeoxDrop/.env` (main). A chave privada de contato foi
+transferida localmente do .env da worktree backend após conferir o mesmo projeto Supabase;
+nenhum valor foi registrado no Git. Edite o .env da pasta principal para configurar o servidor.
 A origem pública `https://sketchfab.com` foi incluída em MEDIA_ALLOWED_ORIGINS para o embed aprovado.
 REDIS_KEY_PREFIX="NEOX QA:" isola as chaves locais; vazio mantém as chaves padrão.
 Credenciais ficam apenas no .env privado, conforme [.env.example](.env.example). Não enviar
@@ -84,4 +87,5 @@ com TEST_CONNECTIONS_ENABLED=false; não usar esses testes 503 contra o servidor
 
 Git: .env/configurações privadas/build ignorados; preservar frontend e laboratório 3D nas suas
 branches. Revisar segredos, acesso do professor ao repositório e link do vídeo antes da entrega.
-Não houve push/deploy. Checkout WhatsApp ainda não comprovado com serviços reais.
+Não houve push/deploy. Próxima etapa: escolher dados definitivos, cadastrar com autorização,
+concluir o teste da segunda conta e gravar o vídeo de entrega (5–10min).

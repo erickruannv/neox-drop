@@ -848,3 +848,46 @@ Capturas públicas, sem cookies/segredos: /tmp/neox-main-home-qa.png,
 Regressão: pytest 183 passed/6 skipped; Playwright UI com fixtures 122 passed/4 skipped; build
 vendor/Tailwind e ruff check passaram. WhatsApp positivo externo continua pendente de número em
 store_settings e chave privada backend. Segunda conta inválida não foi retestada. Sem push/deploy.
+
+
+## Checkout WhatsApp concluído com serviços reais — 23/11/2026
+
+Número autorizado configurado manualmente pelo usuário em store_settings. Chave privada
+estava somente no .env da worktree backend; após conferir URL do mesmo projeto e leitura real
+do contato esperado, somente SUPABASE_SECRET_KEY foi transferida para o .env privado da main.
+FastAPI :8000 reiniciado para carregar a correção. Nenhuma chave, URI, senha ou número foi
+copiado para estes registros; não houve SQL nem alteração de usuários/permissões.
+
+Usuário autorizou nova ativação TEMPORÁRIA só do SKU NEOX-QA-20261122-A01. PATCH incluiu
+somente active=true; comparação integral dos campos de negócio antes/depois confirmou preço,
+estoques, imagens, créditos e demais dados preservados (somente active/updatedAt mudaram).
+31 verificações de integração/API/armazenamento PASS e 13 verificações de navegador PASS:
+
+- Checkout POST 200, contrato OpenAPI validado. BR40, 2 unidades, preço Atlas 17000 centavos,
+  subtotal/total 34000. Preço/total falsos enviados pelo cliente como 1 foram ignorados.
+- wa.me usa exatamente o número autorizado, esquema HTTPS, um parâmetro text codificado,
+  contendo nome do produto, tamanho, quantidade, subtotal e total corretos. Sem reserva/pagamento.
+- Linhas repetidas BR40 1+1 agrupadas em 2; dois tamanhos BR40x2 e BR42x1 geraram total
+  51000 centavos e mensagem correta com duas linhas, sem criar outros produtos.
+- Quantidade acima do estoque, tamanho indisponível, soma de duplicadas acima do estoque/
+  limite, carrinho vazio e quantidade booleana: 422 sem link; sem CSRF: 403.
+- Chromium contra main :8000, sem mocks: detalhe 200, tamanho40, carrinho 1→2, subtotal
+  R$170→R$340, checkout 200, resumo total R$340 e href idêntico ao waUrl da API. Número e texto
+  conferidos sem imprimir URL completa. Link não clicado; nenhuma requisição a wa.me.
+
+Leitura direta independente do Atlas comprovou preço/estoque/mídia intactos após checkout:
+nenhuma baixa/reserva ou outro documento gerado. DELETE final desativou o mesmo QA; Atlas
+confirmou active=false e demais dados originais preservados. Checkout após desativação recusado
+com 422 sem link. Snapshot de todos os outros produtos idêntico; somente chaves NEOX QA
+exclusivas desta execução limpas; sessão administrativa encerrada (logout 204).
+
+10 testes locais focados (cart/checkout/adapter de contato) passaram, com dublês explicitamente
+separados da execução real acima. Na etapa anterior desta missão, passaram 10 erros HTTP reais
+incluindo carrinho vazio, inativo/inexistente, id/tamanho/quantidade inválidos e Origin/CSRF.
+Sem alteração de código, contratos ou frontend; implementação existente suficiente. Relatório
+sanitizado: /tmp/neox-checkout-acceptance-result.json. Captura pública sem credenciais:
+/tmp/neox-checkout-qa.png. Esses arquivos temporários não são necessários para iniciar o app.
+
+Não resta bloqueio do checkout. Pendências externas ao checkout: seleção e autorização dos
+produtos definitivos, segunda conta ainda invalid_credentials, vídeo5–10min e acesso GitHub
+para o professor após autorização de publicação. Sem push, deploy ou envio de mensagem real.
