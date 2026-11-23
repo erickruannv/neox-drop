@@ -7,7 +7,7 @@
 {#- Marcas e coleções exploráveis: listas fixas como as categorias do contrato (sem endpoint de marcas).
     shortcut: marcas/coleções do catálogo acadêmico aprovado; trocar por lista vinda do backend
     se surgir endpoint de facetas. Performance contém o Air Max 90 aprovado. -#}
-{%- set brands = ["Nike", "adidas"] -%}
+{%- set brands = ["Nike", "adidas", "New Balance", "ASICS"] -%}
 {%- set collections = ["Street", "Classics", "Performance"] -%}
 {%- set items = catalog["items"] if catalog else [] -%}
 {%- set page = catalog.page if catalog else 1 -%}
@@ -100,7 +100,7 @@
     </details>
 
     <section aria-label="Resultados" class="min-w-0" data-catalog-results aria-busy="false">
-      <ul class="grid grid-cols-1 gap-4 transition-opacity min-[420px]:grid-cols-2 xl:grid-cols-3 lg:gap-6" data-catalog-list>
+      <ul class="grid grid-cols-2 gap-3 transition-opacity sm:gap-4 xl:grid-cols-3 lg:gap-6" data-catalog-list>
         {% for p in items %}<li>{{ product_card(p) }}</li>{% endfor %}
       </ul>
 

@@ -1,5 +1,5 @@
 {
-  "_leia": "Catálogo acadêmico aprovado pelo responsável em 2026-11-23. A lista aprovados corresponde exatamente a mongo/catalogo-academico.json (fonte do cadastro). Preços fictícios para demonstração; não são ofertas comerciais. Alternativas continuam sem autorização de cadastro. Não usar upsert nem alterar o QA ou registros existentes.",
+  "_leia": "Catálogo acadêmico aprovado pelo responsável em 2026-11-23. A lista aprovados corresponde exatamente a mongo/catalogo-academico.json (fonte do cadastro). Preços fictícios para demonstração; não são ofertas comerciais. Expansão para nove produtos autorizada pelo responsável em 2026-11-23: ver cadastro_pedido_2026_11_23. Não usar upsert nem alterar o QA ou registros existentes.",
   "aprovados": [
     {
       "sku": "NEOX-AM95-DARKARMY",
@@ -150,146 +150,6 @@
       ]
     }
   ],
-  "alternativas_aguardando_aprovacao": [
-    {
-      "sku": "NEOX-DEMO-205",
-      "slug": "new-balance-2002r",
-      "name": "New Balance 2002R",
-      "brand": "New Balance",
-      "category": "Street",
-      "priceCents": 84990,
-      "mainImageUrl": "/static/images/products/new-balance-2002r/main.webp",
-      "description": "Cabedal em camurça e malha em tons de lilás e cinza, entressola clara. Preço demonstrativo.",
-      "currency": "BRL",
-      "galleryUrls": [
-        "/static/images/products/new-balance-2002r/main.webp"
-      ],
-      "colorName": "Lilás/Cinza",
-      "active": true,
-      "attributes": {
-        "imageCredit": "Foto: LeDroider, CC0, fundo removido",
-        "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:New_Balance_2002R.jpg"
-      },
-      "sizes": [
-        {
-          "sizeBR": 38,
-          "stock": 3
-        },
-        {
-          "sizeBR": 39,
-          "stock": 4
-        },
-        {
-          "sizeBR": 40,
-          "stock": 5
-        },
-        {
-          "sizeBR": 41,
-          "stock": 5
-        },
-        {
-          "sizeBR": 42,
-          "stock": 4
-        },
-        {
-          "sizeBR": 43,
-          "stock": 2
-        }
-      ]
-    },
-    {
-      "sku": "NEOX-DEMO-206",
-      "slug": "nike-dunk-low-vermelho-cinza",
-      "name": "Nike Dunk Low",
-      "brand": "Nike",
-      "category": "Street",
-      "priceCents": 79990,
-      "mainImageUrl": "/static/images/products/nike-dunk-low-vermelho-cinza/main.webp",
-      "description": "Couro vermelho com sobreposições cinza e solado branco. Preço demonstrativo.",
-      "currency": "BRL",
-      "galleryUrls": [
-        "/static/images/products/nike-dunk-low-vermelho-cinza/main.webp"
-      ],
-      "colorName": "Vermelho/Cinza",
-      "active": true,
-      "attributes": {
-        "imageCredit": "Foto: William Mucci, CC0, fundo removido",
-        "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Nike_dunk_low.jpg"
-      },
-      "sizes": [
-        {
-          "sizeBR": 38,
-          "stock": 3
-        },
-        {
-          "sizeBR": 39,
-          "stock": 4
-        },
-        {
-          "sizeBR": 40,
-          "stock": 5
-        },
-        {
-          "sizeBR": 41,
-          "stock": 5
-        },
-        {
-          "sizeBR": 42,
-          "stock": 4
-        },
-        {
-          "sizeBR": 43,
-          "stock": 2
-        }
-      ]
-    },
-    {
-      "sku": "NEOX-DEMO-207",
-      "slug": "new-balance-574-cinza",
-      "name": "New Balance 574",
-      "brand": "New Balance",
-      "category": "Classics",
-      "priceCents": 69990,
-      "mainImageUrl": "/static/images/products/new-balance-574-cinza/main.webp",
-      "description": "Cabedal em camurça e malha cinza com o N reflexivo e entressola clara. Preço demonstrativo.",
-      "currency": "BRL",
-      "galleryUrls": [
-        "/static/images/products/new-balance-574-cinza/main.webp"
-      ],
-      "colorName": "Cinza",
-      "active": true,
-      "attributes": {
-        "imageCredit": "Foto: LeDroider, CC0, fundo removido",
-        "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:New_Balance_574.jpg"
-      },
-      "sizes": [
-        {
-          "sizeBR": 38,
-          "stock": 3
-        },
-        {
-          "sizeBR": 39,
-          "stock": 4
-        },
-        {
-          "sizeBR": 40,
-          "stock": 5
-        },
-        {
-          "sizeBR": 41,
-          "stock": 5
-        },
-        {
-          "sizeBR": 42,
-          "stock": 4
-        },
-        {
-          "sizeBR": 43,
-          "stock": 2
-        }
-      ]
-    }
-  ],
   "pendente_sem_midia": [
     {
       "name": "New Balance 9060",
@@ -313,14 +173,205 @@
       "motivo": "cede a posição 1; 3D continua no slide e na página"
     }
   ],
-  "reserva_nao_preparada": [
-    {
-      "name": "adidas Gazelle Indoor",
-      "colorName": "Azul/Branco/Gum",
-      "fonte": "https://commons.wikimedia.org/w/index.php?curid=148699790",
-      "autor": "LeDroider",
-      "licenca": "CC0",
-      "observacao": "par em vista lateral sobre madeira; preparar recorte só se aprovado"
-    }
-  ]
+  "cadastro_pedido_2026_11_23": {
+    "_leia": "Pedido do responsável em 2026-11-23: no mínimo oito produtos ativos no catálogo real e o Air Max 95 Dark Army fora dos destaques. 205/206/207 e AM95 featured.enabled=false já foram gravados pelo Codex (df5be07); NÃO inserir de novo. Falta: inserir os três documentos de 'inserir' (insert, sem upsert; não tocar no QA) e aplicar 'alterar_ativos'. Imagens em app/static/images/products/<slug>/main.webp (feature/frontend). Validados contra ProductCreate do OpenAPI. Fotos CC0 de LeDroider no Wikimedia Commons, fundo removido; licença reconferida na API do Commons em 2026-11-23.",
+    "inserir": [
+      {
+        "sku": "NEOX-DEMO-208",
+        "slug": "adidas-gazelle-indoor-azul",
+        "name": "adidas Gazelle Indoor",
+        "brand": "adidas",
+        "category": "Classics",
+        "priceCents": 64990,
+        "colorName": "Azul/Branco/Gum",
+        "description": "Camurça azul com as três listras em couro claro, letreiro dourado e sola de borracha translúcida cor de mel. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
+        "attributes": {
+          "imageCredit": "Foto: LeDroider, CC0, fundo removido",
+          "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Adidas_Gazelle_Indoor.jpg"
+        },
+        "featured": {
+          "enabled": true,
+          "order": 2,
+          "backgroundHex": "#0F2340",
+          "accentHex": "#5AA2FF"
+        },
+        "mainImageUrl": "/static/images/products/adidas-gazelle-indoor-azul/main.webp",
+        "galleryUrls": [
+          "/static/images/products/adidas-gazelle-indoor-azul/main.webp"
+        ],
+        "currency": "BRL",
+        "active": true,
+        "sizes": [
+          {
+            "sizeBR": 38,
+            "stock": 3
+          },
+          {
+            "sizeBR": 39,
+            "stock": 4
+          },
+          {
+            "sizeBR": 40,
+            "stock": 5
+          },
+          {
+            "sizeBR": 41,
+            "stock": 5
+          },
+          {
+            "sizeBR": 42,
+            "stock": 4
+          },
+          {
+            "sizeBR": 43,
+            "stock": 2
+          }
+        ]
+      },
+      {
+        "sku": "NEOX-DEMO-209",
+        "slug": "nike-cortez-branco-vermelho",
+        "name": "Nike Cortez",
+        "brand": "Nike",
+        "category": "Classics",
+        "priceCents": 54990,
+        "colorName": "Branco/Vermelho/Azul",
+        "description": "Couro branco com Swoosh vermelho e entressola com faixa azul. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
+        "attributes": {
+          "imageCredit": "Foto: LeDroider, CC0, fundo removido",
+          "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Nike_Cortez.jpg"
+        },
+        "featured": {
+          "enabled": true,
+          "order": 5,
+          "backgroundHex": "#1B2433",
+          "accentHex": "#FF4D5E"
+        },
+        "mainImageUrl": "/static/images/products/nike-cortez-branco-vermelho/main.webp",
+        "galleryUrls": [
+          "/static/images/products/nike-cortez-branco-vermelho/main.webp"
+        ],
+        "currency": "BRL",
+        "active": true,
+        "sizes": [
+          {
+            "sizeBR": 38,
+            "stock": 3
+          },
+          {
+            "sizeBR": 39,
+            "stock": 4
+          },
+          {
+            "sizeBR": 40,
+            "stock": 5
+          },
+          {
+            "sizeBR": 41,
+            "stock": 5
+          },
+          {
+            "sizeBR": 42,
+            "stock": 4
+          },
+          {
+            "sizeBR": 43,
+            "stock": 2
+          }
+        ]
+      },
+      {
+        "sku": "NEOX-DEMO-210",
+        "slug": "asics-gel-1130-branco-dourado",
+        "name": "ASICS GEL-1130",
+        "brand": "ASICS",
+        "category": "Performance",
+        "priceCents": 74990,
+        "colorName": "Branco/Dourado/Prata",
+        "description": "Malha branca com sobreposições prateadas e douradas, listras pretas e entressola creme. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
+        "attributes": {
+          "imageCredit": "Foto: LeDroider, CC0, fundo removido",
+          "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Asics_Gel-1130.jpg"
+        },
+        "mainImageUrl": "/static/images/products/asics-gel-1130-branco-dourado/main.webp",
+        "galleryUrls": [
+          "/static/images/products/asics-gel-1130-branco-dourado/main.webp"
+        ],
+        "currency": "BRL",
+        "active": true,
+        "sizes": [
+          {
+            "sizeBR": 38,
+            "stock": 3
+          },
+          {
+            "sizeBR": 39,
+            "stock": 4
+          },
+          {
+            "sizeBR": 40,
+            "stock": 5
+          },
+          {
+            "sizeBR": 41,
+            "stock": 5
+          },
+          {
+            "sizeBR": 42,
+            "stock": 4
+          },
+          {
+            "sizeBR": 43,
+            "stock": 2
+          }
+        ]
+      }
+    ],
+    "alterar_ativos": [
+      {
+        "slug": "nike-dunk-low-vermelho-cinza",
+        "campo": "featured",
+        "de": null,
+        "para": {
+          "enabled": true,
+          "order": 4,
+          "backgroundHex": "#24272B",
+          "accentHex": "#FF4A4F"
+        },
+        "motivo": "vitrine mais chamativa: Dunk vermelho no carrossel"
+      }
+    ],
+    "ordem_final_destaques": [
+      "nike-air-max-90-infrared (1, já)",
+      "adidas-gazelle-indoor-azul (2, novo)",
+      "adidas-samba-og (3, já)",
+      "nike-dunk-low-vermelho-cinza (4)",
+      "nike-cortez-branco-vermelho (5, novo)"
+    ],
+    "resultado_esperado": {
+      "ativos": 9,
+      "destaques": 5,
+      "por_categoria": {
+        "Street": 3,
+        "Performance": 2,
+        "Classics": 4
+      },
+      "marcas": [
+        "Nike",
+        "adidas",
+        "New Balance",
+        "ASICS"
+      ]
+    },
+    "ja_gravados_pelo_codex": [
+      "NEOX-DEMO-205",
+      "NEOX-DEMO-206",
+      "NEOX-DEMO-207"
+    ],
+    "para_o_codex_reconciliar": [
+      "tests/integration/test_pages.py::test_integrated_home_shows_approved_collections_and_keeps_photo_credits espera 'Andre Bond Sr.'/'CC BY 4.0' na home; a imagem do AM95 saiu do banner Street (agora Dunk Low) e o crédito da home lista Dunk, Gazelle e AM90.",
+      "tests/integration/test_showcase.py::test_fastapi_showcase_keeps_curated_media_and_contracts_without_remote_writes espera o conjunto antigo de destaques das fixtures (com AM95); fixtures agora: AM90, Gazelle Indoor, Samba, Dunk Low, Cortez.",
+      "tests/e2e/live/delivery.spec.js (opt-in) exige AM95 no carrossel com 3D no hero; o player do Sketchfab agora fica só no bloco 'Demonstração 3D' de /tenis/nike-air-max-95-dark-army. Aceite novo em tests/e2e/live/catalogo-real.spec.js."
+    ]
+  }
 }

@@ -40,18 +40,19 @@ R$&nbsp;{{ brl_amount(cents) }}
 
 {# Card de produto (ProductSummary). data-card=* permite ao catalog.js clonar e preencher. #}
 {% macro product_card(p) -%}
-<article class="product-card group h-full">
-  <div class="relative mb-4 aspect-[3/2] overflow-hidden rounded-xl bg-paper">
-    <img src="{{ p.mainImageUrl }}" alt="" width="1200" height="800" loading="lazy" decoding="async" class="absolute inset-0 size-full object-contain p-2 transition-transform duration-500 ease-out-soft group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100" data-card="image">
-    <span class="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide" data-card="category">{{ p.category }}</span>
+<article class="product-card group h-full" data-category="{{ p.category }}" data-card="root">
+  {#- Topo na cor da coleção e o tênis sobrepondo a borda (referência 06), sem marcas de terceiros. -#}
+  <div class="card-stage">
+    <img src="{{ p.mainImageUrl }}" alt="" width="1200" height="800" loading="lazy" decoding="async" class="card-shoe" data-card="image">
+    <span class="absolute left-2 top-2 rounded-full bg-white/95 px-2 py-0.5 text-[10px] sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-[11px] font-bold uppercase tracking-wide text-ink" data-card="category">{{ p.category }}</span>
   </div>
   <p class="text-xs font-bold uppercase tracking-wide text-muted" data-card="brand">{{ p.brand }}</p>
-  <h3 class="mt-1 font-bold leading-tight">
+  <h3 class="display-type mt-1 text-[0.82rem] leading-tight [overflow-wrap:anywhere] min-[400px]:text-[0.95rem] sm:text-xl">
     <a href="/tenis/{{ p.slug|urlencode }}" class="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-3 focus-visible:after:outline-ink" data-card="link">{{ p.name }}</a>
   </h3>
   <div class="mt-2 flex items-end justify-between gap-2">
-    <p class="text-xl font-extrabold" data-card="price">{{ brl(p.priceCents) }}</p>
-    <span class="grid size-10 place-items-center rounded-xl bg-ink text-white transition-colors duration-300 group-hover:bg-lime group-hover:text-ink" aria-hidden="true">{{ icon("arrow-right", "size-5 transition-transform duration-300 group-hover:translate-x-0.5") }}</span>
+    <p class="text-base font-extrabold tabular-nums sm:text-xl" data-card="price">{{ brl(p.priceCents) }}</p>
+    <span class="grid size-9 shrink-0 place-items-center rounded-xl bg-ink sm:size-10 text-white transition-colors duration-300 group-hover:bg-lime group-hover:text-ink" aria-hidden="true">{{ icon("arrow-right", "size-5 transition-transform duration-300 group-hover:translate-x-0.5") }}</span>
   </div>
 </article>
 {%- endmacro %}

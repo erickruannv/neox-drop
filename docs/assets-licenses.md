@@ -15,7 +15,7 @@ Ficam só produtos com fotografia real, nítida e do modelo/colorway exato:
 |---|---|---|
 | Nike Air Max 90 Infrared | ✅ | foto CC BY 2.0 correta |
 | adidas Samba OG branco/preto/gum | ✅ | 3 fotos (CC0 + Unsplash) corretas |
-| Nike Air Max 95 Dark Army/Orange Blaze | ✅ destaque 1 | scan 3D fotogramétrico CC BY; imagens = capturas do scan (ver abaixo) |
+| Nike Air Max 95 Dark Army/Orange Blaze | ✅ catálogo (fora dos destaques desde 2026-11-23) | scan 3D fotogramétrico CC BY; imagens = capturas do scan (ver abaixo) |
 | Nike Air Max 95 OG Neon preto/cinza/lima | ❌ sem foto | nenhuma foto/scan com licença comercial da colorway; o Dark Army é a alternativa apresentada |
 | New Balance 9060 cinza | ❌ retirado | sem foto licenciada nem 3D |
 | Nike Dunk Low (panda) | ❌ não incluído | só fotos de mão segurando o par (Unsplash), não de produto |
@@ -46,17 +46,23 @@ Rejeitadas por modelo/cor errados: Commons `Air Max 95.jpg` (outro Air Max), `Ni
 
 ## 3D
 
-O hero e a página do produto abrem com a **foto**; o 3D do mesmo produto só carrega quando a pessoa
-interage com a foto (arraste horizontal, toque ou pílula "Girar 360°") e aparece no lugar dela quando
-fica pronto (`static/js/viewer3d.js`, `partials/rotate3d.html`). Giro só em Y (camada de arraste própria
-sobre o embed; GLB futuro via Model Viewer com phi fixo). Produto sem `model3dUrl` não mostra convite.
+Hero e página do produto abrem com a **foto**. Desde 2026-11-23 o player do Sketchfab (marca, logo e
+dica "click & hold" obrigatórios no plano gratuito) **não aparece mais no hero nem no lugar da foto**:
+fica só no bloco separado "Demonstração 3D" da página do AM95, identificado como player externo de
+terceiros, carregado ao tocar/arrastar ou pela pílula "Girar 360°" (`static/js/viewer3d.js`, opção
+`embed`). GLB próprio/licenciado gira nativo no lugar da foto (Model Viewer, phi fixo, giro só em Y).
+
+Busca de 2026-11-23 na API do Sketchfab (só baixáveis): nenhum modelo com a mesma colorway dos outros
+produtos (AM90 Infrared, Samba OG, Dunk vermelho/cinza, 574 cinza, 2002R lilás, Gazelle azul, Cortez,
+GEL-1130). Só o AM95 Dark Army tem modelo idêntico à foto. Baixar o GLB dele exige conta Sketchfab e a
+descrição do autor diz "Purchase on Sketchfab only" (ver observação abaixo): licença a confirmar.
 
 **Escolhido (2026-11-22): um único modelo, fotorrealista.** Avaliado no Chromium com GPU, em
 vários ângulos, não só "carregou":
 
 | Modelo | Decisão | Fonte | Licença | Motivo |
 |---|---|---|---|---|
-| Nike Air Max 95 Dark Army/Orange Blaze | ✅ **em uso** (destaque 1) | [Sketchfab c425a652…](https://sketchfab.com/3d-models/c425a652fc59427ba1fcef48ea174c92), Andre Bond Sr. | CC BY 4.0 | fotogrametria; camurça, malha, costura e bolhas de ar com aparência de foto |
+| Nike Air Max 95 Dark Army/Orange Blaze | ✅ **em uso** (bloco "Demonstração 3D" do produto) | [Sketchfab c425a652…](https://sketchfab.com/3d-models/c425a652fc59427ba1fcef48ea174c92), Andre Bond Sr. | CC BY 4.0 | fotogrametria; camurça, malha, costura e bolhas de ar com aparência de foto |
 | Nike Air Max 90 Essentials Olive | reserva | [Sketchfab feaf8296…](https://sketchfab.com/3d-models/feaf82967c5f44bd94aa774228d76d21), Andre Bond Sr. | CC BY 4.0 | fotorrealista (250 fotos, Reality Capture), mas sem foto da colorway |
 | Nike Air Max 90 preto/branco/vermelho | reserva | [Sketchfab ce4a4e58…](https://sketchfab.com/3d-models/ce4a4e5847b34cd6b4ed0ecf134f556d), Thomson | CC BY 4.0 | scan KIRI bom, 12k vértices; não é a Infrared branca |
 | Nike Air Max 90 (Raw) — link do pedido | ❌ | [Sketchfab fe4211e3…](https://sketchfab.com/3d-models/fe4211e3fb0d43eab4bd29a6b1471243) | CC BY | scan cru: chão e suporte junto, sola derretida |
@@ -99,25 +105,23 @@ explícita (Royalty Free / Standard) antes de comprar.
 | Qualquer um | **Escanear os pares do estoque** (fotogrametria por app de celular → GLB → Model Viewer) | grátis a ~US$ 15/mês de app | colorway exata e direito autoral próprio; qualidade boa, não de configurador |
 | Qualquer um | Encomendar modelagem/escaneamento profissional | orçamento | qualidade de configurador; custo alto |
 
-## Alternativas propostas (não incorporadas — aguardam aprovação)
+## Expansão do catálogo (aprovada pelo responsável em 2026-11-23)
 
-Arquivos já preparados (recorte BiRefNet, WebP 1600×1000, fundo transparente) mas **não ligados à
-vitrine**: `products/new-balance-2002r/main.webp`, `products/nike-dunk-low-vermelho-cinza/main.webp` e
-`products/new-balance-574-cinza/main.webp`.
-Licença CC0 reconfirmada na API do Commons em 2026-11-23. Dados prontos (ProductCreate) em
-`docs/catalogo-definitivo.json` → `alternativas_aguardando_aprovacao`. New Balance 9060: nova busca em
-2026-11-23 (Openverse/Flickr, categorias do Commons) sem resultado utilizável.
+Nove tênis com foto real e licença livre. Recorte BiRefNet, WebP 1600×1000, fundo transparente.
+Licença CC0 reconfirmada na API do Commons em 2026-11-23. Dados (ProductCreate) em
+`docs/catalogo-definitivo.json` → `cadastro_pedido_2026_11_23`; 205/206/207 já gravados pelo Codex.
 
-Sem foto utilizável para **Air Max 95 OG Neon** e **New Balance 9060 cinza** (buscados em
-Commons, Flickr via Openverse, Unsplash e Pexels em 2026-11-21/22). Fotos reais encontradas para
-substituir, se aprovado:
+| Arquivo | Produto | Fonte | Autor | Licença | Alteração |
+|---|---|---|---|---|---|
+| `products/new-balance-2002r/main.webp` | New Balance 2002R lilás/cinza (par) | [Commons](https://commons.wikimedia.org/wiki/File:New_Balance_2002R.jpg) | LeDroider | CC0 | fundo removido |
+| `products/nike-dunk-low-vermelho-cinza/main.webp` | Nike Dunk Low vermelho/cinza (par) | [Commons](https://commons.wikimedia.org/wiki/File:Nike_dunk_low.jpg) | William Mucci | CC0 | fundo removido |
+| `products/new-balance-574-cinza/main.webp` | New Balance 574 cinza | [Commons](https://commons.wikimedia.org/wiki/File:New_Balance_574.jpg) | LeDroider | CC0 | fundo removido |
+| `products/adidas-gazelle-indoor-azul/main.webp` | adidas Gazelle Indoor azul/gum | [Commons](https://commons.wikimedia.org/wiki/File:Adidas_Gazelle_Indoor.jpg) | LeDroider | CC0 | só o pé de baixo do par; fundo removido |
+| `products/nike-cortez-branco-vermelho/main.webp` | Nike Cortez branco/vermelho/azul | [Commons](https://commons.wikimedia.org/wiki/File:Nike_Cortez.jpg) | LeDroider | CC0 | fundo e expositor removidos |
+| `products/asics-gel-1130-branco-dourado/main.webp` | ASICS GEL-1130 branco/dourado/prata | [Commons](https://commons.wikimedia.org/wiki/File:Asics_Gel-1130.jpg) | LeDroider | CC0 | fundo e prateleira removidos |
 
-| No lugar de | Alternativa | Fonte | Licença | Observação |
-|---|---|---|---|---|
-| New Balance 9060 cinza | New Balance 2002R (camurça lilás/cinza, par) | [Commons, LeDroider](https://commons.wikimedia.org/w/index.php?curid=149192395) | CC0 | 2335×2424, foto de produto nítida; mesmo autor da foto do Samba |
-| (extra) | Nike Dunk Low vermelho/cinza (par) | [Commons, William Mucci](https://commons.wikimedia.org/w/index.php?curid=99442772) | CC0 | 2963×3523, fundo claro liso |
-| (extra) | New Balance 574 cinza (pé único, lateral) | [Commons, LeDroider](https://commons.wikimedia.org/w/index.php?curid=153859594) | CC0 | 3136×1826, vitrine de loja; recorte em `products/new-balance-574-cinza/main.webp` (2026-11-23) |
-| (reserva, sem recorte) | adidas Gazelle Indoor azul (par) | [Commons, LeDroider](https://commons.wikimedia.org/w/index.php?curid=148699790) | CC0 | 3688×2725, par lateral sobre madeira |
+New Balance 9060: sem foto utilizável (buscas de 2026-11-21 a 23 em Commons, Openverse/Flickr,
+Unsplash e Pexels). Air Max 95 OG Neon: idem.
 
 O Air Max 95 já tem o Dark Army (3D + capturas) como representante aprovado.
 

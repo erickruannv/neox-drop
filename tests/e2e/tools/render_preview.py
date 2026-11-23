@@ -72,8 +72,13 @@ def pages() -> tuple[dict[str, tuple[str, dict]], dict]:
     for item in no3d["featured"]["items"]:
         item.pop("model3dUrl", None)
 
+    # Banco antigo com o AM95 (embed Sketchfab) ainda em destaque: o hero não pode embutir o player.
+    am95 = copy.deepcopy(home)
+    am95["featured"]["items"].insert(0, next({**d, "featured": {**d["featured"], "enabled": True, "order": 1}} for d in details if "sketchfab.com" in d.get("model3dUrl", "")))
+
     out = {
         "": ("home.html", home),
+        "am95-destaque": ("home.html", am95),
         "sem-3d": ("home.html", no3d),
         "empty": ("home.html", empty),
         "model": ("home.html", model),

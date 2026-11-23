@@ -15,7 +15,7 @@ test("home renderiza marca, hero e lançamentos a partir do contexto", async ({ 
     await expect(cards.nth(i)).toContainText(brl(p.priceCents).replace(/\s/, " "));
     await expect(cards.nth(i).getByRole("link")).toHaveAttribute("href", `/tenis/${p.slug}`);
   }
-  for (const [category, image] of [["Street", "nike-air-max-95-dark-army/lateral.webp"], ["Classics", "adidas-samba-og/main.webp"], ["Performance", "nike-air-max-90-infrared/main.webp"]]) {
+  for (const [category, image] of [["Street", "nike-dunk-low-vermelho-cinza/main.webp"], ["Classics", "adidas-gazelle-indoor-azul/main.webp"], ["Performance", "nike-air-max-90-infrared/main.webp"]]) {
     const collection = page.locator(`#colecoes a[href="/tenis?category=${category}"]`);
     await expect(collection).toBeVisible();
     await expect(collection.locator("img")).toHaveAttribute("src", `/static/images/products/${image}`);

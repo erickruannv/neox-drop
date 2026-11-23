@@ -2,8 +2,9 @@
 // o 3D só carrega quando a pessoa interage: arrasta na horizontal, toca/clica na foto ou usa a
 // pílula "Girar 360°" (teclado). Enquanto carrega, a foto continua visível; se falhar, fica a
 // foto com aviso. Giro SOMENTE em Y nos dois motores:
-// - embed Sketchfab: camada própria de arraste (ver sketchfab.js);
-// - GLB próprio/licenciado: Model Viewer com phi fixo (min = max), sem zoom/pan.
+// - GLB próprio/licenciado: Model Viewer com phi fixo (min = max), sem zoom/pan, nativo no lugar da foto;
+// - embed Sketchfab: o player gratuito exibe marca e controles obrigatórios, então só roda no bloco
+//   separado "Demonstração 3D" (opção embed), nunca no hero nem na foto principal.
 import { createSketchfabViewer, sketchfabUid } from "./sketchfab.js";
 
 // Ângulo polar fixo (phi = min = max): sem inclinação vertical.
@@ -36,7 +37,7 @@ function glbViewer(item, reduced) {
 
 // media: contêiner relative com [data-3d-photo], [data-3d-toggle] e [data-3d-status].
 // onState(state, item) avisa o chamador (ex.: trocar o crédito da foto pelo do modelo).
-export function inline3d(media, { zoom = 0.8, onState = () => {} } = {}) {
+export function inline3d(media, { zoom = 0.8, embed = false, onState = () => {} } = {}) {
   const toggle = media.querySelector("[data-3d-toggle]");
   const label = toggle.querySelector("[data-3d-label]");
   const status = media.querySelector("[data-3d-status]");
@@ -140,9 +141,10 @@ export function inline3d(media, { zoom = 0.8, onState = () => {} } = {}) {
     // Troca de produto (carrossel/galeria): sempre volta à foto do item novo.
     set(next) {
       reset();
-      item = next;
-      toggle.hidden = !next?.model3dUrl;
-      media.toggleAttribute("data-has-3d", Boolean(next?.model3dUrl));
+      const url = next?.model3dUrl && (embed || !sketchfabUid(next.model3dUrl)) ? next.model3dUrl : null;
+      item = next && { ...next, model3dUrl: url };
+      toggle.hidden = !url;
+      media.toggleAttribute("data-has-3d", Boolean(url));
       if (next) setState("idle");
     },
     reset,

@@ -4,6 +4,10 @@
     contagens de estoque não são expostas. -#}
 {%- set p = product -%}
 {%- set gallery = p.galleryUrls if p.galleryUrls else [p.mainImageUrl] -%}
+{#- GLB próprio gira no lugar da foto; o player do Sketchfab (marca/controles obrigatórios) fica no
+    bloco separado "Demonstração 3D". data-open-3d marca, no SSR, a página com 3D. -#}
+{%- set m3d = p.get("model3dUrl") or "" -%}
+{%- set embed3d = m3d.startswith("https://sketchfab.com/") -%}
 
 {% block title %}{{ p.name }} — NEOX drop{% endblock %}
 {% block description %}{{ p.name }} ({{ p.brand }}), {{ p.colorName }}.{% endblock %}
@@ -22,11 +26,11 @@
 
   <div class="mt-6 grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-12">
     <section aria-label="Galeria" class="min-w-0" data-gallery>
-      <div class="relative grid aspect-[4/3] place-items-center overflow-hidden rounded-3xl bg-white p-6 shadow-[0_8px_24px_rgb(0_0_0/0.06)] sm:p-10" data-3d-stage{% if p.get("model3dUrl") %} data-open-3d{% endif %}>
+      <div class="relative grid aspect-[4/3] place-items-center overflow-hidden rounded-3xl bg-white p-6 shadow-[0_8px_24px_rgb(0_0_0/0.06)] sm:p-10"{% if m3d and not embed3d %} data-3d-stage data-open-3d{% endif %}>
         <span class="display-type pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none whitespace-nowrap text-center text-[clamp(4rem,12vw,10rem)] text-ink/[0.05]" aria-hidden="true">{{ p.name.split(" ")[0]|upper }}</span>
         <img src="{{ gallery[0] }}" alt="{{ p.name }}, {{ p.colorName }}" width="1200" height="900" fetchpriority="high" decoding="async"
              class="absolute inset-0 size-full object-contain p-6 sm:p-10" data-gallery-main data-3d-photo>
-        {% include "partials/rotate3d.html" %}
+        {% if m3d and not embed3d %}{% include "partials/rotate3d.html" %}{% endif %}
       </div>
       {% if gallery|length > 1 %}
       <ul class="mt-3 grid grid-cols-4 gap-2 pb-1 sm:flex sm:gap-3 sm:overflow-x-auto" aria-label="Imagens do produto">
@@ -99,6 +103,19 @@
       <p class="mt-4 text-sm text-muted">Preço e disponibilidade são confirmados ao gerar o pedido pelo WhatsApp.</p>
     </section>
   </div>
+  {% if embed3d %}
+  <section aria-labelledby="demo-3d-titulo" class="mt-10 rounded-3xl bg-ink p-4 text-white sm:p-6 lg:w-[calc(58.333%-1.75rem)]">
+    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+      <h2 id="demo-3d-titulo" class="display-type text-xl sm:text-2xl">Demonstração 3D</h2>
+      <p class="text-xs font-semibold uppercase tracking-wide text-white/70">Player externo · Sketchfab</p>
+    </div>
+    <p class="mt-2 max-w-prose text-sm leading-relaxed text-white/80">Modelo 3D de terceiros do mesmo tênis, exibido pelo player gratuito do Sketchfab, com a marca e os controles dele. Toque ou arraste para carregar; gira só na horizontal.</p>
+    <div class="relative mt-4 aspect-[16/10] overflow-hidden rounded-2xl bg-white/[0.06]" data-3d-demo data-open-3d>
+      <img src="{{ p.mainImageUrl }}" alt="" width="1200" height="750" loading="lazy" decoding="async" class="absolute inset-0 size-full object-contain p-6 sm:p-10" data-3d-photo>
+      {% include "partials/rotate3d.html" %}
+    </div>
+  </section>
+  {% endif %}
 </div>
 {% endblock %}
 
