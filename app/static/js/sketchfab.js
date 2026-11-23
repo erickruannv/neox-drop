@@ -7,6 +7,9 @@ const API_SRC = "https://static.sketchfab.com/api/sketchfab-viewer-1.12.1.js";
 const EMBED_RE = /^https:\/\/sketchfab\.com\/models\/([0-9a-f]{32})\/embed$/;
 const SPIN_DEG_PER_S = 14;
 const KEY_STEP = Math.PI / 12; // 15°
+// Script carregou mas o modelo não ficou pronto (iframe bloqueado, rede lenta): desiste e volta
+// à foto com aviso, em vez de "Carregando…" eterno.
+export const READY_TIMEOUT_MS = 25000;
 
 export const sketchfabUid = (url) => EMBED_RE.exec(url ?? "")?.[1] ?? null;
 
@@ -172,12 +175,14 @@ export function createSketchfabViewer(stage, { reduced, zoom = 1, onState = () =
       return;
     }
     if (current !== uid) return;
+    const timer = setTimeout(() => current === uid && !api && onState("error", uid), window.__sfTimeoutMs ?? READY_TIMEOUT_MS);
     new Sketchfab(frame).init(uid, {
       ...INIT,
       success(next) {
         next.start();
         next.addEventListener("viewerready", async () => {
           const cam = await frameModel(next, zoom);
+          clearTimeout(timer);
           if (current !== uid) return;
           if (!cam) return onState("error", uid);
           api = next;
@@ -194,6 +199,7 @@ export function createSketchfabViewer(stage, { reduced, zoom = 1, onState = () =
         });
       },
       error() {
+        clearTimeout(timer);
         if (current === uid) onState("error", uid);
       },
     });

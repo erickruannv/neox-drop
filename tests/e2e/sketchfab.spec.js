@@ -134,6 +134,18 @@ test("palco 3D: falha ao carregar a Viewer API mostra aviso e mantém a foto", a
   await expect(pad(page)).toBeHidden();
 });
 
+test("palco 3D: script carrega mas o modelo nunca fica pronto → aviso e foto após o timeout", async ({ page }) => {
+  await page.unroute("https://static.sketchfab.com/**");
+  const NEVER = FAKE.replace('if (ev === "viewerready") setTimeout(cb, 20);', "");
+  await page.route("https://static.sketchfab.com/**", (r) => r.fulfill({ contentType: "application/javascript", body: NEVER }));
+  await page.addInitScript(() => (window.__sfTimeoutMs = 400));
+  await page.goto("/");
+  await open(page);
+  await expect(dialog(page).locator("[data-viewer-hint]")).toContainText("indisponível");
+  await expect(dialog(page).locator("[data-viewer-poster]")).toBeVisible();
+  await expect(pad(page)).toBeHidden();
+});
+
 test("produto: 'Ver em 3D' abre o mesmo palco com o modelo do produto", async ({ page }) => {
   const item = items.find(uidOf);
   await page.goto(`/tenis/${item.slug}/`);

@@ -11,3 +11,23 @@ if (menu) {
   document.addEventListener("keydown", (e) => e.key === "Escape" && close(true));
   document.addEventListener("click", (e) => !menu.contains(e.target) && close(false));
 }
+
+// Imagem de produto que falha (404, origem fora do ar): esconde o ícone quebrado e mostra um
+// aviso discreto no lugar ([data-img-missing], ver input.css). Captura: "error" não borbulha.
+function missing(img) {
+  if (!img.matches("main img") || img.closest("[data-img-missing]")) return;
+  const box = img.parentElement;
+  if (getComputedStyle(box).position === "static") box.style.position = "relative";
+  box.dataset.imgMissing = "";
+  img.hidden = true;
+}
+document.addEventListener("error", (e) => e.target instanceof HTMLImageElement && missing(e.target), true);
+document.addEventListener("load", (e) => e.target instanceof HTMLImageElement && unmiss(e.target), true);
+function unmiss(img) {
+  // a mesma <img> é reaproveitada no hero/galeria ao trocar de produto
+  if (img.parentElement?.hasAttribute("data-img-missing")) {
+    delete img.parentElement.dataset.imgMissing;
+    img.hidden = false;
+  }
+}
+for (const img of document.querySelectorAll("main img[src]")) if (img.complete && !img.naturalWidth && img.getAttribute("src")) missing(img);

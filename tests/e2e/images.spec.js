@@ -57,3 +57,13 @@ test("galeria: foto não é girada nem recebe sombra retangular", async ({ page 
   expect(style).toEqual({ t: "none", f: "none", fit: "contain" });
   expect(inside(await box(main), await box(main.locator("..")))).toBe(true);
 });
+
+test("imagem de produto que falha: sem ícone quebrado, aviso discreto no lugar", async ({ page }) => {
+  await page.route("**/static/images/products/**", (r) => r.fulfill({ status: 404, body: "" }));
+  await page.goto("/tenis/");
+  const well = page.locator("[data-catalog-list] article").first().locator("[data-card=image]").locator("..");
+  await expect(well).toHaveAttribute("data-img-missing", "");
+  await expect(well.locator("[data-card=image]")).toBeHidden();
+  const text = await well.evaluate((el) => getComputedStyle(el, "::after").content);
+  expect(text).toContain("Imagem indisponível");
+});
