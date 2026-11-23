@@ -25,7 +25,7 @@ Só usar os projetos de TESTE já conferidos. Um worker até existir rate limit 
 
 | Serviço | Papel | Situação |
 |---|---|---|
-| Supabase PostgreSQL/Auth | Identidade, perfil admin/RLS e contato WhatsApp privado | URL/Publishable configurados; postflight, perfil e login real pendentes |
+| Supabase PostgreSQL/Auth | Identidade, perfil admin/RLS e contato WhatsApp privado | URL/Publishable configurados; admin ativado conforme confirmação do usuário; login/RLS de sessão reais pendentes |
 | MongoDB Atlas | Produtos, preço em centavos e estoque autoritativos | Cluster0, papel neox_drop_test@admin restrito ao banco neox_drop_test; products strict/error, seis índices adicionais, zero documentos |
 | Upstash Redis | Até 5 recentes, TTL 7 dias; cache 300s, sem governar preço | Credenciais ausentes; registro de visita e seção recentes ligados à UI, ainda sem prova externa |
 
@@ -34,12 +34,12 @@ fixtures ou produtos inventados. Admin sem sessão continua bloqueado. Health re
 sem Redis; isso não comprova o fluxo completo. A vitrine :8001 é demonstração e não vale como
 prova de persistência. Não recriar Mongo/Supabase nem reaplicar a migration manual já executada.
 
-**Única ação manual atual:** Supabase → neox-drop-test → SQL Editor → New query, como postgres:
-executar [admin_profiles_pending.sql](supabase/verification/admin_profiles_pending.sql)
-e retornar a única linha JSON. A consulta trata só pendências e mostra UUIDs/e-mails mascarados
-das duas contas, sem ativá-las. Contagens, RLS e grants de tabela já informados não são repetidos.
-Depois será solicitada autorização específica
-para ativar UMA conta existente; a outra permanece sem privilégio. Nenhuma promoção automática.
+**Única ação manual atual:** preencher no `.env` privado as quatro variáveis já previstas:
+`NEOX_TEST_ADMIN_EMAIL`, `NEOX_TEST_ADMIN_PASSWORD`, `NEOX_TEST_NONADMIN_EMAIL` e
+`NEOX_TEST_NONADMIN_PASSWORD`, usando as duas contas existentes. O UUID administrativo
+confirmado é `4d03df16-ce24-4633-b45a-ce1bcdc6ac06`; não promover outra conta nem repetir SQL.
+Avisar apenas quando estiver salvo; não enviar os valores no chat. O próximo teste será login,
+perfil sob RLS, logout/revogação e negação de acesso à segunda conta, sem alterar os perfis.
 
 Credenciais ficam apenas no .env privado, conforme [.env.example](.env.example). Não enviar
 senhas/chaves/URIs no chat, vídeo ou Git. Redis ainda requer instância Free/REST URL/token.

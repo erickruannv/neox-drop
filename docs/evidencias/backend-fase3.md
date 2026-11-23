@@ -646,3 +646,27 @@ UUID da conta escolhida e apresentar associação role=admin/is_active=true para
 separada. Não promover automaticamente. Depois validar login/negação da segunda conta e,
 somente com autorização de INSERT, cadastrar o primeiro produto fictício pela interface.
 Estrutura Mongo concluída; CRUD real, login administrativo e checkout continuam sem comprovação.
+
+
+## Após ativação administrativa confirmada pelo usuário — 22/11/2026
+
+Usuário confirmou UUID `4d03df16-ce24-4633-b45a-ce1bcdc6ac06`, role=admin e is_active=true.
+Nenhuma migration, SQL de verificação ou promoção foi executada novamente pelo agente.
+Conexões reais verificadas pelo Python, usando os adaptadores existentes com opt-in só no
+processo: Supabase Auth health/settings responderam; ping autenticado Atlas passou;
+products.count_documents retornou 0. FastAPI já ativo em http://127.0.0.1:8000: home,
+catálogo, login e API de produtos 200; API sem produtos; /health 200/degraded sem Redis;
+/api/admin/me 401 e /admin/produtos 303 sem sessão. Isso comprova conectividade e leitura,
+não login administrativo, CRUD ou persistência de produtos.
+
+Regressão: pytest 171 passed/6 skipped; ruff passou; build Tailwind/vendor passou;
+Playwright UI 114 passed/4 skipped (fixtures/dublês, desktop e celular emulado).
+As quatro variáveis NEOX_TEST_* estão ausentes tanto no .env como no ambiente do processo;
+logo login real/admin versus não-admin, logout e RLS de sessão não foram executados.
+Credenciais Redis e chave backend de contato também ausentes. Sem ferramentas Upstash
+autenticadas disponíveis; plano Free confirmado em https://upstash.com/pricing/redis
+(250 MB, 500 mil comandos/mês), sem criar recurso ou ativar plano pago.
+Contato WhatsApp continua não configurado conforme confirmação anterior; checkout externo
+não comprovado. Nenhum documento inserido/alterado ou outro serviço remoto modificado.
+Próxima e única ação solicitada: preencher as quatro credenciais de teste já previstas no
+.env privado; não enviar valores no chat. README atualizado para não pedir SQL novamente.
