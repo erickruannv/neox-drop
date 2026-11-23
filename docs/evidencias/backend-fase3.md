@@ -689,3 +689,15 @@ Teste de sessão renovada remove apenas o cookie de acesso local, sem esperar ex
 Único bloqueio solicitado agora: corrigir o par local da segunda conta; Redis ainda sem
 credenciais, criação não executada. Relatórios brutos pytest capturados em diretório temporário
 privado e removidos; nenhuma senha, token ou e-mail completo registrado nesta evidência.
+
+
+### Reteste da segunda conta após correção informada — 22/11/2026
+
+Executado somente test_real_auth_user_without_active_admin_is_forbidden: FAILURE no
+sign_in_with_password, antes de authorize. Diagnóstico mínimo confirmou AuthApiError HTTP 400,
+code invalid_credentials. Não há override de ambiente, chaves locais duplicadas, espaços nas
+bordas, interpolação alterando valores ou comentário cortando senha sem aspas. Não expostos
+valores, e-mails ou tokens; nenhuma sessão foi criada. Tentativas encerradas, sem reset de senha,
+SQL, testes do administrador ou escrita em outro banco. Login válido da segunda conta e negação
+por privilégio continuam pendentes; criação do Redis não iniciada. Próxima ação: conferir no
+Auth/Users o e-mail exato da segunda conta e salvar no .env o par dessa mesma conta.
