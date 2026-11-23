@@ -5,6 +5,39 @@ import { test, expect } from '@playwright/test';
 test.skip(process.env.NEOX_DELIVERY_QA !== '1' || !process.env.NEOX_FASTAPI_URL,
   'Exige servidor real e opt-in NEOX_DELIVERY_QA=1.');
 
+test('ordem autorizada AM90 AM95 Samba e foto para 3D do mesmo AM95', async ({ page }, info) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const response = await page.goto('/');
+  expect(response.status()).toBe(200);
+  const items = await page.locator('#hero-data').evaluate(el => JSON.parse(el.textContent));
+  expect(items.slice(0, 3).map(p => p.sku)).toEqual([
+    'NEOX-AM90-INFRARED', 'NEOX-AM95-DARKARMY', 'NEOX-SAMBA-OG-BP',
+  ]);
+  await expect(page.locator('#hero h1')).toHaveText(items[0].name);
+  await expect(page.locator('#hero [data-3d-photo]')).toHaveAttribute('src', items[0].mainImageUrl);
+  await expect(page.locator('[data-sketchfab-frame]')).toHaveCount(0);
+  await page.screenshot({ path: info.outputPath('ordem-inicial.png') });
+  const am95 = items[1];
+  expect(am95.model3dUrl).toBe('https://sketchfab.com/models/c425a652fc59427ba1fcef48ea174c92/embed');
+  await page.locator(`#hero [data-thumbs] button[data-id="${am95.id}"]`).click();
+  await expect(page.locator('#hero h1')).toHaveText(am95.name);
+  await expect(page.locator('#hero [data-3d-photo]')).toHaveAttribute('src', am95.mainImageUrl);
+  await expect(page.locator('[data-sketchfab-frame]')).toHaveCount(0);
+  await page.locator('#hero [data-3d-toggle]').click();
+  await expect(page.locator('#hero [data-hero-media]')).toHaveAttribute('data-state3d', 'ready');
+  const pad = page.locator('#hero [data-rotate-pad]');
+  const yaw = await pad.getAttribute('aria-valuenow');
+  await pad.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(pad).not.toHaveAttribute('aria-valuenow', yaw);
+  await expect(page.locator('#hero [data-field=credit]')).toContainText('Andre');
+  await page.waitForTimeout(2500); // Texturas finais para inspeção visual.
+  await page.screenshot({ path: info.outputPath('am95-3d.png') });
+  await page.locator('#hero [data-3d-toggle]').click();
+  await expect(page.locator('#hero [data-hero-media]')).toHaveAttribute('data-state3d', 'idle');
+  await expect(page.locator('#hero [data-3d-photo]')).toHaveCSS('opacity', '1');
+});
+
 test('entrega integrada: catálogo Atlas, navegação, foto/3D, carrinho, WhatsApp, recentes e admin', async ({ page, isMobile }, info) => {
   test.setTimeout(180000);
   await page.emulateMedia({ reducedMotion: 'reduce' });

@@ -21,7 +21,7 @@
       "colorName": "Dark Army/Orange Blaze",
       "featured": {
         "enabled": true,
-        "order": 1,
+        "order": 2,
         "backgroundHex": "#1F231C",
         "accentHex": "#FF6A1F"
       },
@@ -68,7 +68,7 @@
       "colorName": "Branco/Preto/Infrared",
       "featured": {
         "enabled": true,
-        "order": 2,
+        "order": 1,
         "backgroundHex": "#231315",
         "accentHex": "#FF5A4E"
       },

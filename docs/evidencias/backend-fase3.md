@@ -1064,3 +1064,46 @@ Cinco caminhos HTTP privados (.env/.git/código/traversal) retornaram404; health
 Licenças/créditos preservados, inclusive CC BY4.0 do embed AM95; nenhum GLB experimental.
 Não houve push/deploy. Roteiro8min existente preservado; segunda conta com credenciais
 inválidas continua pendência secundária, não comprovada por negação após login válido.
+
+## Ordem final autorizada e preparação da publicação — 23/11/2026
+
+Autorização específica do responsável: somente featured.order do AM90 (2→1) e AM95 (1→2).
+Confirmados ambiente test, Cluster0 e banco neox_drop_test; os dois documentos únicos, ativos
+e em destaque tinham os valores anteriores esperados. Atualizações condicionais por _id,
+SKU, ordem anterior e updatedAt, com $set exclusivamente em featured.order; matched2/modified2.
+Não utilizada a API de edição, pois atualizaria também updatedAt. Comparação BSON de todos
+os documentos antes/depois confirmou somente os dois campos autorizados, inclusive updatedAt
+preservado; QA, Samba, preços, estoque, status, mídias e créditos intactos. Nenhuma outra
+escrita remota: sem login/logout, Redis, cache/detalhe ou alteração de contas nesta etapa.
+
+API featured e home reais confirmam AM90 → AM95 → Samba. Fontes locais
+mongo/catalogo-academico.json e docs/catalogo-definitivo.json sincronizadas somente na ordem.
+Teste direcionado em tests/e2e/live/delivery.spec.js: desktop e mobile-360 aprovados (2 passed
+em23,7s), foto inicial do AM90, troca para a foto do AM95, carregamento do mesmo modelo
+Sketchfab aprovado, giro horizontal por teclado, crédito e retorno à foto. Capturas públicas
+inspecionadas em .gstack/order-qa (ignorado). Emulação não substitui aparelho físico.
+Teste independente real de leitura API/home/filtros contra Atlas: 1 passed, exit0.
+
+Investigação503: caminho Performance usa o mesmo filtro Mongo das demais categorias, sem
+fixtures; falhas externas viram503 explícito pelo handler sanitizado. Executadas40 consultas
+sequenciais alternando HTML/API Performance: HTTP200 em todas, latência mínima0,716s,
+mediana0,766s e máxima0,812s. Oito consultas diretas ao Mongo, com novas conexões TLS e count
+do produto Performance, passaram. Timeout3s mantido. Causa da ocorrência anterior não pôde
+ser concluída retroativamente: houve indisponibilidade de dependência, mas não há evidência
+para distinguir seleção de servidor, handshake/rede ou consulta. Sem recorrência observada
+nesta amostra; não é garantia de disponibilidade futura. Nenhuma correção especulativa.
+
+Executados somente teste de catálogo real e dois testes de navegador pertinentes, checagem
+de sintaxe JS e pnpm build (aprovados). Suítes completas184backend/137UI da integração anterior
+não repetidas, pois não houve mudança na aplicação. Nenhuma nova funcionalidade implementada.
+
+Revisão final: 1360 versões de texto históricas/atuais (<2MB) examinadas contra segredos
+locais e padrões de credenciais, sem achados; .env ignorado, nunca versionado e modo0600.
+Lockfiles, exemplo de configuração, entrada FastAPI, licenças e build presentes. Isso não
+equivale a auditoria exaustiva de segurança. Não existe remote GitHub configurado neste clone.
+README agora orienta clone novo sem compartilhar credenciais; roteiro8min atualizado para
+ordem final, requisitos obrigatórios e limitações, sem sugerir prova de privilégio inexistente.
+Para gravar CRUD novamente é necessária autorização de um único QA; esta tarefa não autoriza
+novos registros. Restam gravar/conferir o vídeo, definir destino/acesso do professor e autorizar
+publicação. Segunda conta válida e teste em celular físico permanecem pendências declaradas.
+Não houve push, deploy, cadastro ou outras escritas remotas.

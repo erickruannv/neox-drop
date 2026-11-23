@@ -7,7 +7,14 @@ Sem pagamentos ou frete real. O 3D aprovado usa embed Sketchfab com fallback par
 
 ## Abrir a aplicação real
 
-Na pasta principal `/Users/dg/Documents/NeoxDrop`, branch `main`:
+Pré-requisitos: Python 3.13, uv, Node.js compatível com as dependências e pnpm 10.6.2.
+Em um clone novo, copie `.env.example` para `.env` e configure os projetos de teste conforme
+[o guia existente](docs/CONFIGURAR-BANCOS-TESTE.md). Sem credenciais a aplicação inicia,
+mas catálogo/login/checkout ficam indisponíveis; não há fallback para dados fictícios.
+Não compartilhe o `.env`; o professor deve usar credenciais próprias/autorizadas.
+
+Na pasta principal `/Users/dg/Documents/NeoxDrop`, branch `main` (em outro computador,
+substitua o caminho pela pasta clonada):
 
 ```sh
 cd /Users/dg/Documents/NeoxDrop
@@ -66,9 +73,9 @@ login válido dessa conta não foi comprovada. Restam vídeo5–10min e acesso d
 GitHub após autorização de publicação. Health retorna ok com os três serviços disponíveis.
 Não recriar bancos nem reaplicar migrations já aprovadas.
 
-Na revisão final, Atlas mantém AM95 → AM90 → Samba no carrossel. A troca solicitada para
-AM90 → AM95 → Samba exige autorização específica de escrita; nenhuma ordem foi alterada
-automaticamente. New Balance 2002R e Nike Dunk Low continuam apenas preparados em
+Ordem real do carrossel, alterada com autorização específica: AM90 → AM95 → Samba.
+Somente featured.order dos dois Nike foi atualizado, inclusive updatedAt preservado.
+New Balance 2002R e Nike Dunk Low continuam apenas preparados em
 `mongo/catalogo-adicional.pending.json`, sem cadastro autorizado. A foto do AM95 abre o
 próprio 3D apenas ao interagir; crédito CC BY preservado e fallback fotográfico disponível.
 
@@ -105,5 +112,14 @@ com TEST_CONNECTIONS_ENABLED=false; não usar esses testes 503 contra o servidor
 
 Git: .env/configurações privadas/build ignorados; preservar frontend e laboratório 3D nas suas
 branches. Revisar segredos, acesso do professor ao repositório e link do vídeo antes da entrega.
+Ainda não há remote GitHub configurado neste clone. Definir o repositório de destino,
+configurar a origem local e autorizar o push antes de publicar; não enviar o `.env`.
 Não houve push/deploy. Próxima etapa: concluir o teste da segunda conta e preparar o vídeo
 e o acesso do professor ao repositório.
+
+Para o vídeo, o roteiro existente cobre 8 minutos. Uma nova demonstração de escrita CRUD exige
+autorização de um único registro QA antes de gravar; não editar os três produtos da vitrine.
+O 503 isolado de Performance não teve causa conclusiva; 40 consultas posteriores à página/API
+e oito consultas diretas ao Atlas passaram sem recorrência observada. Não é garantia de
+disponibilidade futura. Celular físico e segunda conta permanecem pendências
+de validação, sem impedir a publicação do código com essas limitações declaradas.
