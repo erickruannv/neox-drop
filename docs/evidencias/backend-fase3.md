@@ -891,3 +891,28 @@ sanitizado: /tmp/neox-checkout-acceptance-result.json. Captura pública sem cred
 Não resta bloqueio do checkout. Pendências externas ao checkout: seleção e autorização dos
 produtos definitivos, segunda conta ainda invalid_credentials, vídeo5–10min e acesso GitHub
 para o professor após autorização de publicação. Sem push, deploy ou envio de mensagem real.
+
+
+## Proposta dos três produtos acadêmicos — 23/11/2026, SEM escrita remota
+
+Payloads ProductCreate prontos em mongo/catalogo-academico.json, gerados da curadoria aprovada,
+sem alterar fixtures/frontend ou contratos. Preços fictícios explicitados nas descrições:
+
+- NEOX-AM95-DARKARMY / nike-air-max-95-dark-army: Nike Air Max 95 Dark Army/Orange Blaze,
+  89990 centavos, Street, 39:2/40:3/41:2/42:2 (9). Galeria 4 WebP e embed/CC BY 4.0 preservados.
+- NEOX-AM90-INFRARED / nike-air-max-90-infrared: Nike Air Max 90 Infrared, 74990 centavos,
+  Performance, tamanhos38–42 com 2 unidades cada (10). WebP/Christian H./CC BY 2.0 preservados.
+- NEOX-SAMBA-OG-BP / adidas-samba-og: Adidas Samba OG Branco/Preto, 59990 centavos,
+  Classics, tamanhos37–41 com 2 unidades cada (10). Galeria3/LeDroider CC0/Cris Unsplash preservados.
+
+Propostos active=true e featured.enabled=true, ordens1/2/3; cores da curadoria mantidas.
+Sem ObjectIds/datas inventados no payload: serão gerados pelo backend no cadastro autorizado.
+Passaram contrato OpenAPI, ProductCreate, validate_product, codificação BSON, estoques totais,
+igualdade das mídias/créditos com a curadoria e existência/assinatura WebP dos oito arquivos.
+Consulta SOMENTE LEITURA no Atlas: nenhum conflito de SKU/slug, inclusive case-insensitive.
+Validator atual da coleção lido sem alterar estrutura; compatibilidade dos documentos completos
+verificada localmente com jsonschema/bsonType. Isso não substitui um INSERT real autorizado.
+Home, catálogo por categoria e três detalhes renderizaram localmente; apenas AM95 tem botão3D.
+As oito mídias responderam HTTP200/image-webp pelo FastAPI principal. Nenhum produto/QA alterado.
+Após aprovação única: inserir somente estes três pelos endpoints existentes, rechecando colisões;
+validar catálogo/filtros/detalhes/3D, recentes Redis, carrinho e checkout sem enviar WhatsApp.

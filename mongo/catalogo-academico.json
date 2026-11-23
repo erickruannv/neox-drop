@@ -1,0 +1,150 @@
+[
+  {
+    "sku": "NEOX-AM95-DARKARMY",
+    "slug": "nike-air-max-95-dark-army",
+    "name": "Nike Air Max 95 Dark Army/Orange Blaze",
+    "brand": "Nike",
+    "category": "Street",
+    "priceCents": 89990,
+    "currency": "BRL",
+    "active": true,
+    "description": "Colorway Dark Army/Orange Blaze: camadas em camurça e malha em tons de oliva, areia e marrom, cabedal preto e bolhas de ar laranja. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
+    "mainImageUrl": "/static/images/products/nike-air-max-95-dark-army/lateral.webp",
+    "galleryUrls": [
+      "/static/images/products/nike-air-max-95-dark-army/lateral.webp",
+      "/static/images/products/nike-air-max-95-dark-army/frente34.webp",
+      "/static/images/products/nike-air-max-95-dark-army/medial.webp",
+      "/static/images/products/nike-air-max-95-dark-army/tras34.webp"
+    ],
+    "colorName": "Dark Army/Orange Blaze",
+    "featured": {
+      "enabled": true,
+      "order": 1,
+      "backgroundHex": "#1F231C",
+      "accentHex": "#FF6A1F"
+    },
+    "attributes": {
+      "model3dCredit": "Scan 3D “Nike Air Max 95 Dark Army/Orange Blaze” por Andre Bond Sr., CC BY 4.0, via Sketchfab",
+      "model3dCreditUrl": "https://sketchfab.com/3d-models/c425a652fc59427ba1fcef48ea174c92",
+      "imageCredit": "Imagens: capturas do scan 3D de Andre Bond Sr., CC BY 4.0, fundo removido",
+      "imageCreditUrl": "https://sketchfab.com/3d-models/c425a652fc59427ba1fcef48ea174c92"
+    },
+    "model3dUrl": "https://sketchfab.com/models/c425a652fc59427ba1fcef48ea174c92/embed",
+    "sizes": [
+      {
+        "sizeBR": 39,
+        "stock": 2
+      },
+      {
+        "sizeBR": 40,
+        "stock": 3
+      },
+      {
+        "sizeBR": 41,
+        "stock": 2
+      },
+      {
+        "sizeBR": 42,
+        "stock": 2
+      }
+    ]
+  },
+  {
+    "sku": "NEOX-AM90-INFRARED",
+    "slug": "nike-air-max-90-infrared",
+    "name": "Nike Air Max 90 Infrared",
+    "brand": "Nike",
+    "category": "Performance",
+    "priceCents": 74990,
+    "currency": "BRL",
+    "active": true,
+    "description": "Colorway Infrared: cabedal branco e cinza, faixa preta e detalhes vermelho-infravermelho. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
+    "mainImageUrl": "/static/images/products/nike-air-max-90-infrared/main.webp",
+    "galleryUrls": [
+      "/static/images/products/nike-air-max-90-infrared/main.webp"
+    ],
+    "colorName": "Branco/Preto/Infrared",
+    "featured": {
+      "enabled": true,
+      "order": 2,
+      "backgroundHex": "#231315",
+      "accentHex": "#FF5A4E"
+    },
+    "attributes": {
+      "imageCredit": "Foto: Christian H., CC BY 2.0, fundo removido",
+      "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Nike_Air_Max_90_Infrared_(4805905007).jpg"
+    },
+    "sizes": [
+      {
+        "sizeBR": 38,
+        "stock": 2
+      },
+      {
+        "sizeBR": 39,
+        "stock": 2
+      },
+      {
+        "sizeBR": 40,
+        "stock": 2
+      },
+      {
+        "sizeBR": 41,
+        "stock": 2
+      },
+      {
+        "sizeBR": 42,
+        "stock": 2
+      }
+    ]
+  },
+  {
+    "sku": "NEOX-SAMBA-OG-BP",
+    "slug": "adidas-samba-og",
+    "name": "Adidas Samba OG Branco/Preto",
+    "brand": "adidas",
+    "category": "Classics",
+    "priceCents": 59990,
+    "currency": "BRL",
+    "active": true,
+    "description": "Couro branco, três listras pretas, biqueira em camurça e solado gum. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
+    "mainImageUrl": "/static/images/products/adidas-samba-og/main.webp",
+    "galleryUrls": [
+      "/static/images/products/adidas-samba-og/main.webp",
+      "/static/images/products/adidas-samba-og/lateral.webp",
+      "/static/images/products/adidas-samba-og/par.webp"
+    ],
+    "colorName": "Branco/Preto/Gum",
+    "featured": {
+      "enabled": true,
+      "order": 3,
+      "backgroundHex": "#29221A",
+      "accentHex": "#D2A878"
+    },
+    "attributes": {
+      "imageCredit": "Fotos: LeDroider (CC0) e Cris (Licença Unsplash), fundo removido",
+      "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Adidas_Samba_OG.jpg"
+    },
+    "sizes": [
+      {
+        "sizeBR": 37,
+        "stock": 2
+      },
+      {
+        "sizeBR": 38,
+        "stock": 2
+      },
+      {
+        "sizeBR": 39,
+        "stock": 2
+      },
+      {
+        "sizeBR": 40,
+        "stock": 2
+      },
+      {
+        "sizeBR": 41,
+        "stock": 2
+      }
+    ]
+  }
+]

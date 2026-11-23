@@ -50,9 +50,11 @@ válido dessa conta ainda não foi comprovada. Checkout WhatsApp concluído com 
 contato lido do Supabase, preços/estoques revalidados no Atlas, carrinho e link/mensagem
 conferidos na API e no navegador. O teste não abriu o link nem enviou mensagens. O QA voltou
 a active=false; não houve alteração de preço/estoque/mídia ou de outros produtos.
-Para produtos definitivos, escolher modelos/colorways, SKUs, preços/estoques verdadeiros e mídia
-licenciada. O painel cadastra; créditos em attributes são aceitos pela API, sem campos próprios
-no formulário atual. Não reaproveitar dados fictícios de QA como oferta real.
+Catálogo acadêmico preparado em [mongo/catalogo-academico.json](mongo/catalogo-academico.json):
+três produtos escolhidos pelo responsável, com preços fictícios identificados nas descrições,
+estoques distribuídos e mídia/créditos aprovados. Aguarda autorização única dos três INSERTs;
+nenhum documento remoto gravado. O painel cadastra; créditos em attributes são aceitos pela API,
+sem campos próprios no formulário atual. Não reaproveitar o QA nem apresentar preços como oferta real.
 
 O servidor lê `/Users/dg/Documents/NeoxDrop/.env` (main). A chave privada de contato foi
 transferida localmente do .env da worktree backend após conferir o mesmo projeto Supabase;
@@ -87,5 +89,5 @@ com TEST_CONNECTIONS_ENABLED=false; não usar esses testes 503 contra o servidor
 
 Git: .env/configurações privadas/build ignorados; preservar frontend e laboratório 3D nas suas
 branches. Revisar segredos, acesso do professor ao repositório e link do vídeo antes da entrega.
-Não houve push/deploy. Próxima etapa: escolher dados definitivos, cadastrar com autorização,
+Não houve push/deploy. Próxima etapa: aprovar o catálogo preparado, cadastrar com autorização,
 concluir o teste da segunda conta e gravar o vídeo de entrega (5–10min).
