@@ -51,7 +51,7 @@ def unavailable(request: Request):
         context.update(
             featured={"items": []},
             recent={"items": []},
-            launches={"items": [], "page": 1, "limit": 4, "total": 0},
+            launches={"items": [], "page": 1, "limit": 6, "total": 0},
         )
     elif request.url.path == "/tenis":
         name = "catalog.html"
@@ -70,7 +70,7 @@ async def home(request: Request, response: Response, collection: Collection):
         response,
         "home.html",
         featured=await featured(collection),
-        launches=await list_products(collection, PublicFilters(limit=4), public=True),
+        launches=await list_products(collection, PublicFilters(limit=6), public=True),
         recent=await resolve_recent(collection, identifiers) if identifiers else {"items": []},
     )
 

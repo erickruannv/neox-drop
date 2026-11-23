@@ -59,6 +59,26 @@ async def test_public_pages_use_catalog_context_and_keep_api_contract(catalog_ap
         assert api_missing.headers["content-type"].startswith("application/json")
 
 
+async def test_home_can_render_six_launches(catalog_app, page_templates):
+    from copy import deepcopy
+
+    from bson import ObjectId
+
+    app, collection, doc, cursor = catalog_app
+    documents = [{**deepcopy(doc), "_id": ObjectId(), "name": f"Tênis local {i}"} for i in range(6)]
+
+    async def rows(length=None):
+        return documents if length is None else documents[:length]
+
+    cursor.to_list.side_effect = rows
+    collection.count_documents.return_value = 6
+    templates.env.loader.mapping["home.html"] = '{{ launches["items"]|length }}'
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        home = await client.get("/")
+        assert home.status_code == 200
+        assert home.text == "6"
+
+
 async def test_admin_html_requires_auth_before_mongodb(page_templates):
     app = create_app(Settings(_env_file=None, cookie_secret="local-test-" * 8))
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:

@@ -972,3 +972,40 @@ Ajuste visual final dos nomes aprovados: a inspeção da homepage mostrou a pala
 partida em duas linhas no hero. Reduzido apenas o clamp máximo do h1, sem mudar os nomes/dados.
 Medição DOM antes: Orange em 2 linhas; depois: 1 linha em 1440px e 390px, sem overflow. Capturas
 atualizadas. Regressão UI completa continuou 126 passed/4 skipped; sem nova operação nos bancos.
+
+
+## Preparação de expansão sem alterar catálogo remoto — 23/11/2026
+
+Frontend em trabalho, com alterações não commitadas na worktree própria. Nenhum merge nem
+arquivo visual do Claude modificado. Os três produtos existentes foram apenas consultados e
+continuam iguais aos payloads aprovados. Supabase, Redis e checkout não foram reconfigurados.
+
+Candidatos em mongo/catalogo-adicional.pending.json (ainda SEM autorização de INSERT):
+NEOX-DEMO-205 / new-balance-2002r, New Balance 2002R Lilás/Cinza, Street, 84990 centavos;
+NEOX-DEMO-206 / nike-dunk-low-vermelho-cinza, Nike Dunk Low Vermelho/Cinza, Street, 79990.
+Preservados preços/tamanhos/estoques propostos pelo Claude: BR38:3,39:4,40:5,41:5,42:4,43:2,
+23 unidades fictícias por produto. Propostos ativos, sem novo destaque nem model3dUrl.
+Imagens WebP inspecionadas e existentes; autores LeDroider/William Mucci e CC0 conforme
+assets-licenses.md. Contrato ProductCreate, validação backend, BSON e estoques passaram.
+Leitura Atlas não encontrou colisões case-insensitive de SKU/slug. Nenhum cadastro remoto.
+Sem sexto modelo adicional com imagem local aprovada; os assets atuais permitem cinco modelos.
+
+Incompatibilidade reproduzida por teste: home limitada a quatro lançamentos, insuficiente para
+uma vitrine de até seis. Ajustado somente app/api/pages.py (limite/fallback6); teste local falhou
+com4 e passou com6. Não alterados templates, CSS, JS, contratos ou qualquer banco.
+Ponto para o frontend final: incluir New Balance nas listas fixas de marcas; filtros backend já
+aceitam a marca. /api/products é resumo; imagem+galeria+3D/créditos vêm do detalhe e /api/featured,
+sempre do mesmo documento/id. Candidatos novos não herdam o modelo do AM95.
+
+Preparado tests/real/test_live_catalog_readonly.py com opt-in: compara IDs/preços/campos da API,
+destaques e URLs de mídia/modelo com consulta independente ao Atlas, verifica nomes/slugs da
+home e filtros. Somente find/GETs públicos, sem visitante, detalhe/cache, login ou POSTs:
+nenhuma operação em Supabase/Redis ou escrita Mongo. Passou no servidor main :8000, reiniciado
+com limite6. O teste geral local e o real são registrados separadamente; produtos novos só
+poderão ser comprovados no catálogo após autorização e cadastro. Integração do novo hero e
+regressão UI completa ficam para o commit final do Claude, preservando sua worktree em edição.
+
+Verificação final: ruff check e format aprovados; suíte local 184 passed / 7 skipped;
+teste real somente de leitura acima executado separadamente: 1 passed, exit 0.
+Revisão independente confirmou ausência de escritas; alinhada a ordenação do teste à API
+(createdAt decrescente, desempate por id crescente).
