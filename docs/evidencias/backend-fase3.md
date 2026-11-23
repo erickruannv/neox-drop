@@ -966,3 +966,9 @@ ruff check/format(51 arquivos) passaram. Revisão independente sem bloqueios. As
 com fixtures não substituem o teste real acima. Nenhuma mensagem enviada, push ou deploy.
 Pendências de entrega: segunda conta com credenciais válidas, vídeo5–10min e publicação/acesso
 GitHub somente após autorização. Os produtos existentes já permitem a apresentação principal.
+
+
+Ajuste visual final dos nomes aprovados: a inspeção da homepage mostrou a palavra Orange
+partida em duas linhas no hero. Reduzido apenas o clamp máximo do h1, sem mudar os nomes/dados.
+Medição DOM antes: Orange em 2 linhas; depois: 1 linha em 1440px e 390px, sem overflow. Capturas
+atualizadas. Regressão UI completa continuou 126 passed/4 skipped; sem nova operação nos bancos.
