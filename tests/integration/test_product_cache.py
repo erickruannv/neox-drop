@@ -76,6 +76,31 @@ async def test_corrupt_cache_and_redis_failure_fall_back(catalog_app, monkeypatc
         assert "secret" not in response.text
 
 
+async def test_legacy_cached_credit_cannot_restore_unsafe_link(catalog_app, monkeypatch):
+    from app.services.catalog import public_product
+
+    app, collection, doc, _ = catalog_app
+    payload = public_product(doc)
+    payload["attributes"] = {"imageCredit": "Autor", "imageCreditUrl": "javascript:alert(1)"}
+    cache = AsyncMock()
+    cache.get.return_value = json.dumps(
+        {"version": doc["updatedAt"].isoformat(), "payload": payload}
+    )
+
+    @asynccontextmanager
+    async def redis(settings):
+        yield cache
+
+    monkeypatch.setattr("app.services.catalog.redis_client", redis)
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app), base_url="http://test"
+    ) as client:
+        response = await client.get(f"/api/products/{doc['slug']}")
+        assert response.status_code == 200
+        assert response.json()["attributes"] == {"imageCredit": "Autor"}
+        assert collection.find_one.await_count == 1
+
+
 async def test_mutation_success_not_rolled_back_by_redis_failure(
     catalog_app, examples, monkeypatch
 ):

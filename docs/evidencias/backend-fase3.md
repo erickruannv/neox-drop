@@ -771,3 +771,41 @@ Redis é coberta localmente pela suíte de recentes, sem simular indisponibilida
 externo. Não foi comprovada visita HTTP a um produto ativo nem seu card nos recentes da UI:
 não há produto ativo e o usuário proibiu alterar os existentes. Redis não valida estoque/preço.
 Sem alterações em templates/CSS/JS/contratos, sem push/deploy/custos adicionais.
+
+
+## Integração final na main local — 22/11/2026
+
+Três worktrees limpas antes da operação. main fc48c18 avançou por fast-forward até backend
+088a12c, depois integrado frontend exato 0f71b74 com merge preservando os dois históricos.
+Merge automático sem conflitos de conteúdo; nenhum reset, squash, nova branch/worktree ou
+remoção. Worktrees de backend/Claude preservadas. Laboratório 3D experimental não integrado.
+
+Correções locais: filtros de marca/categoria exatos ignoram caixa, escapando regex; select de
+categoria conserva caixa e valores personalizados. Embed Sketchfab exige URL canônica quando
+a origem está autorizada. Créditos HTTPS sem credenciais validados; projeções Mongo e cache
+Redis removem URLs legadas inseguras. Testes reproduziram falhas antes das correções, inclusive
+cache hit sem fallback. Contratos OpenAPI/UI intocados. Testes de curadoria atualizados para
+três produtos, só AM95 com modelo 3D; Performance sem foto permanece fora dos cards da home.
+
+Verificações finais: pytest 181 passed/6 skipped; ruff check e format --check (51 arquivos)
+passaram; build vendor/Tailwind passou; Playwright UI 122 passed/4 skipped (fixtures).
+Teste externo Sketchfab desktop/GPU, sem mock do modelo: arraste horizontal gira e vertical
+não inclina, 1 passed; executado no servidor temporário de TESTE, não é prova de produto ativo
+na loja. Falhas/carregamento travado e fallback são cobertos pela suíte UI com simulações.
+Teste real Redis opt-in passou com chave NEOX QA exclusiva/TTL/limpeza, sem escrita no Mongo.
+
+Servidor principal transferido da worktree backend para /Users/dg/Documents/NeoxDrop, main,
+porta 8000, um worker. Preview antigo :8001 encerrado após conferir PID/comando/cwd. .env
+privado copiado apenas porque não existia no destino, modo 0600 e Git ignorado; adicionada
+origem pública Sketchfab à allowlist local, sem exposição de credenciais. /health 200/ok,
+home, catálogo, filtros e login 200; admin sem sessão 303; imagem AM95 WebP 200.
+Browser Chromium contra :8000: Marcas/Coleções, filtro ADIDAS/classics e categoria personalizada
+passaram; carrinho vazio, login/painel real, filtro neox qa no Atlas e logout passaram. Um erro
+de seletor no roteiro ad-hoc do carrinho foi corrigido no roteiro, sem alteração de aplicação.
+Revisão independente encontrou bypass no cache de créditos; corrigido e revisado sem pendências.
+
+Sem autorização de ativação, o único QA segue inativo e o catálogo real fica vazio. Nenhuma
+escrita de produto foi feita nesta integração. Detalhe positivo/3D e recentes visíveis no FastAPI
+principal aguardam essa autorização. Checkout positivo externo também aguarda número na tabela
+store_settings e chave backend privada; não houve SQL de escrita, promoção ou envio WhatsApp.
+Conta não-admin continua invalid_credentials, sem reteste. Sem push ou deploy.

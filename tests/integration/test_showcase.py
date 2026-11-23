@@ -16,12 +16,18 @@ async def test_fastapi_showcase_keeps_curated_media_and_contracts_without_remote
         assert "category=Performance" not in home.text
         assert "nb9060-web.glb" not in home.text
         featured = (await c.get("/api/featured")).json()
-        assert len(featured["items"]) == 2
+        assert {p["slug"] for p in featured["items"]} == {
+            "nike-air-max-95-dark-army",
+            "nike-air-max-90-infrared",
+            "adidas-samba-og",
+        }
         for product in featured["items"]:
             Draft202012Validator(
                 {"$ref": "#/components/schemas/ProductDetail", "components": contract["components"]}
             ).validate(product)
-            assert product["model3dUrl"].startswith("https://sketchfab.com/models/")
+            if product.get("model3dUrl"):
+                assert product["slug"] == "nike-air-max-95-dark-army"
+                assert product["model3dUrl"].startswith("https://sketchfab.com/models/")
             page = await c.get(f"/tenis/{product['slug']}")
             assert page.status_code == 200
             assert product["attributes"]["imageCredit"] in page.text

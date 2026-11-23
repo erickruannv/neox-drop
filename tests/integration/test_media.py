@@ -119,7 +119,7 @@ def curated_media():
     return json.loads(source.read_text())["featured"]["items"]
 
 
-@pytest.mark.parametrize("index", [0, 1])
+@pytest.mark.parametrize("index", [0, 1, 2])
 async def test_curated_embed_and_credits_reach_fastapi_unchanged(catalog_app, curated_media, index):
     from app.schemas.product import ProductCreate
 
@@ -135,10 +135,13 @@ async def test_curated_embed_and_credits_reach_fastapi_unchanged(catalog_app, cu
     cursor.to_list.return_value = [doc]
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app), base_url="http://test") as c:
         product = (await c.get(f"/api/products/{item['slug']}")).json()
-        assert product["model3dUrl"] == item["model3dUrl"]
+        assert product.get("model3dUrl") == item.get("model3dUrl")
         assert product["attributes"] == item["attributes"]
         page = await c.get(f"/tenis/{item['slug']}")
         assert page.status_code == 200
         assert item["attributes"]["imageCredit"] in page.text
-        assert item["attributes"]["model3dCreditUrl"] in page.text
-        assert "data-open-3d" in page.text
+        if item.get("model3dUrl"):
+            assert item["attributes"]["model3dCreditUrl"] in page.text
+            assert "data-open-3d" in page.text
+        else:
+            assert "data-open-3d" not in page.text

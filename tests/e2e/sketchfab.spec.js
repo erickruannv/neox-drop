@@ -101,27 +101,44 @@ test("palco 3D: reduced-motion não gira sozinho; sem ele gira até o primeiro g
   expect((await sf(page)).looks.length).toBe(after);
 });
 
-test("palco 3D: Esc fecha, devolve o foco; reabrir após trocar o destaque carrega o modelo certo", async ({ page }) => {
+test("palco 3D: Esc fecha, devolve o foco; destaque sem 3D esconde o botão; voltar reabre o modelo certo", async ({ page }) => {
+  const [with3d, without] = [items.find(uidOf), items.find((i) => !uidOf(i))];
+  const thumb = (it) => page.locator(`#hero [data-thumbs] button[data-id="${it.id}"]`);
   await page.goto("/");
+  await thumb(with3d).click();
   await open(page);
   await expect(pad(page)).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(dialog(page)).toBeHidden();
   await expect(page.locator("#hero").getByRole("button", { name: /em 3D/ })).toBeFocused();
 
-  const next = items[1];
-  await page.locator(`#hero [data-thumbs] button[data-id="${next.id}"]`).click();
-  await expect(page.locator("#hero h1")).toHaveText(next.name);
+  await thumb(without).click();
+  await expect(page.locator("#hero h1")).toHaveText(without.name);
+  await expect(page.locator("#hero").getByRole("button", { name: /em 3D/ })).toBeHidden(); // nunca outro tênis no lugar
+
+  await thumb(with3d).click();
   await open(page);
   await expect(pad(page)).toBeVisible();
-  expect((await sf(page)).inits.at(-1).uid).toBe(uidOf(next));
-  await expect(pad(page)).toHaveAttribute("aria-label", new RegExp(next.name));
-  await expect(dialog(page).locator("[data-viewer-poster]")).toBeHidden(); // estado "ready" do 2º modelo aplicado
+  expect((await sf(page)).inits.at(-1).uid).toBe(uidOf(with3d));
+  await expect(pad(page)).toHaveAttribute("aria-label", new RegExp(with3d.name));
+  await expect(dialog(page).locator("[data-viewer-poster]")).toBeHidden();
 });
 
 test("palco 3D: falha ao carregar a Viewer API mostra aviso e mantém a foto", async ({ page }) => {
   await page.unroute("https://static.sketchfab.com/**");
   await page.route("https://static.sketchfab.com/**", (r) => r.abort());
+  await page.goto("/");
+  await open(page);
+  await expect(dialog(page).locator("[data-viewer-hint]")).toContainText("indisponível");
+  await expect(dialog(page).locator("[data-viewer-poster]")).toBeVisible();
+  await expect(pad(page)).toBeHidden();
+});
+
+test("palco 3D: script carrega mas o modelo nunca fica pronto → aviso e foto após o timeout", async ({ page }) => {
+  await page.unroute("https://static.sketchfab.com/**");
+  const NEVER = FAKE.replace('if (ev === "viewerready") setTimeout(cb, 20);', "");
+  await page.route("https://static.sketchfab.com/**", (r) => r.fulfill({ contentType: "application/javascript", body: NEVER }));
+  await page.addInitScript(() => (window.__sfTimeoutMs = 400));
   await page.goto("/");
   await open(page);
   await expect(dialog(page).locator("[data-viewer-hint]")).toContainText("indisponível");

@@ -60,6 +60,12 @@ function init(form) {
     list.replaceChildren(...items.map(card));
     empty.hidden = items.length > 0;
     status.textContent = `${total} ${total === 1 ? "tênis encontrado" : "tênis encontrados"}`;
+    // Faixa Marcas/Coleções acompanha os filtros aplicados sem recarregar.
+    for (const chip of document.querySelectorAll("[data-chip]")) {
+      const [key, value] = chip.dataset.chip.split("=");
+      chip.toggleAttribute("aria-current", (lastParams.get(key) ?? "").toLowerCase() === value.toLowerCase());
+      if (chip.hasAttribute("aria-current")) chip.setAttribute("aria-current", "true");
+    }
     const pages = Math.max(1, Math.ceil(total / limit));
     pager.hidden = pages <= 1;
     pager.querySelector("[data-page-label]").textContent = `Página ${page} de ${pages}`;

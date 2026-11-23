@@ -146,6 +146,17 @@
   .btn-lime {
     @apply inline-flex items-center gap-3 rounded-full bg-lime px-6 py-3 font-bold text-ink transition-transform duration-200 ease-out-soft hover:-translate-y-0.5 active:translate-y-0;
   }
+  /* Filtro rápido (marca/coleção) no catálogo; ativo = preto com borda lima. */
+  .chip {
+    @apply inline-flex min-h-10 items-center rounded-full border border-ink/15 bg-paper px-4 text-sm font-semibold text-ink transition-colors duration-200 hover:border-ink focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink;
+  }
+  .chip[aria-current="true"] {
+    @apply border-ink bg-ink text-paper shadow-[inset_0_-3px_0_var(--color-lime)];
+  }
+  [data-img-missing]::after {
+    content: "Imagem indisponível";
+    @apply pointer-events-none absolute inset-0 grid place-items-center text-xs font-semibold text-muted;
+  }
   .icon-btn {
     @apply inline-flex size-11 items-center justify-center rounded-full transition-colors duration-200;
   }

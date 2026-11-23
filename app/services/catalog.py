@@ -29,6 +29,25 @@ def invalid_product():
     return ApiFault(422, "VALIDATION_ERROR", "Revise os dados do produto.")
 
 
+def safe_credit_url(value):
+    if not isinstance(value, str) or not re.fullmatch(r"https://[^\s\\]+", value):
+        return False
+    try:
+        url = urlsplit(value)
+        _ = url.port
+        return bool(url.hostname and not url.username and not url.password)
+    except ValueError:
+        return False
+
+
+def public_attributes(attributes):
+    return {
+        key: value
+        for key, value in attributes.items()
+        if key not in {"imageCreditUrl", "model3dCreditUrl"} or safe_credit_url(value)
+    }
+
+
 def validate_product(payload, settings) -> dict:
     try:
         data = ProductCreate.model_validate(payload).model_dump(exclude_unset=True)
@@ -68,6 +87,16 @@ def validate_product(payload, settings) -> dict:
             or url.password
             or f"https://{url.netloc}" not in settings.media_allowed_origins
         ):
+            raise invalid_product()
+    model = data.get("model3dUrl")
+    if (
+        model
+        and urlsplit(model).hostname == "sketchfab.com"
+        and not re.fullmatch(r"https://sketchfab\.com/models/[0-9a-f]{32}/embed", model)
+    ):
+        raise invalid_product()
+    for key in ("imageCreditUrl", "model3dCreditUrl"):
+        if key in data.get("attributes", {}) and not safe_credit_url(data["attributes"][key]):
             raise invalid_product()
     stack = [(data.get("attributes", {}), 0)]
     while stack:
@@ -120,6 +149,8 @@ def public_product(doc: dict, detail: bool = True) -> dict:
             "attributes",
         }
     result = {key: doc[key] for key in keys if key in doc}
+    if "attributes" in result:
+        result["attributes"] = public_attributes(result["attributes"])
     result["id"] = str(doc["_id"])
     result["sizesAvailable"] = sorted({s["sizeBR"] for s in doc["sizes"] if s["stock"] > 0})
     return result
@@ -178,7 +209,7 @@ def catalog_filter(filters, public: bool):
     for key in ("brand", "category"):
         value = getattr(filters, key)
         if value:
-            query[key] = value
+            query[key] = {"$regex": f"^{re.escape(value)}$", "$options": "i"}
     if filters.q:
         query["$or"] = [
             {key: {"$regex": re.escape(filters.q), "$options": "i"}}
@@ -241,6 +272,8 @@ async def product_detail(collection, slug: str, settings):
                     exclude_unset=True,
                 )
                 if payload["id"] == str(probe["_id"]) and payload["slug"] == slug:
+                    if "attributes" in payload:
+                        payload["attributes"] = public_attributes(payload["attributes"])
                     return payload
     except Exception:
         logger.warning("event=cache_read_unavailable")
