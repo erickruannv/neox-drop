@@ -113,7 +113,16 @@
                   class="w-full rounded-xl border border-ink/20 bg-paper px-3 py-2 focus:border-ink focus:outline-none aria-invalid:border-coral-deep"></textarea>
         <p id="pf-galleryUrls-hint" class="mt-1 text-xs text-muted">Uma imagem por linha. Vazio usa a imagem principal.</p>
       </div>
-      {{ field("model3dUrl", "Modelo 3D (.glb)", required=false, hint="Opcional. Somente arquivo licenciado.") }}
+      {{ field("model3dUrl", "Modelo 3D", required=false, hint="Opcional. Embed do Sketchfab (https://sketchfab.com/models/<id>/embed) ou .glb em /static/…; somente modelo licenciado.") }}
+
+      <fieldset class="grid gap-4 rounded-2xl border border-ink/15 p-4 md:col-span-2 md:grid-cols-2">
+        <legend class="px-1 font-semibold">Créditos e fontes das mídias</legend>
+        <p class="text-xs text-muted md:col-span-2">Obrigatório quando a licença exige atribuição (ex.: CC BY). Aparece na página do produto e no palco 3D.</p>
+        {{ field("imageCredit", "Crédito das imagens", required=false, hint="Ex.: Foto: Autor, CC BY 2.0, fundo removido") }}
+        {{ field("imageCreditUrl", "Fonte das imagens (URL)", type="url", required=false, hint="Página da licença/origem, https://…") }}
+        {{ field("model3dCredit", "Crédito do modelo 3D", required=false, hint="Ex.: Scan 3D por Autor, CC BY 4.0, via Sketchfab") }}
+        {{ field("model3dCreditUrl", "Fonte do modelo 3D (URL)", type="url", required=false, hint="Página do modelo, https://…") }}
+      </fieldset>
 
       <fieldset class="md:col-span-2" data-sizes>
         <legend class="font-semibold">Numerações e estoque *</legend>

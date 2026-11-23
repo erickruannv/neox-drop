@@ -15,9 +15,10 @@ test("home renderiza marca, hero e lançamentos a partir do contexto", async ({ 
     await expect(cards.nth(i)).toContainText(brl(p.priceCents).replace(/\s/, " "));
     await expect(cards.nth(i).getByRole("link")).toHaveAttribute("href", `/tenis/${p.slug}`);
   }
-  await expect(page.locator('a[href="/tenis?category=Performance"]')).toHaveCount(0);
-  for (const c of ["Street", "Classics"]) {
-    await expect(page.locator(`a[href="/tenis?category=${c}"]`)).toBeVisible();
+  for (const [category, image] of [["Street", "nike-air-max-95-dark-army/lateral.webp"], ["Classics", "adidas-samba-og/main.webp"], ["Performance", "nike-air-max-90-infrared/main.webp"]]) {
+    const collection = page.locator(`#colecoes a[href="/tenis?category=${category}"]`);
+    await expect(collection).toBeVisible();
+    await expect(collection.locator("img")).toHaveAttribute("src", `/static/images/products/${image}`);
   }
 });
 
@@ -67,8 +68,8 @@ test("navegação: Marcas e Coleções levam a destinos visíveis; menu do celul
   };
   await go("Coleções");
   await expect(page.locator("#colecoes")).toBeInViewport();
-  await expect(page.locator("#colecoes a[href^='/tenis?category=']")).toHaveCount(2);
-  await expect(page.locator('#colecoes a[href="/tenis?category=Performance"]')).toHaveCount(0);
+  await expect(page.locator("#colecoes a[href^='/tenis?category=']")).toHaveCount(3);
+  await expect(page.locator('#colecoes a[href="/tenis?category=Performance"]')).toBeVisible();
 
   await go("Marcas");
   await expect(page).toHaveURL(/\/tenis\/?#marcas$/);

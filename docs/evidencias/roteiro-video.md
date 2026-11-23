@@ -35,5 +35,6 @@ Evidências atuais: administrador real/RLS, CRUD/persistência Atlas, carrinho, 
 recentes Redis visíveis foram comprovados na main :8000. O único QA foi desativado ao final da
 ativação temporária autorizada; preparar a autorização dos registros da gravação antes de filmar.
 Checkout WhatsApp positivo passou em 23/11/2026, incluindo link e mensagem, sem envio real.
-Faltam segunda conta com credenciais válidas e seleção dos dados definitivos. Fotos/3D não
+Os três produtos definitivos acadêmicos foram cadastrados e permanecem ativos; fonte em
+mongo/catalogo-academico.json. Falta validar a segunda conta com credenciais válidas. Fotos/3D não
 comprovam estoque real. Os quatro modelos 3D completos continuam fora desta validação.

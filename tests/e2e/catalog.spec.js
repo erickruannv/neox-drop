@@ -10,6 +10,12 @@ async function openFilters(page) {
 
 const cards = (page) => page.locator("[data-catalog-list] article");
 
+test("Performance permanece acessível na navegação e no filtro", async ({ page }) => {
+  await page.goto("/tenis/");
+  await expect(page.locator('#colecoes a[data-chip="category=Performance"]')).toHaveAttribute("href", "/tenis?category=Performance");
+  await expect(page.getByLabel("Categoria", { exact: true }).locator('option[value="Performance"]')).toHaveCount(1);
+});
+
 test("SSR lista o catálogo com links por slug e contagem", async ({ page }) => {
   await page.goto("/tenis/");
   await expect(cards(page)).toHaveCount(mock.catalog.length);
@@ -56,7 +62,8 @@ test("estado vazio e erro com nova tentativa", async ({ page }) => {
 
   await page.getByLabel("Busca", { exact: true }).fill("inexistente");
   await page.getByRole("button", { name: "Aplicar" }).click();
-  await expect(page.getByText("Nenhum tênis encontrado com esses filtros.")).toBeVisible();
+  await expect(page.getByText("Nenhum tênis encontrado", { exact: true })).toBeVisible();
+  await expect(page.locator("[data-catalog-empty]").getByRole("link", { name: "Ver todos os tênis" })).toHaveAttribute("href", "/tenis");
   await expect(cards(page)).toHaveCount(0);
 
   await page.getByLabel("Busca", { exact: true }).fill("erro");

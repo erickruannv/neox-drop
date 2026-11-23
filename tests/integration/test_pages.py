@@ -182,14 +182,16 @@ async def test_real_templates_without_database_show_unavailability_not_demo():
         assert (await client.get("/api/products")).status_code == 503
 
 
-async def test_integrated_home_hides_unillustrated_collection_and_keeps_photo_credit():
+async def test_integrated_home_shows_approved_collections_and_keeps_photo_credits():
     app = create_app(Settings(_env_file=None))
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         page = await client.get("/")
-        assert "/tenis?category=Performance" not in page.text
-        assert "/tenis?category=Street" in page.text
+        for category in ("Street", "Classics", "Performance"):
+            assert f"/tenis?category={category}" in page.text
+        assert "/static/images/products/nike-air-max-90-infrared/main.webp" in page.text
         assert "Christian H." in page.text
         assert "CC BY 2.0" in page.text
+        assert "Andre Bond Sr." in page.text and "CC BY 4.0" in page.text
 
 
 async def test_security_policy_allows_only_required_3d_hosts_and_survives_errors():

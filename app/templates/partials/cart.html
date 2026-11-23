@@ -10,7 +10,9 @@
 
     <ul class="flex-1 divide-y divide-ink/10 overflow-y-auto px-5" data-cart-list></ul>
     <div class="flex flex-1 flex-col items-center justify-center gap-3 px-5 text-center" data-cart-empty>
-      <p class="font-bold">Seu carrinho está vazio.</p>
+      <span class="grid size-16 place-items-center rounded-full bg-white text-ink shadow-[0_8px_24px_rgb(0_0_0/0.06)]">{{ icon("cart", "size-7") }}</span>
+      <p class="display-type text-xl">Seu carrinho está vazio.</p>
+      <p class="max-w-xs text-sm text-muted">Escolha um tênis e a numeração para montar o pedido pelo WhatsApp.</p>
       <a href="/tenis" class="btn-lime">Ver tênis {{ icon("arrow-right", "size-5") }}</a>
     </div>
 

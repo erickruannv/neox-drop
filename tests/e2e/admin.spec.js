@@ -124,6 +124,39 @@ test.describe("produtos (admin)", () => {
     await expect(page.getByLabel("Nome *")).toHaveValue("");
   });
 
+  test("3D do Sketchfab e créditos vão no ProductCreate (attributes); URL inválida é barrada", async ({ page }) => {
+    let body = null;
+    await page.route("**/api/admin/products", (r) => {
+      body = r.request().postDataJSON();
+      r.fulfill({ status: 201, json: { ...body, id: "6740a1b2c3d4e5f6010000ab", createdAt: "2026-11-19T00:00:00Z", updatedAt: "2026-11-19T00:00:00Z" } });
+    });
+    await page.goto("/admin/produtos/");
+    await fillValid(page);
+    await page.getByLabel("Modelo 3D", { exact: true }).fill("https://sketchfab.com/3d-models/air-max-c425a652fc59427ba1fcef48ea174c92");
+    await page.getByLabel("Fonte das imagens (URL)").fill("http://exemplo.org");
+    await page.getByRole("button", { name: "Cadastrar produto" }).click();
+    await expect(page.locator("[data-form-errors]")).toContainText("Modelo 3D:");
+    await expect(page.locator("[data-form-errors]")).toContainText("Fonte das imagens: URL https://");
+    await expect(page.getByLabel("Modelo 3D", { exact: true })).toHaveAttribute("aria-invalid", "true");
+    expect(body).toBeNull();
+
+    const model = "https://sketchfab.com/models/c425a652fc59427ba1fcef48ea174c92/embed";
+    const attributes = {
+      imageCredit: "Foto: Autor, CC BY 2.0", imageCreditUrl: "https://commons.wikimedia.org/wiki/File:X.jpg",
+      model3dCredit: "Scan 3D por Autor, CC BY 4.0, via Sketchfab", model3dCreditUrl: "https://sketchfab.com/3d-models/c425a652fc59427ba1fcef48ea174c92",
+    };
+    await page.getByLabel("Modelo 3D", { exact: true }).fill(model);
+    await page.getByLabel("Crédito das imagens").fill(attributes.imageCredit);
+    await page.getByLabel("Fonte das imagens (URL)").fill(attributes.imageCreditUrl);
+    await page.getByLabel("Crédito do modelo 3D").fill(attributes.model3dCredit);
+    await page.getByLabel("Fonte do modelo 3D (URL)").fill(attributes.model3dCreditUrl);
+    await page.getByRole("button", { name: "Cadastrar produto" }).click();
+    await expect(page.locator("[data-admin-status]")).toContainText("cadastrado");
+    expectSchemaKeys("ProductCreate", body);
+    expect(body.model3dUrl).toBe(model);
+    expect(body.attributes).toEqual(attributes);
+  });
+
   test("409 e 422 mostram mensagens nos campos", async ({ page }) => {
     let status = 409;
     await page.route("**/api/admin/products", (r) =>

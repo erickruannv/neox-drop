@@ -22,7 +22,7 @@ painel protegido: `/admin/produtos`. O carrinho é aberto pelo botão do cabeça
 O .env local foi configurado com APP_ENV=test e TEST_CONNECTIONS_ENABLED=true;
 o .env.example e os padrões do código continuam com conexões desabilitadas.
 Só usar os projetos de TESTE já conferidos. Um worker até existir rate limit compartilhado.
-A main reúne backend `088a12c` e frontend `0f71b74`, preservando os históricos. Worktrees
+A main reúne backend validado e frontend `9ccf0bd`, preservando os históricos. Worktrees
 anteriores foram mantidas; a demonstração antiga :8001 foi encerrada. Não executar duas lojas.
 
 ## Estado real
@@ -30,31 +30,34 @@ anteriores foram mantidas; a demonstração antiga :8001 foi encerrada. Não exe
 | Serviço | Papel | Situação |
 |---|---|---|
 | Supabase PostgreSQL/Auth | Identidade, perfil admin/RLS e contato WhatsApp privado | URL/Publishable configurados; admin real validado: login, painel, renovação, logout e RLS/revogação; segunda conta pendente |
-| MongoDB Atlas | Produtos, preço em centavos e estoque autoritativos | Cluster0, papel neox_drop_test@admin restrito ao banco neox_drop_test; products strict/error, seis índices adicionais; CRUD e persistência reais comprovados com um registro fictício, agora inativo |
-| Upstash Redis | Até 5 recentes, TTL 7 dias; cache 300s, sem governar preço | Upstash real validado: gravação/leitura, ordem, cinco únicos, TTL e expiração; home/recentes e cache comprovados no FastAPI real durante ativação temporária QA |
+| MongoDB Atlas | Produtos, preço em centavos e estoque autoritativos | Cluster0, papel neox_drop_test@admin restrito ao banco neox_drop_test; products strict/error, seis índices adicionais; três produtos acadêmicos ativos/em destaque, persistência confirmada após reinício; QA inativo |
+| Upstash Redis | Até 5 recentes, TTL 7 dias; cache 300s, sem governar preço | Upstash real validado: gravação/leitura, ordem, cinco únicos, TTL e expiração; home/recentes comprovados com os três produtos cadastrados no Atlas |
 
-FastAPI principal :8000 utiliza Supabase e Atlas reais no mesmo processo. Cadastro pela UI,
-edição pela API, catálogo ativo, persistência após reiniciar e desativação foram comprovados.
-O único produto fictício autorizado (`NEOX-QA-20261122-A01`) permanece no Atlas com active=false;
-por isso o catálogo público está vazio. Nenhum outro registro foi alterado. Admin sem sessão
-continua bloqueado. Health retorna ok com os três serviços disponíveis. Não recriar
-Mongo/Supabase nem reaplicar a migration manual já executada.
+FastAPI principal :8000 utiliza Supabase, Atlas e Upstash reais no mesmo processo.
+Catálogo acadêmico cadastrado, ativo e em destaque (preços fictícios):
 
-**Supabase + MongoDB: fluxo administrativo principal concluído com serviços reais.**
-O único QA foi temporariamente atualizado/ativado com autorização: home/destaque, catálogo,
-detalhe com mídia e créditos, carrinho, 3D Sketchfab e recentes visíveis na home passaram com
-os três serviços reais. Ao final foi desativado; o documento e a mídia aprovada foram preservados.
-Preço/estoque fictícios e demais produtos não foram alterados. Chaves próprias de QA removidas.
-Pendência secundária: a segunda conta recebe invalid_credentials no Auth; a negação após login
-válido dessa conta ainda não foi comprovada. Checkout WhatsApp concluído com serviços reais:
-contato lido do Supabase, preços/estoques revalidados no Atlas, carrinho e link/mensagem
-conferidos na API e no navegador. O teste não abriu o link nem enviou mensagens. O QA voltou
-a active=false; não houve alteração de preço/estoque/mídia ou de outros produtos.
-Catálogo acadêmico preparado em [mongo/catalogo-academico.json](mongo/catalogo-academico.json):
-três produtos escolhidos pelo responsável, com preços fictícios identificados nas descrições,
-estoques distribuídos e mídia/créditos aprovados. Aguarda autorização única dos três INSERTs;
-nenhum documento remoto gravado. O painel cadastra; créditos em attributes são aceitos pela API,
-sem campos próprios no formulário atual. Não reaproveitar o QA nem apresentar preços como oferta real.
+| Produto | Preço | Categoria | Estoque |
+|---|---:|---|---:|
+| Nike Air Max 95 Dark Army/Orange Blaze | R$ 899,90 | Street | 9 |
+| Nike Air Max 90 Infrared | R$ 749,90 | Performance | 10 |
+| Adidas Samba OG Branco/Preto | R$ 599,90 | Classics | 10 |
+
+[mongo/catalogo-academico.json](mongo/catalogo-academico.json) é a fonte aprovada do cadastro;
+`docs/catalogo-definitivo.json.aprovados` foi sincronizado. Alternativas não foram cadastradas.
+O registro `NEOX-QA-20261122-A01` permanece inativo e intocado. Não executar seed/upsert para
+repetir o cadastro. Home, três Coleções, filtros, detalhes, imagens/créditos, 3D do AM95, carrinho,
+WhatsApp e recentes foram validados no navegador contra os serviços reais. Após reiniciar,
+os três produtos mantiveram os mesmos IDs/dados e continuaram ativos/em destaque.
+
+O pedido de exemplo (AM95x1 + AM90x2 + Sambax1) totalizou R$ 2.999,60, revalidado no Atlas;
+link e mensagem WhatsApp conferidos sem abrir o link/enviar mensagem. Redis preservou ordem,
+deduplicação e TTL7dias dos recentes. Estoque não foi reservado/decrementado pelo checkout.
+O painel agora aceita créditos e fontes das imagens/modelo3D nos campos de attributes.
+
+Pendência secundária: segunda conta ainda recebe invalid_credentials no Auth; a negação após
+login válido dessa conta não foi comprovada. Restam vídeo5–10min e acesso do professor ao
+GitHub após autorização de publicação. Health retorna ok com os três serviços disponíveis.
+Não recriar bancos nem reaplicar migrations já aprovadas.
 
 O servidor lê `/Users/dg/Documents/NeoxDrop/.env` (main). A chave privada de contato foi
 transferida localmente do .env da worktree backend após conferir o mesmo projeto Supabase;
@@ -89,5 +92,5 @@ com TEST_CONNECTIONS_ENABLED=false; não usar esses testes 503 contra o servidor
 
 Git: .env/configurações privadas/build ignorados; preservar frontend e laboratório 3D nas suas
 branches. Revisar segredos, acesso do professor ao repositório e link do vídeo antes da entrega.
-Não houve push/deploy. Próxima etapa: aprovar o catálogo preparado, cadastrar com autorização,
-concluir o teste da segunda conta e gravar o vídeo de entrega (5–10min).
+Não houve push/deploy. Próxima etapa: concluir o teste da segunda conta e preparar o vídeo
+e o acesso do professor ao repositório.

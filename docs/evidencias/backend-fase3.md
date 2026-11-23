@@ -916,3 +916,53 @@ Home, catálogo por categoria e três detalhes renderizaram localmente; apenas A
 As oito mídias responderam HTTP200/image-webp pelo FastAPI principal. Nenhum produto/QA alterado.
 Após aprovação única: inserir somente estes três pelos endpoints existentes, rechecando colisões;
 validar catálogo/filtros/detalhes/3D, recentes Redis, carrinho e checkout sem enviar WhatsApp.
+
+
+## Três produtos cadastrados e frontend 9ccf0bd integrado — 23/11/2026
+
+Autorização explícita restrita aos três payloads do commit72014b3 em mongo/catalogo-academico.json.
+Conferido arquivo aprovado byte a byte, validação backend e origens antes de escrever. Read-only
+Atlas não encontrou conflito de SKU/slug; executados exatamente três POSTs /api/admin/products,
+201 cada, pelo admin autorizado. Novo cliente Mongo confirmou cada id/payload/estoque e um único
+documento por SKU. Snapshot de TODOS os registros anteriores idêntico, incluindo o QA inativo.
+Nenhum upsert, UPDATE/DELETE de produto, alternativa adicional ou alteração Auth/credenciais.
+
+Comparação com docs/catalogo-definitivo do frontend: mídias, créditos, colorway e model3dUrl
+idênticos, mas SKU/nome/preço/categoria/estoque/descrição eram antigos. A seção aprovados foi
+sincronizada à fonte autorizada; alternativas permaneceram sem cadastro. Allowlist necessária
+confirmada: somente https://sketchfab.com, sem wildcard; imagens são locais. CSP preservada.
+Frontend exato9ccf0bd mergeado na main sem conflitos, preservando backend e história; worktrees
+anteriores intocadas. AM90 usa a imagem limpa do mesmo arquivo/fonte CC BY2.0.
+
+Reproduzido filtro Performance oculto pelo frontend, corrigido no template com teste UI. Também
+corrigidas imagens antigas dos cards Coleções: Street→AM95, Classics→Samba, Performance→AM90;
+créditos aprovados incluídos, grade3 no desktop. Fixtures locais alinhadas nas categorias e testes
+antigos que proibiam Performance atualizados. Sem mudança de contrato ou arquitetura.
+
+FastAPI principal main :8000 reiniciado de PID3962→8548. Snapshot Mongo antes/depois idêntico;
+GET catálogo exatos três SKUs, destaques em ordem1/2/3 e detalhes com preços corretos; /health
+200/ok. Isso comprova persistência após processo novo, sem alterar os produtos.
+
+Chromium com JANELA VISÍVEL, rede/GPU e FastAPI principal, sem mocks: 39 verificações PASS:
+três Lançamentos e imagens carregadas, heroAM95, catálogo3, filtros Street/Performance/Classics/
+adidas, detalhes3/imagens/créditos, visitas POST204, carrinho3linhas (AM95x1, AM90x2, Sambax1),
+subtotal/total299960 centavos, checkout200, número/mensagem corretos e nenhuma requisição a wa.me;
+AM95 3D real carregado, giro horizontal e vertical sem tilt; recentes em ordem AM95/Samba/AM90,
+sem duplicações e visíveis na home. Leitura Redis independente confirmou lista/TTL7dias.
+Celular EMULADO 390px: três lançamentos e sem overflow. Snapshot integral Mongo após navegação/
+checkout idêntico; os três produtos continuam ativos/destaques e o QA inativo. Sem exclusões;
+chaves próprias de visita mantidas com TTL, sem sobrescrever chaves preexistentes.
+
+Depois do ajuste Coleções, outra conferência visual real confirmou três imagens/categorias,
+clique Performance mostrando AM90 e celular emulado sem overflow. Capturas públicas locais:
+/tmp/neox-lancamentos-main.png, /tmp/neox-home-definitiva.png, /tmp/neox-catalogo-definitivo.png,
+/tmp/neox-colecoes-definitivas.png, /tmp/neox-performance-definitiva.png,
+/tmp/neox-3d-definitivo.png, /tmp/neox-checkout-definitivo.png, /tmp/neox-recentes-definitivo.png.
+Relatório sanitizado /tmp/neox-definitivo-result.json. Navegador conectado CUA indisponível;
+substituído por Chromium local visível e captura inspecionada, não apenas asserções automáticas.
+
+Regressão final: pytest183 passed/6 skipped; UI126 passed/4 skipped; build vendor/Tailwind,
+ruff check/format(51 arquivos) passaram. Revisão independente sem bloqueios. As suítes locais
+com fixtures não substituem o teste real acima. Nenhuma mensagem enviada, push ou deploy.
+Pendências de entrega: segunda conta com credenciais válidas, vídeo5–10min e publicação/acesso
+GitHub somente após autorização. Os produtos existentes já permitem a apresentação principal.

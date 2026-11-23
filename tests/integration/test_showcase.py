@@ -13,7 +13,7 @@ async def test_fastapi_showcase_keeps_curated_media_and_contracts_without_remote
         home = await c.get("/")
         assert home.status_code == 200 and "data-demo-banner" in home.text
         assert "estoque ilustrativos" in home.text
-        assert "category=Performance" not in home.text
+        assert "category=Performance" in home.text
         assert "nb9060-web.glb" not in home.text
         featured = (await c.get("/api/featured")).json()
         assert {p["slug"] for p in featured["items"]} == {
@@ -36,7 +36,7 @@ async def test_fastapi_showcase_keeps_curated_media_and_contracts_without_remote
                 assert image.status_code == 200 and image.headers["content-type"] == "image/webp"
         assert (await c.get("/tenis?category=Street")).status_code == 200
         listing = (await c.get("/api/products?category=Street")).json()
-        assert listing["total"] == 1 and listing["items"][0]["brand"] == "adidas"
+        assert listing["total"] == 1 and listing["items"][0]["slug"] == "nike-air-max-95-dark-army"
         assert (await c.get("/tenis/inexistente")).status_code == 404
         assert (await c.get("/api/admin/products")).status_code == 401
         assert (await c.get("/admin/produtos")).status_code == 303
