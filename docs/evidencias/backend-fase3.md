@@ -1107,3 +1107,46 @@ Para gravar CRUD novamente é necessária autorização de um único QA; esta ta
 novos registros. Restam gravar/conferir o vídeo, definir destino/acesso do professor e autorizar
 publicação. Segunda conta válida e teste em celular físico permanecem pendências declaradas.
 Não houve push, deploy, cadastro ou outras escritas remotas.
+
+## Suporte ao catálogo ampliado do Claude — 23/11/2026 (em andamento)
+
+Autorização do responsável para produtos acadêmicos adicionais, preservando registros
+existentes e sem alterar a interface. Comparados os dois payloads de
+mongo/catalogo-adicional.pending.json com o manifesto atual do Claude: mesmos dados, mídia,
+créditos e SKUs; mantida a descrição explícita de preço fictício. New Balance574 já possui
+payload no manifesto e WebP/CC0 documentados. Validados ProductCreate/backend, caminhos
+WebP reais, ausência de model3dUrl e colisões case-insensitive de SKU/slug.
+
+INSERTs reais no Cluster0/neox_drop_test.products, sem upsert:
+- NEOX-DEMO-205 / New Balance2002R Lilás/Cinza / 84990centavos / 23unidades fictícias;
+- NEOX-DEMO-206 / Nike Dunk Low Vermelho/Cinza / 79990 / 23;
+- NEOX-DEMO-207 / New Balance574 Cinza / 69990 / 23.
+BR38:3,39:4,40:5,41:5,42:4,43:2; ativos, sem novos destaques nem3D; 2002R/Dunk em Street,
+574 em Classics. Créditos CC0 LeDroider
+(2002R/574) e William Mucci(Dunk), conforme mídia existente. Nenhuma foto/modelo inventado.
+Atualização autorizada do AM95: exclusivamente featured.enabled=false; ativo no catálogo.
+Todos os documentos preexistentes comparados em BSON, idênticos salvo esse campo; inclusive
+updatedAt preservado. Novos documentos conferidos integralmente depois da gravação.
+Total real:6ativos, QA inativo. Fonte local de cadastros em mongo/catalogo-academico.json.
+
+Para o Claude: não cadastrar novamente os SKUs205/206/207. Usar os mesmos SKU/slug/caminhos
+de mídia da fonte Mongo e manter créditos. Acrescentar New Balance aos controles de marca;
+API já aceita o filtro. AM95 não pertence mais ao hero; demonstrar3D separadamente apenas
+se houver solução visual aprovada. Asserções E2E antigas que exigem AM95 no carrossel
+precisam ser reconciliadas com a nova direção, sem desabilitar testes para ocultar falhas.
+Home obtém até6lançamentos; catálogo padrão até12, suficiente para oito produtos.
+Gazelle não tem ainda WebP local nesta main; faltam sua mídia/payload e o oitavo produto.
+Não inserir nomes/arquivos imaginários. Aguardar manifesto e commit final do frontend para
+os próximos INSERTs autorizados e merge revisado. Nenhuma edição na worktree do Claude.
+
+Teste real tests/real/test_live_catalog_readonly.py aprovado após os INSERTs: compara
+API/home/filtros/mídias diretamente com os seis documentos ativos do Atlas, sem fixtures.
+Supabase, Redis, checkout, permissões e credenciais não reconfigurados. Sem push/deploy.
+Esta etapa NÃO comprova oito produtos nem integração do frontend ainda não entregue.
+
+Navegador real Chromium em desktop e celular emulado: seis cards correspondentes à API
+Atlas, seis imagens carregadas, filtro direto New Balance retorna dois, AM90 primeiro no
+hero e AM95 ausente dos destaques. Ambos os percursos passaram; capturas inspecionadas em
+.gstack/backend-expansion (ignoradas). Conferência independente de todos os campos da
+fonte local versus seis documentos Atlas passou; nenhuma nova alteração remota nesse teste.
+Ainda não existem oito documentos ativos nem novo commit visual entregue para integrar.

@@ -18,7 +18,7 @@
     ],
     "colorName": "Dark Army/Orange Blaze",
     "featured": {
-      "enabled": true,
+      "enabled": false,
       "order": 2,
       "backgroundHex": "#1F231C",
       "accentHex": "#FF6A1F"
@@ -143,6 +143,144 @@
       },
       {
         "sizeBR": 41,
+        "stock": 2
+      }
+    ]
+  },
+  {
+    "sku": "NEOX-DEMO-205",
+    "slug": "new-balance-2002r",
+    "name": "New Balance 2002R",
+    "brand": "New Balance",
+    "category": "Street",
+    "priceCents": 84990,
+    "mainImageUrl": "/static/images/products/new-balance-2002r/main.webp",
+    "description": "Cabedal em camurça e malha em tons de lilás e cinza, entressola clara. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
+    "currency": "BRL",
+    "galleryUrls": [
+      "/static/images/products/new-balance-2002r/main.webp"
+    ],
+    "colorName": "Lilás/Cinza",
+    "active": true,
+    "attributes": {
+      "imageCredit": "Foto: LeDroider, CC0, fundo removido",
+      "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:New_Balance_2002R.jpg"
+    },
+    "sizes": [
+      {
+        "sizeBR": 38,
+        "stock": 3
+      },
+      {
+        "sizeBR": 39,
+        "stock": 4
+      },
+      {
+        "sizeBR": 40,
+        "stock": 5
+      },
+      {
+        "sizeBR": 41,
+        "stock": 5
+      },
+      {
+        "sizeBR": 42,
+        "stock": 4
+      },
+      {
+        "sizeBR": 43,
+        "stock": 2
+      }
+    ]
+  },
+  {
+    "sku": "NEOX-DEMO-206",
+    "slug": "nike-dunk-low-vermelho-cinza",
+    "name": "Nike Dunk Low",
+    "brand": "Nike",
+    "category": "Street",
+    "priceCents": 79990,
+    "mainImageUrl": "/static/images/products/nike-dunk-low-vermelho-cinza/main.webp",
+    "description": "Couro vermelho com sobreposições cinza e solado branco. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
+    "currency": "BRL",
+    "galleryUrls": [
+      "/static/images/products/nike-dunk-low-vermelho-cinza/main.webp"
+    ],
+    "colorName": "Vermelho/Cinza",
+    "active": true,
+    "attributes": {
+      "imageCredit": "Foto: William Mucci, CC0, fundo removido",
+      "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:Nike_dunk_low.jpg"
+    },
+    "sizes": [
+      {
+        "sizeBR": 38,
+        "stock": 3
+      },
+      {
+        "sizeBR": 39,
+        "stock": 4
+      },
+      {
+        "sizeBR": 40,
+        "stock": 5
+      },
+      {
+        "sizeBR": 41,
+        "stock": 5
+      },
+      {
+        "sizeBR": 42,
+        "stock": 4
+      },
+      {
+        "sizeBR": 43,
+        "stock": 2
+      }
+    ]
+  },
+  {
+    "sku": "NEOX-DEMO-207",
+    "slug": "new-balance-574-cinza",
+    "name": "New Balance 574",
+    "brand": "New Balance",
+    "category": "Classics",
+    "priceCents": 69990,
+    "mainImageUrl": "/static/images/products/new-balance-574-cinza/main.webp",
+    "description": "Cabedal em camurça e malha cinza com o N reflexivo e entressola clara. Preço fictício para demonstração acadêmica; não constitui oferta comercial.",
+    "currency": "BRL",
+    "galleryUrls": [
+      "/static/images/products/new-balance-574-cinza/main.webp"
+    ],
+    "colorName": "Cinza",
+    "active": true,
+    "attributes": {
+      "imageCredit": "Foto: LeDroider, CC0, fundo removido",
+      "imageCreditUrl": "https://commons.wikimedia.org/wiki/File:New_Balance_574.jpg"
+    },
+    "sizes": [
+      {
+        "sizeBR": 38,
+        "stock": 3
+      },
+      {
+        "sizeBR": 39,
+        "stock": 4
+      },
+      {
+        "sizeBR": 40,
+        "stock": 5
+      },
+      {
+        "sizeBR": 41,
+        "stock": 5
+      },
+      {
+        "sizeBR": 42,
+        "stock": 4
+      },
+      {
+        "sizeBR": 43,
         "stock": 2
       }
     ]
