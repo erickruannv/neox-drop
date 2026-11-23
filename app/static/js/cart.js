@@ -179,6 +179,13 @@ function initDrawer(drawer) {
     }
     save([...memory, { productId, sizeBR, quantity }]);
     drawer.showModal();
+    // Feedback visual: destaca a linha adicionada e "pulsa" o contador (CSS; reduced-motion zera).
+    list.querySelector(`[data-key="${CSS.escape(`${productId}:${sizeBR}`)}"]`)?.setAttribute("data-just-added", "");
+    if (badge) {
+      badge.removeAttribute("data-bump");
+      void badge.offsetWidth; // reinicia a animação em adições seguidas
+      badge.setAttribute("data-bump", "");
+    }
     live.textContent = `${name}, numeração ${sizeBR}, adicionado ao carrinho`;
   });
 

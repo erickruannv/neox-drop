@@ -22,10 +22,11 @@
 
   <div class="mt-6 grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-12">
     <section aria-label="Galeria" class="min-w-0" data-gallery>
-      <div class="relative grid aspect-[4/3] place-items-center overflow-hidden rounded-3xl bg-white p-6 shadow-[0_8px_24px_rgb(0_0_0/0.06)] sm:p-10">
+      <div class="relative grid aspect-[4/3] place-items-center overflow-hidden rounded-3xl bg-white p-6 shadow-[0_8px_24px_rgb(0_0_0/0.06)] sm:p-10" data-3d-stage{% if p.get("model3dUrl") %} data-open-3d{% endif %}>
         <span class="display-type pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none whitespace-nowrap text-center text-[clamp(4rem,12vw,10rem)] text-ink/[0.05]" aria-hidden="true">{{ p.name.split(" ")[0]|upper }}</span>
         <img src="{{ gallery[0] }}" alt="{{ p.name }}, {{ p.colorName }}" width="1200" height="900" fetchpriority="high" decoding="async"
-             class="absolute inset-0 size-full object-contain p-6 sm:p-10" data-gallery-main>
+             class="absolute inset-0 size-full object-contain p-6 sm:p-10" data-gallery-main data-3d-photo>
+        {% include "partials/rotate3d.html" %}
       </div>
       {% if gallery|length > 1 %}
       <ul class="mt-3 grid grid-cols-4 gap-2 pb-1 sm:flex sm:gap-3 sm:overflow-x-auto" aria-label="Imagens do produto">
@@ -41,12 +42,6 @@
       {% endif %}
       {%- set pa = p.attributes if p.get('attributes') else {} %}
       <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
-        {% if p.get('model3dUrl') %}
-        <button type="button" class="inline-flex h-11 items-center gap-2 rounded-full bg-ink px-5 font-bold text-white transition-colors hover:bg-ink-soft"
-                data-open-3d aria-label="Ver {{ p.name }} em 3D">
-          {{ icon("cube", "size-5") }} Ver em 3D
-        </button>
-        {% endif %}
         {% if pa.get('imageCredit') or pa.get('model3dCredit') %}
         <ul class="text-xs text-muted">
           {% for k in ["imageCredit", "model3dCredit"] if pa.get(k) %}
@@ -105,7 +100,6 @@
     </section>
   </div>
 </div>
-{% include "partials/viewer3d.html" %}
 {% endblock %}
 
 {% block scripts %}

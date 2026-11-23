@@ -84,3 +84,9 @@ test("drawer aberto: sem violações axe sérias", async ({ page }) => {
   const { violations } = await new AxeBuilder({ page }).include("#cart-drawer").withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
   expect(violations.filter((v) => ["serious", "critical"].includes(v.impact)).map((v) => v.id)).toEqual([]);
 });
+
+test("feedback ao adicionar: linha destacada e contador pulsa", async ({ page }) => {
+  await add(page, volt.slug, 41);
+  await expect(drawer(page).locator(`[data-key="${volt.id}:41"]`)).toHaveAttribute("data-just-added", "");
+  await expect(page.locator("[data-cart-count]")).toHaveAttribute("data-bump", "");
+});

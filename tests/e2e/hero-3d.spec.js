@@ -60,11 +60,12 @@ test("GLB carregado: arraste horizontal gira em Y; vertical e roda não inclinam
   await page.emulateMedia({ reducedMotion: "reduce" }); // sem auto-rotate: mede só o arraste
   await page.route("**/*.glb", (route) => route.fulfill({ body: boxGlb(), contentType: "model/gltf-binary" }));
   await page.goto("/model/");
-  await page.locator("#hero").getByRole("button", { name: /em 3D/ }).click();
-  const mv = page.getByRole("dialog").locator("model-viewer");
+  await page.locator("#hero [data-3d-toggle]").click();
+  const mv = page.locator("#hero [data-hero-media] model-viewer");
   await expect.poll(() => mv.evaluate((el) => el.loaded), { timeout: 90_000 }).toBe(true);
-  await expect(page.locator("[data-viewer-poster]")).toBeHidden({ timeout: 30_000 });
-  await expect(page.locator("[data-viewer-status]")).toContainText("Arraste na horizontal");
+  await expect(page.locator("#hero [data-hero-media]")).toHaveAttribute("data-state3d", "ready", { timeout: 30_000 });
+  await expect(page.locator("#hero [data-3d-photo]")).toHaveCSS("opacity", "0");
+  await expect(page.locator("#hero [data-3d-status]")).toContainText("Arraste na horizontal");
 
   const box = await mv.boundingBox();
   const cx = box.x + box.width / 2;

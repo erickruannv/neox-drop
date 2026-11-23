@@ -4,7 +4,6 @@
 
 {% block content %}
 {% include "partials/hero.html" %}
-{% include "partials/viewer3d.html" %}
 
 <div class="on-light">
   {# Faixa de confiança: só afirmações verificáveis (cap. 05) — sem frete grátis, parcelamento ou trocas. #}
@@ -33,20 +32,19 @@
       {% for key, title, text, bg, img in [
         ("Street", "Street", "Estilo urbano o tempo todo.", "bg-raspberry bg-gradient-to-r from-raspberry to-[#c2305c]", "/static/images/products/nike-air-max-95-dark-army/lateral.webp"),
         ("Classics", "Classics", "Modelos icônicos que nunca saem de moda.", "bg-coral-deep bg-gradient-to-r from-coral-deep via-coral-deep to-coral", "/static/images/products/adidas-samba-og/main.webp"),
-        ("Performance", "Performance", "Explore a seleção Performance.", "bg-ink", "/static/images/products/nike-air-max-90-infrared/main.webp"),
+        ("Performance", "Performance", "Explore a seleção Performance.", "bg-deep-teal bg-gradient-to-r from-deep-teal to-[#21414a]", "/static/images/products/nike-air-max-90-infrared/main.webp"),
       ] %}
       <li>
         <a href="/tenis?category={{ key|urlencode }}" class="collection-card group {{ bg }}">
-          <span class="relative z-10 flex max-w-[52%] flex-col">
-            <span class="text-xs font-semibold uppercase tracking-wider">Coleção</span>
-            <span class="display-type mt-1 text-[clamp(1.5rem,2.4vw,2.25rem)]">{{ title }}</span>
-            <span class="mt-2 text-sm leading-snug">{{ text }}</span>
-            <span class="mt-auto inline-grid size-9 place-items-center rounded-full bg-white pt-0 text-ink transition-transform group-hover:translate-x-1" aria-hidden="true">{{ icon("arrow-right", "size-4") }}</span>
-          </span>
+          {# Título em largura livre no topo; tênis no canto inferior direito, abaixo do título. #}
+          <span class="relative z-10 text-xs font-semibold uppercase tracking-wider">Coleção</span>
+          <span class="display-type relative z-10 mt-1 whitespace-nowrap text-[clamp(1.6rem,2.3vw,2.1rem)] leading-none">{{ title }}</span>
+          <span class="relative z-10 mt-3 max-w-[46%] text-sm leading-snug opacity-90">{{ text }}</span>
+          <span class="relative z-10 mt-auto inline-grid size-9 place-items-center rounded-full bg-white text-ink transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">{{ icon("arrow-right", "size-4") }}</span>
           {# Só fotografia real e licenciada (docs/assets-licenses.md); sem foto, o card fica tipográfico. #}
           {% if img %}
           <img src="{{ img }}" alt="" width="1600" height="1000" loading="lazy"
-               class="pointer-events-none absolute -right-6 bottom-2 w-[60%] max-w-80 -rotate-6 drop-shadow-[0_18px_20px_rgb(0_0_0/0.35)]">
+               class="pointer-events-none absolute bottom-1 right-2 w-[54%] max-w-72 drop-shadow-[0_18px_20px_rgb(0_0_0/0.35)]">
           {% endif %}
         </a>
       </li>
@@ -64,7 +62,7 @@
 
     {% set products = launches["items"] if launches and launches["items"] else [] %}
     {% if products %}
-    <ul class="mt-6 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 {{ 'lg:grid-cols-3' if products|length <= 3 else 'lg:grid-cols-4' }} lg:gap-6">
+    <ul class="mt-6 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 {{ 'lg:grid-cols-4' if products|length % 4 == 0 else 'lg:grid-cols-3' }} lg:gap-6">
       {% for p in products %}
       <li>
         {{ product_card(p) }}

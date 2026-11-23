@@ -80,3 +80,25 @@ test("navegação: Marcas e Coleções levam a destinos visíveis; menu do celul
   for (const href of await page.locator("a[href]").evaluateAll((els) => els.map((a) => a.getAttribute("href"))))
     expect(href === "#" || href === "").toBe(false);
 });
+
+test("indicador do menu: Início, Tênis, Marcas e Coleções seguem rota, filtro e âncora", async ({ page, isMobile }) => {
+  const nav = page.locator(`nav[aria-label="${isMobile ? "Principal (menu)" : "Principal"}"]`);
+  const expectActive = async (name) => {
+    await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
+    await expect(nav.locator('[aria-current="page"]')).toHaveText(name);
+  };
+  for (const [url, name] of [
+    ["/", "Início"], ["/#colecoes", "Coleções"], ["/tenis/", "Tênis"], ["/tenis/#marcas", "Marcas"],
+    ["/tenis/?brand=Nike", "Marcas"], ["/tenis/?category=Street", "Coleções"], ["/tenis/nike-air-max-90-infrared/", "Tênis"],
+  ]) {
+    await page.goto(url);
+    await expectActive(name);
+  }
+  // mesma página: âncora e filtro aplicado sem recarregar
+  await page.goto("/tenis/");
+  if (isMobile) await page.locator("header").getByLabel("Menu", { exact: true }).click();
+  await nav.getByRole("link", { name: "Marcas" }).click();
+  await expectActive("Marcas");
+  await page.locator("#marcas").getByRole("link", { name: "Todas" }).first().click();
+  await expectActive("Tênis");
+});

@@ -43,6 +43,7 @@ function init(form) {
       if (!res.ok || !body?.items) throw new Error(body?.error?.message ?? "");
       render(body);
       history.replaceState(null, "", `/tenis${params.size ? `?${params}` : ""}`);
+      dispatchEvent(new Event("neox:navchange"));
     } catch (err) {
       if (seq !== requestSeq) return;
       error.querySelector("[data-catalog-error-message]").textContent = err.message || "Verifique sua conexão e tente de novo.";
@@ -58,6 +59,7 @@ function init(form) {
 
   function render({ items, page, limit, total }) {
     list.replaceChildren(...items.map(card));
+    list.dataset.animate = ""; // entrada curta só nos cards trocados pelo filtro (CSS)
     empty.hidden = items.length > 0;
     status.textContent = `${total} ${total === 1 ? "tênis encontrado" : "tênis encontrados"}`;
     // Faixa Marcas/Coleções acompanha os filtros aplicados sem recarregar.
