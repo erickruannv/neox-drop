@@ -38,7 +38,7 @@ anteriores foram mantidas; a demonstração antiga :8001 foi encerrada. Não exe
 |---|---|---|
 | Supabase PostgreSQL/Auth | Identidade, perfil admin/RLS e contato WhatsApp privado | URL/Publishable configurados; admin real validado: login, painel, renovação, logout e RLS/revogação; segunda conta pendente |
 | MongoDB Atlas | Produtos, preço em centavos e estoque autoritativos | Cluster0, papel neox_drop_test@admin restrito ao banco neox_drop_test; products strict/error, seis índices adicionais; nove produtos acadêmicos ativos, cinco em destaque; QA inativo |
-| Upstash Redis | Até 5 recentes, TTL 7 dias; cache 300s, sem governar preço | Upstash real validado: gravação/leitura, ordem, cinco únicos, TTL e expiração; home/recentes comprovados com os três produtos cadastrados no Atlas |
+| Upstash Redis | Até 5 recentes e 3 últimas pesquisas por visitante, TTL 7 dias; cache 300s, sem governar preço | Upstash real validado: gravação/leitura, ordem, cinco únicos, TTL e expiração; home/recentes comprovados com os três produtos cadastrados no Atlas |
 
 FastAPI principal :8000 utiliza Supabase, Atlas e Upstash reais no mesmo processo.
 Catálogo acadêmico cadastrado e ativo (preços e estoques fictícios):
@@ -78,8 +78,8 @@ no ambiente privado e saída protegida; não habilita escrita de produtos. Celul
 não houve teste em aparelho físico. O arquivo de evidências registra os resultados e falhas.
 
 Pendência secundária: segunda conta ainda recebe invalid_credentials no Auth; a negação após
-login válido dessa conta não foi comprovada. Restam vídeo5–10min e acesso do professor ao
-GitHub após autorização de publicação. Health retorna ok com os três serviços disponíveis.
+login válido dessa conta não foi comprovada. Resta o vídeo 5–10min; o repositório público está em
+https://github.com/erickruannv/neox-drop. Health retorna ok com os três serviços disponíveis.
 Não recriar bancos nem reaplicar migrations já aprovadas.
 
 Ordem final autorizada: Dunk Low → AM95 Dark Army → Samba OG → Gazelle Indoor → Cortez.
@@ -125,10 +125,9 @@ com TEST_CONNECTIONS_ENABLED=false; não usar esses testes 503 contra o servidor
 
 Git: .env/configurações privadas/build ignorados; preservar frontend e laboratório 3D nas suas
 branches. Revisar segredos, acesso do professor ao repositório e link do vídeo antes da entrega.
-Ainda não há remote GitHub configurado neste clone. Definir o repositório de destino,
-configurar a origem local e autorizar o push antes de publicar; não enviar o `.env`.
-Não houve push/deploy. Próxima etapa: concluir o teste da segunda conta e preparar o vídeo
-e o acesso do professor ao repositório.
+Repositório público: https://github.com/erickruannv/neox-drop (origin/main). O `.env` nunca é
+enviado. Não há deploy: a aplicação roda localmente. Pendências: gravar o vídeo e, opcionalmente,
+concluir o teste da segunda conta.
 
 Para o vídeo, o roteiro existente cobre 8 minutos. Uma nova demonstração de escrita CRUD exige
 autorização de um único registro QA antes de gravar; não editar os três produtos da vitrine.

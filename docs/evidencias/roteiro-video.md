@@ -15,7 +15,7 @@ carrinho → total → WhatsApp.
 | 1:30–2:50 | Painel: cadastrar o único produto TESTE ACADÊMICO autorizado | Validação no servidor; preço em centavos; SKU duplicado é recusado (mostrar tentativa) |
 | 2:50–3:30 | Atlas Data Explorer: coleção `products`, filtro pelo SKU do QA | Documento gravado no MongoDB, mesmo ID exibido no painel |
 | 3:30–4:10 | `/tenis` (sem recarregar dados à mão) e página do produto QA | Aparece imediatamente, sem seed. Reiniciar o Uvicorn e recarregar: mesmo produto/ID |
-| 4:10–5:00 | Abrir dois tênis; voltar à home → "Vistos recentemente". Upstash Data Browser: chave `recent:visitor:…` e TTL | Lista no Redis: mais recente primeiro, sem repetição, até 5 itens, TTL 7 dias |
+| 4:10–5:00 | Abrir dois tênis; menu "Recentes" → "Vistos recentemente". Clicar na busca vazia → "Pesquisas recentes" (3 últimas). Upstash Data Browser: chave `recent:visitor:…` e TTL | Lista no Redis: mais recente primeiro, sem repetição, até 5 itens, TTL 7 dias |
 | 5:00–6:10 | Carrinho: tamanho obrigatório, dois produtos, alterar quantidade, remover um, subtotal | Carrinho guarda só id/tamanho/quantidade; preço e estoque são revalidados no backend |
 | 6:10–6:50 | "Pedir pelo WhatsApp": mostrar resumo e o link `wa.me` aberto, sem tocar em Enviar | Número vem do Supabase (`store_settings`); mensagem codificada com itens, tamanhos e total |
 | 6:50–7:30 | Logout; abrir `/admin/produtos` de novo → volta ao login | Sessão invalidada. O painel só cadastra e lista: a desativação do QA é feita depois, fora da câmera, pela API admin (`DELETE`, `active=false`, documento preservado) |
