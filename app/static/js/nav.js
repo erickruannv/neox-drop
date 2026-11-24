@@ -37,7 +37,7 @@ for (const img of document.querySelectorAll("main img[src]")) if (img.complete &
 export function activeNav({ pathname, search, hash }) {
   const path = pathname.replace(/\/+$/, "") || "/";
   const q = new URLSearchParams(search);
-  if (path === "/") return hash === "#colecoes" ? "colecoes" : "inicio";
+  if (path === "/") return hash === "#colecoes" ? "colecoes" : hash === "#recentes" ? "recentes" : "inicio";
   if (path === "/tenis") return hash === "#marcas" || q.get("brand") ? "marcas" : q.get("category") ? "colecoes" : "tenis";
   return path.startsWith("/tenis/") ? "tenis" : "";
 }

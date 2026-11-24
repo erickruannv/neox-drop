@@ -112,7 +112,7 @@ test("indicador do menu: Início, Tênis, Marcas e Coleções seguem rota, filtr
     await expect(nav.locator('[aria-current="page"]')).toHaveText(name);
   };
   for (const [url, name] of [
-    ["/", "Início"], ["/#colecoes", "Coleções"], ["/tenis/", "Tênis"], ["/tenis/#marcas", "Marcas"],
+    ["/", "Início"], ["/#colecoes", "Coleções"], ["/#recentes", "Recentes"], ["/tenis/", "Tênis"], ["/tenis/#marcas", "Marcas"],
     ["/tenis/?brand=Nike", "Marcas"], ["/tenis/?category=Street", "Coleções"], ["/tenis/nike-air-max-90-infrared/", "Tênis"],
   ]) {
     await page.goto(url);
@@ -125,4 +125,14 @@ test("indicador do menu: Início, Tênis, Marcas e Coleções seguem rota, filtr
   await expectActive("Marcas");
   await page.locator("#marcas").getByRole("link", { name: "Todas" }).first().click();
   await expectActive("Tênis");
+});
+
+test("vistos recentemente: logo abaixo do hero, antes das coleções, e alcançável pelo menu", async ({ page }) => {
+  await page.goto("/#recentes");
+  const recent = page.locator("#recentes");
+  await expect(recent).toBeInViewport();
+  await expect(recent.getByRole("heading", { name: "Vistos recentemente" })).toBeVisible();
+  const order = await page.evaluate(() =>
+    document.querySelector("#recentes").compareDocumentPosition(document.querySelector("#colecoes")) & Node.DOCUMENT_POSITION_FOLLOWING);
+  expect(order).toBeTruthy();
 });

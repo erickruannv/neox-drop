@@ -270,8 +270,8 @@ async def test_home_exposes_recent_history_only_when_provided(catalog_app, monke
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.get("/")
         assert response.status_code == 200
-        assert ("data-recent-products" in response.text) is history
-        if history:
-            section = response.text.split("data-recent-products", 1)[1].split("</section>", 1)[0]
-            assert "Vistos recentemente" in section
-            assert doc["slug"] in section
+        # Seção sempre presente (âncora #recentes do menu); sem histórico mostra só a dica.
+        section = response.text.split("data-recent-products", 1)[1].split("</section>", 1)[0]
+        assert "Vistos recentemente" in section
+        assert (f"/tenis/{doc['slug']}" in section) is history
+        assert ("data-recent-empty" in section) is not history

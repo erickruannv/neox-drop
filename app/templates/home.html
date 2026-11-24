@@ -26,6 +26,24 @@
     </ul>
   </section>
 
+  {# Histórico Redis logo abaixo do hero e com âncora no menu (#recentes): antes ficava no fim da página. #}
+  <section id="recentes" data-recent-products aria-labelledby="recentes-titulo" class="mx-auto max-w-screen-2xl scroll-mt-24 px-4 pt-8 sm:px-6 lg:px-10">
+    <div class="flex flex-wrap items-center gap-4 sm:gap-6">
+      <span class="hidden h-1 w-14 rounded bg-lime sm:block" aria-hidden="true"></span>
+      <h2 id="recentes-titulo" class="display-type min-w-0 text-[clamp(1.5rem,3.5vw,2.5rem)]">Vistos recentemente</h2>
+    </div>
+    {% set recent_items = recent["items"] if recent and recent["items"] else [] %}
+    {% if recent_items %}
+    <ul class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5 lg:gap-6">
+      {% for p in recent_items %}
+      <li>{{ product_card(p) }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p data-recent-empty class="mt-6 rounded-2xl bg-white p-6 text-muted">Os tênis que você abrir aparecem aqui. <a href="/tenis" class="font-bold text-ink underline">Ver catálogo</a></p>
+    {% endif %}
+  </section>
+
   <section id="colecoes" aria-labelledby="colecoes-titulo" class="mx-auto max-w-screen-2xl scroll-mt-24 px-4 pt-8 sm:px-6 lg:px-10">
     <h2 id="colecoes-titulo" class="sr-only">Coleções</h2>
     <ul class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
@@ -73,16 +91,6 @@
     <p class="mt-6 rounded-2xl bg-white p-6 text-muted">{% if serviceMessage is defined and serviceMessage %}Não foi possível consultar os lançamentos.{% else %}Nenhum lançamento disponível no momento.{% endif %} <a href="/tenis" class="font-bold text-ink underline">Ver catálogo</a></p>
     {% endif %}
   </section>
-  {% if recent and recent["items"] %}
-  <section data-recent-products aria-labelledby="recentes-titulo" class="mx-auto max-w-screen-2xl px-4 pt-12 sm:px-6 lg:px-10">
-    <h2 id="recentes-titulo" class="display-type text-2xl">Vistos recentemente</h2>
-    <ul class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-6">
-      {% for p in recent["items"] %}
-      <li>{{ product_card(p) }}</li>
-      {% endfor %}
-    </ul>
-  </section>
-  {% endif %}
 </div>
 {% endblock %}
 
