@@ -57,7 +57,7 @@ mongo/catalogo-academico.json. Falta validar a segunda conta com credenciais vá
 comprovam estoque real. Os quatro modelos 3D completos continuam fora desta validação.
 Ordem final: Dunk → AM95 → Samba → Gazelle → Cortez. Nove produtos ativos, incluindo os três
 cadastros adicionais autorizados. AM90 continua no catálogo/carrinho, mas não aparece em
-hero, banners, lançamentos ou recentes da home; seu histórico Redis continua íntegro.
+hero, banners ou lançamentos da home; se aberto, aparece em "Vistos recentemente" (Redis íntegro).
 O3D do AM95 fica em Demonstração3D, no detalhe, separado da galeria fotográfica; não afirmar
 GLB nativo concluído. Não filmar emulação como prova de aparelho físico.
 Após gravar: conferir duração de 5–10 minutos, legibilidade, ausência de segredos, acesso ao vídeo e

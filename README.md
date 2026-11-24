@@ -84,8 +84,8 @@ Não recriar bancos nem reaplicar migrations já aprovadas.
 
 Ordem final autorizada: Dunk Low → AM95 Dark Army → Samba OG → Gazelle Indoor → Cortez.
 São cinco slides e nove produtos ativos no catálogo. O AM90 permanece ativo, disponível no
-catálogo/detalhe/carrinho, mas o loader da home o exclui de destaques, lançamentos e recentes.
-Essa curadoria não remove seu histórico Redis nem altera os contratos das APIs públicas.
+catálogo/detalhe/carrinho, mas o loader da home o exclui de destaques e lançamentos. Se o
+visitante abrir o AM90, ele aparece em "Vistos recentemente": curadoria não filtra o histórico Redis.
 O banner Performance mostra o GEL-1130, agora cadastrado. New Balance e ASICS funcionam
 nos filtros. Campos comerciais dos seis produtos anteriores foram preservados; somente
 featured do Dunk foi adicionado conforme a autorização e o schema existente.

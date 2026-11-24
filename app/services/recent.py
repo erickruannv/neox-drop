@@ -32,8 +32,8 @@ async def register_visit(collection, product_id: str, visitor: str, settings):
                 keys=[f"{settings.redis_key_prefix}recent:visitor:{visitor}"],
                 args=[str(identifier), str(settings.recent_ttl_seconds)],
             )
-    except Exception:
-        logger.warning("event=recent_write_unavailable")
+    except Exception as exc:
+        logger.warning("event=recent_write_unavailable error=%s", type(exc).__name__)
 
 
 async def recent_ids(visitor: str | None, settings) -> list[str]:
@@ -51,8 +51,8 @@ async def recent_ids(visitor: str | None, settings) -> list[str]:
                 if isinstance(value, str) and ObjectId.is_valid(value)
             )
         )
-    except Exception:
-        logger.warning("event=recent_read_unavailable")
+    except Exception as exc:
+        logger.warning("event=recent_read_unavailable error=%s", type(exc).__name__)
         return []
 
 

@@ -130,8 +130,10 @@ test('entrega integrada: catálogo Atlas, navegação, foto/3D, carrinho, WhatsA
   await test.info().attach('visitor-qa', { body: visitors[0].value, contentType: 'text/plain' });
   await page.keyboard.press('Escape');
   await page.goto('/');
-  await expect(page.locator('main')).not.toContainText(am90.name);
-  expect(await page.locator('main img').evaluateAll(images => images.every(i => !i.src.includes('nike-air-max-90-infrared')))).toBe(true);
+  // AM90 fora da curadoria (hero/lançamentos), mas visível no histórico Redis do visitante.
+  await expect(page.locator('#hero')).not.toContainText(am90.name);
+  await expect(page.locator('section[aria-labelledby="lancamentos-titulo"]')).not.toContainText(am90.name);
+  await expect(page.locator('[data-recent-products] [data-card=link]').first()).toHaveText(am90.name);
   expect((await (await page.request.get('/api/recent')).json()).items[0].id).toBe(am90.id);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(await page.evaluate(() => window.cspViolations)).toEqual([]);

@@ -76,7 +76,7 @@ async def test_supabase_auth_state_isolated_per_request(monkeypatch):
     assert not requests  # Creating SDKs must not contact Auth or start refresh.
 
 
-async def test_redis_cleanup_and_disabled_telemetry(monkeypatch):
+async def test_redis_client_reused_and_disabled_telemetry(monkeypatch):
     client = MagicMock(close=AsyncMock())
     factory = MagicMock(return_value=client)
     monkeypatch.setattr("app.db.redis.Redis", factory)
@@ -87,9 +87,11 @@ async def test_redis_cleanup_and_disabled_telemetry(monkeypatch):
         upstash_redis_rest_url="https://redis.example.invalid",
         upstash_redis_rest_token="test-not-a-credential",
     )
-    async with redis_client(settings) as actual:
-        assert actual is client
-    client.close.assert_awaited_once()
+    for _ in range(2):
+        async with redis_client(settings) as actual:
+            assert actual is client
+    factory.assert_called_once()
+    client.close.assert_not_awaited()
     assert factory.call_args.kwargs["allow_telemetry"] is False
     assert factory.call_args.kwargs["rest_retries"] == 0
 
@@ -138,7 +140,7 @@ async def test_primary_probe_deadline(monkeypatch):
     }
 
 
-async def test_redis_adapter_enforces_deadline_and_closes(monkeypatch):
+async def test_redis_adapter_enforces_deadline_keeps_pool(monkeypatch):
     import asyncio
 
     client = MagicMock(close=AsyncMock())
@@ -155,7 +157,7 @@ async def test_redis_adapter_enforces_deadline_and_closes(monkeypatch):
         with pytest.raises(TimeoutError):
             async with redis_client(settings):
                 await asyncio.Event().wait()
-    client.close.assert_awaited_once()
+    client.close.assert_not_awaited()
 
 
 def test_connection_script_refuses_without_opt_in(monkeypatch, capsys):

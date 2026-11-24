@@ -1,10 +1,15 @@
 import asyncio
 from contextlib import asynccontextmanager
+from weakref import WeakKeyDictionary
 
 from upstash_redis.asyncio import Redis
 
 from app.core.config import Settings
 from app.core.exceptions import ServiceUnavailable
+
+# Um cliente HTTP por event loop: reaproveita a conexão TLS com o Upstash. Cliente novo por
+# chamada estourava o limite de 1 s (medido 0,4–1,8 s) e o histórico sumia da home em silêncio.
+_clients: WeakKeyDictionary = WeakKeyDictionary()
 
 
 @asynccontextmanager
@@ -15,17 +20,15 @@ async def redis_client(settings: Settings):
         or not settings.upstash_redis_rest_token
     ):
         raise ServiceUnavailable()
-    client = Redis(
-        url=settings.upstash_redis_rest_url.get_secret_value(),
-        token=settings.upstash_redis_rest_token.get_secret_value(),
-        rest_retries=0,
-        allow_telemetry=False,
+    key = (
+        settings.upstash_redis_rest_url.get_secret_value(),
+        settings.upstash_redis_rest_token.get_secret_value(),
     )
-    try:
-        async with asyncio.timeout(settings.redis_timeout_seconds):
-            yield client
-    finally:
-        await client.close()
+    clients = _clients.setdefault(asyncio.get_running_loop(), {})
+    if key not in clients:
+        clients[key] = Redis(url=key[0], token=key[1], rest_retries=0, allow_telemetry=False)
+    async with asyncio.timeout(settings.redis_timeout_seconds):
+        yield clients[key]
 
 
 async def check_redis(settings: Settings) -> bool:
