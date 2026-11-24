@@ -16,8 +16,10 @@ async def check_connections(settings: Settings) -> dict[str, bool]:
         try:
             async with asyncio.timeout(deadline_seconds):
                 return name, await check(settings)
-        except Exception:
-            logger.warning("event=connection_unavailable service=%s", name)
+        except Exception as exc:
+            logger.warning(
+                "event=connection_unavailable service=%s error=%s", name, type(exc).__name__
+            )
             return name, False
 
     return dict(

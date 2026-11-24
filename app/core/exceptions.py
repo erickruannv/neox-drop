@@ -33,7 +33,7 @@ async def http_error(request: Request, exc: HTTPException):
 
 
 async def service_error(request: Request, exc: ServiceUnavailable):
-    logger.warning("event=service_unavailable")
+    logger.warning("event=service_unavailable error=%s", type(exc).__name__)
     if request is not None and (
         request.url.path in {"/", "/tenis", "/admin", "/admin/login", "/admin/produtos"}
         or request.url.path.startswith("/tenis/")

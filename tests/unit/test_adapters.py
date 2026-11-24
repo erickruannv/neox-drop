@@ -24,7 +24,7 @@ async def test_adapters_block_network_without_test_opt_in():
     }
 
 
-async def test_mongodb_settings_and_cleanup(monkeypatch):
+async def test_mongodb_client_reused_across_requests(monkeypatch):
     client = MagicMock(close=AsyncMock())
     factory = MagicMock(return_value=client)
     monkeypatch.setattr("app.db.mongodb.AsyncMongoClient", factory)
@@ -39,7 +39,10 @@ async def test_mongodb_settings_and_cleanup(monkeypatch):
         async with mongodb_client(settings) as actual:
             assert actual is client
             raise RuntimeError("query failed")
-    client.close.assert_awaited_once()
+    async with mongodb_client(settings) as again:
+        assert again is client
+    factory.assert_called_once()
+    client.close.assert_not_awaited()
     assert factory.call_args.kwargs["serverSelectionTimeoutMS"] == 2000
     assert factory.call_args.kwargs["timeoutMS"] == 2000
 

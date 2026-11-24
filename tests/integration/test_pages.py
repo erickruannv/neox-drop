@@ -79,7 +79,7 @@ async def test_home_can_render_six_launches(catalog_app, page_templates):
         assert home.text == "6"
 
 
-async def test_home_excludes_am90_from_launches_and_recent_only(
+async def test_home_excludes_am90_from_launches_but_keeps_recent(
     catalog_app, page_templates, monkeypatch
 ):
     from unittest.mock import AsyncMock
@@ -97,7 +97,7 @@ async def test_home_excludes_am90_from_launches_and_recent_only(
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         home = await client.get("/")
         assert home.status_code == 200
-        assert home.text == doc["sku"]
+        assert home.text == f"{doc['sku']},NEOX-AM90-INFRARED"
         assert collection.find.call_args_list[1].args[0]["sku"] == {"$nin": ["NEOX-AM90-INFRARED"]}
         assert collection.count_documents.call_args.args[0]["sku"] == {
             "$nin": ["NEOX-AM90-INFRARED"]

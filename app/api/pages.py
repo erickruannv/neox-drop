@@ -68,9 +68,8 @@ async def home(request: Request, response: Response, collection: Collection):
     identifiers = await recent_ids(request.cookies.get("neox_visitor"), request.app.state.settings)
     highlights = await featured(collection)
     recent = await resolve_recent(collection, identifiers) if identifiers else {"items": []}
-    # Curadoria exclusiva da home: catálogo, detalhe e histórico Redis continuam completos.
-    for group in (highlights, recent):
-        group["items"] = [p for p in group["items"] if p["sku"] not in HOME_EXCLUDED_SKUS]
+    # Curadoria só de destaques/lançamentos; histórico Redis é navegação real e fica completo.
+    highlights["items"] = [p for p in highlights["items"] if p["sku"] not in HOME_EXCLUDED_SKUS]
     return render(
         request,
         response,
