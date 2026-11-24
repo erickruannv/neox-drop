@@ -179,3 +179,19 @@ test("produto sem 3D: sem demonstração, sem pílula e sem 3D", async ({ page }
   await page.waitForTimeout(200);
   await expect(page.locator("[data-sketchfab-frame], model-viewer")).toHaveCount(0);
 });
+
+test("produto: atalho \"Ver em 3D\" na foto leva à demonstração e já carrega o modelo", async ({ page }) => {
+  await page.goto(`/tenis/${with3d.slug}/`);
+  const jump = page.locator("[data-gallery] [data-3d-jump]");
+  await expect(jump).toBeVisible();
+  await expect(jump).toHaveAttribute("href", "#demo-3d");
+  await jump.click();
+  await expect(media(page)).toBeInViewport();
+  await expect(pad(page)).toBeVisible();
+  expect((await sf(page)).inits.map((i) => i.uid)).toEqual([uidOf(with3d)]);
+});
+
+test("produto sem 3D: sem atalho \"Ver em 3D\"", async ({ page }) => {
+  await page.goto(`/tenis/${without.slug}/`);
+  await expect(page.locator("[data-3d-jump]")).toHaveCount(0);
+});

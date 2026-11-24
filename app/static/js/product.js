@@ -36,3 +36,14 @@ document.querySelectorAll("[data-qty-step]").forEach((btn) => {
     qty.value = String(next);
   });
 });
+
+// "Ver em 3D" na foto principal: rola até a Demonstração 3D e já inicia o carregamento do player.
+document.querySelector("[data-3d-jump]")?.addEventListener("click", (e) => {
+  const demo = document.querySelector("[data-3d-demo]");
+  if (!demo) return; // sem a seção, o link #demo-3d segue normal
+  e.preventDefault();
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  demo.closest("section").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+  history.replaceState(null, "", "#demo-3d");
+  if (demo.dataset.state3d === "idle") demo.querySelector("[data-3d-toggle]")?.click();
+});

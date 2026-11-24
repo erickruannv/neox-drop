@@ -31,6 +31,8 @@
         <img src="{{ gallery[0] }}" alt="{{ p.name }}, {{ p.colorName }}" width="1200" height="900" fetchpriority="high" decoding="async"
              class="absolute inset-0 size-full object-contain p-6 sm:p-10" data-gallery-main data-3d-photo>
         {% if m3d and not embed3d %}{% include "partials/rotate3d.html" %}{% endif %}
+        {#- Atalho visível para a demonstração (o player do Sketchfab não entra na foto principal). -#}
+        {% if embed3d %}<a href="#demo-3d" class="rotate-hint" data-3d-jump>{{ icon("rotate", "size-4") }}Ver em 3D</a>{% endif %}
       </div>
       {% if gallery|length > 1 %}
       <ul class="mt-3 grid grid-cols-4 gap-2 pb-1 sm:flex sm:gap-3 sm:overflow-x-auto" aria-label="Imagens do produto">
@@ -104,7 +106,7 @@
     </section>
   </div>
   {% if embed3d %}
-  <section aria-labelledby="demo-3d-titulo" class="mt-10 rounded-3xl bg-ink p-4 text-white sm:p-6 lg:w-[calc(58.333%-1.75rem)]">
+  <section id="demo-3d" aria-labelledby="demo-3d-titulo" class="mt-10 scroll-mt-24 rounded-3xl bg-ink p-4 text-white sm:p-6 lg:w-[calc(58.333%-1.75rem)]">
     <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
       <h2 id="demo-3d-titulo" class="display-type text-xl sm:text-2xl">Demonstração 3D</h2>
       <p class="text-xs font-semibold uppercase tracking-wide text-white/70">Player externo · Sketchfab</p>
