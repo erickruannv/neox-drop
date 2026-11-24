@@ -156,6 +156,10 @@ class RecentList(WireModel):
     items: Annotated[list[ProductSummary], Field(max_length=5)]
 
 
+class RecentSearchList(WireModel):
+    items: Annotated[list[Annotated[str, Field(max_length=100)]], Field(max_length=3)]
+
+
 class PublicFilters(BaseModel):
     q: str | None = Field(default=None, max_length=100)
     brand: str | None = Field(default=None, max_length=120)

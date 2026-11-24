@@ -39,7 +39,7 @@ async def test_visit_atomic_script_and_safe_visitor_cookie(catalog_app, monkeypa
         call = redis.eval.call_args
         assert all(command in call.args[0] for command in ("LREM", "LPUSH", "LTRIM", "EXPIRE"))
         assert call.kwargs["keys"] == [f"{prefix}recent:visitor:{visitor}"]
-        assert call.kwargs["args"] == [str(doc["_id"]), "604800"]
+        assert call.kwargs["args"] == [str(doc["_id"]), "604800", "4"]
 
 
 @pytest.mark.parametrize("prefix", ["", "NEOX QA:"])
@@ -105,3 +105,54 @@ async def test_recent_missing_cookie_and_redis_failure(catalog_app, monkeypatch)
             "/api/recent", headers=headers, json={"productId": str(doc["_id"])}
         )
         assert response.status_code == 404
+
+
+@pytest.mark.parametrize("path", ["/api/products", "/tenis"])
+async def test_search_is_remembered_per_visitor_normalized_and_capped(
+    catalog_app, monkeypatch, path
+):
+    app, _, _, _ = catalog_app
+    redis = AsyncMock()
+
+    @asynccontextmanager
+    async def connection(settings):
+        yield redis
+
+    monkeypatch.setattr("app.services.recent.redis_client", connection)
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app), base_url="http://test"
+    ) as client:
+        response = await client.get(path, params={"q": "  Air   MAX  "})
+        assert response.status_code == 200
+        visitor = client.cookies.get("neox_visitor")
+        assert visitor and len(visitor) == 32
+        call = redis.eval.call_args
+        assert call.kwargs["keys"] == [f"searches:visitor:{visitor}"]
+        assert call.kwargs["args"] == ["air max", "604800", "2"]
+        # sem termo não grava nem cria cookie novo
+        redis.eval.reset_mock()
+        await client.get(path)
+        await client.get(path, params={"q": "   "})
+        redis.eval.assert_not_awaited()
+
+
+async def test_recent_searches_reads_three_and_degrades_to_empty(catalog_app, monkeypatch):
+    app, _, _, _ = catalog_app
+    redis = AsyncMock()
+    redis.lrange.return_value = ["nike", "samba", 7]
+
+    @asynccontextmanager
+    async def connection(settings):
+        yield redis
+
+    monkeypatch.setattr("app.services.recent.redis_client", connection)
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app), base_url="http://test"
+    ) as client:
+        assert (await client.get("/api/recent/searches")).json() == {"items": []}
+        redis.lrange.assert_not_awaited()  # sem cookie válido não consulta o Redis
+        client.cookies.set("neox_visitor", "b" * 32, domain="test.local")
+        assert (await client.get("/api/recent/searches")).json() == {"items": ["nike", "samba"]}
+        redis.lrange.assert_awaited_once_with(f"searches:visitor:{'b' * 32}", 0, 2)
+        redis.lrange.side_effect = RuntimeError("secret://redis")
+        assert (await client.get("/api/recent/searches")).json() == {"items": []}

@@ -11,7 +11,7 @@ from app.schemas.auth import AdminProfile
 from app.schemas.product import AdminFilters, PublicFilters
 from app.services.admin import require_admin
 from app.services.catalog import list_products, product_detail, products_collection
-from app.services.recent import recent_ids, resolve_recent
+from app.services.recent import recent_ids, resolve_recent, track_search
 
 router = APIRouter(include_in_schema=False)
 templates = Jinja2Templates(directory=Path(__file__).resolve().parents[1] / "templates")
@@ -89,13 +89,9 @@ async def catalog(
     collection: Collection,
     filters: Annotated[PublicFilters, Query()],
 ):
-    return render(
-        request,
-        response,
-        "catalog.html",
-        catalog=await list_products(collection, filters, public=True),
-        filters=filters.model_dump(),
-    )
+    catalog = await list_products(collection, filters, public=True)
+    await track_search(request, response, filters.q)
+    return render(request, response, "catalog.html", catalog=catalog, filters=filters.model_dump())
 
 
 @router.get("/tenis/{slug}")

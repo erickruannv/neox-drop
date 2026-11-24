@@ -136,3 +136,27 @@ test("vistos recentemente: logo abaixo do hero, antes das coleções, e alcanç�
     document.querySelector("#recentes").compareDocumentPosition(document.querySelector("#colecoes")) & Node.DOCUMENT_POSITION_FOLLOWING);
   expect(order).toBeTruthy();
 });
+
+test("pesquisas recentes: ao focar a busca mostra as três últimas como atalhos; Esc fecha", async ({ page, isMobile }) => {
+  await page.route("**/api/recent/searches", (route) =>
+    route.fulfill({ json: { items: ["nike", "samba og", "air max"] } }));
+  await page.goto("/");
+  if (isMobile) await page.locator("header").getByLabel("Menu", { exact: true }).click();
+  const input = page.locator(isMobile ? "#busca-menu" : "#busca-header");
+  await input.focus();
+  const box = page.locator("[data-search-history]:visible");
+  await expect(box.getByText("Pesquisas recentes")).toBeVisible();
+  await expect(box.getByRole("link")).toHaveText(["nike", "samba og", "air max"]);
+  await expect(box.getByRole("link", { name: "samba og" })).toHaveAttribute("href", "/tenis?q=samba%20og");
+  await input.press("Escape");
+  await expect(page.locator("[data-search-history]:visible")).toHaveCount(0);
+});
+
+test("pesquisas recentes: sem histórico nada aparece", async ({ page, isMobile }) => {
+  await page.route("**/api/recent/searches", (route) => route.fulfill({ json: { items: [] } }));
+  await page.goto("/");
+  if (isMobile) await page.locator("header").getByLabel("Menu", { exact: true }).click();
+  await page.locator(isMobile ? "#busca-menu" : "#busca-header").focus();
+  await page.waitForTimeout(300);
+  await expect(page.locator("[data-search-history]:visible")).toHaveCount(0);
+});

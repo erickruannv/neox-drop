@@ -1,9 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, Response
 
 from app.schemas.product import FeaturedList, ProductDetail, ProductList, PublicFilters
 from app.services.catalog import list_products, product_detail, products_collection, public_product
+from app.services.recent import track_search
 
 router = APIRouter(prefix="/api", tags=["Público"])
 Collection = Annotated[object, Depends(products_collection)]
@@ -15,8 +16,15 @@ Collection = Annotated[object, Depends(products_collection)]
     response_model=ProductList,
     response_model_exclude_unset=True,
 )
-async def listing(collection: Collection, filters: Annotated[PublicFilters, Query()]):
-    return await list_products(collection, filters, public=True)
+async def listing(
+    request: Request,
+    response: Response,
+    collection: Collection,
+    filters: Annotated[PublicFilters, Query()],
+):
+    result = await list_products(collection, filters, public=True)
+    await track_search(request, response, filters.q)
+    return result
 
 
 @router.get(

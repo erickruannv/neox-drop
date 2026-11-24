@@ -340,6 +340,46 @@
         }
       }
     },
+    "/api/recent/searches": {
+      "get": {
+        "operationId": "listRecentSearches",
+        "summary": "Últimas três pesquisas do visitante",
+        "description": "Redis por cookie neox_visitor (TTL 7 dias), mais recente primeiro, sem repetição. Sem cookie ou Redis indisponível: 200 {items:[]}. As pesquisas são gravadas por GET /tenis?q= e GET /api/products?q=.",
+        "tags": [
+          "Público"
+        ],
+        "security": [],
+        "x-requirements": [
+          "RF-09"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecentSearchList"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/checkout": {
       "post": {
         "operationId": "checkout",
@@ -2006,6 +2046,31 @@
         "examples": [
           {
             "items": []
+          }
+        ]
+      },
+      "RecentSearchList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "maxItems": 3
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "items": [
+              "nike",
+              "samba"
+            ]
           }
         ]
       }

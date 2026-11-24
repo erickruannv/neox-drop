@@ -132,4 +132,4 @@ def test_all_registered_operations_match_approved_contract(contract):
         if method in methods
     }
     assert registered == planned
-    assert len(registered) == 14
+    assert len(registered) == 15
