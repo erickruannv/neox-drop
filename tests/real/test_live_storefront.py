@@ -101,9 +101,7 @@ async def test_real_admin_product_persists_and_appears_in_catalog(
                         assert not (await client.get("/api/products", params={"q": suffix})).json()[
                             "items"
                         ]
-                        assert (await collection.find_one({"sku": payload["sku"]}))[
-                            "active"
-                        ] is False
+                        assert await collection.find_one({"sku": payload["sku"]}) is None
                     finally:
                         await logout(client)
         finally:

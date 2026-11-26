@@ -202,6 +202,14 @@ async def update_product(collection, product_id: str, changes: dict, settings):
     return admin_product(doc)
 
 
+async def delete_product(collection, product_id: str, settings):
+    """Exclusão definitiva: o documento sai do MongoDB e o SKU/slug ficam livres para recadastro."""
+    result = await collection.delete_one({"_id": object_id(product_id)})
+    if not result.deleted_count:
+        raise ApiFault(404, "PRODUCT_NOT_FOUND", "Produto não encontrado.")
+    await invalidate_product(settings, product_id)
+
+
 def catalog_filter(filters, public: bool):
     query = {"active": True} if public else {}
     if not public and getattr(filters, "active", None) is not None:

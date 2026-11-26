@@ -43,7 +43,7 @@ async def test_create_schema_and_conflict(catalog_app, examples, contract):
         assert "secret" not in result.text
 
 
-async def test_patch_merge_and_soft_delete(catalog_app, contract):
+async def test_patch_merge_and_delete(catalog_app, contract):
     app, collection, doc, _ = catalog_app
     doc["featured"] = {
         "enabled": True,
@@ -82,7 +82,10 @@ async def test_patch_merge_and_soft_delete(catalog_app, contract):
         assert result.json()["updatedAt"] > doc["updatedAt"].isoformat()
         result = await client.delete(f"/api/admin/products/{doc['_id']}", headers=headers)
         assert result.status_code == 204 and not result.content
-        assert collection.find_one_and_update.call_args.args[1]["$set"]["active"] is False
+        assert collection.delete_one.call_args.args[0] == {"_id": doc["_id"]}
+        collection.delete_one.return_value.deleted_count = 0
+        result = await client.delete(f"/api/admin/products/{doc['_id']}", headers=headers)
+        assert result.status_code == 404
 
 
 async def test_concurrent_patch_conflicts(catalog_app):

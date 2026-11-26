@@ -15,7 +15,13 @@ from app.schemas.product import (
     ProductPatch,
 )
 from app.services.admin import require_admin
-from app.services.catalog import create_product, list_products, products_collection, update_product
+from app.services.catalog import (
+    create_product,
+    delete_product,
+    list_products,
+    products_collection,
+    update_product,
+)
 
 router = APIRouter(
     prefix="/api/admin/products", tags=["Admin"], dependencies=[Depends(require_admin)]
@@ -75,10 +81,10 @@ async def update(
 
 
 @router.delete(
-    "/{id}", operation_id="deactivateProduct", status_code=204, dependencies=[Depends(require_csrf)]
+    "/{id}", operation_id="deleteProduct", status_code=204, dependencies=[Depends(require_csrf)]
 )
-async def deactivate(id: str, request: Request, response: Response, collection: Collection):
-    await update_product(collection, id, {"active": False}, request.app.state.settings)
+async def delete(id: str, request: Request, response: Response, collection: Collection):
+    await delete_product(collection, id, request.app.state.settings)
     response.status_code = 204
     response.headers["Cache-Control"] = "no-store"
     return response

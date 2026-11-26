@@ -202,16 +202,22 @@ function initProductForm(form) {
       form.elements.name.focus({ preventScroll: true });
       return;
     }
-    if (!confirm(`Excluir “${product.name}” da loja?\n\nEle some do catálogo e do carrinho. O registro fica guardado no MongoDB como inativo e pode voltar pelo Editar (marcando "Produto ativo").`)) return;
+    if (!confirm(`Excluir “${product.name}” definitivamente?\n\nEle sai do MongoDB, da loja e deste painel. Não dá para desfazer; para vender de novo, cadastre outra vez (o SKU e o slug ficam livres).`)) return;
     button.disabled = true;
     try {
       const res = await api(`/api/admin/products/${encodeURIComponent(product.id)}`, undefined, "DELETE");
       if (res.status === 401) return location.assign("/admin/login");
       if (res.status !== 204) throw new Error(String(res.status));
-      product.active = false;
-      tr.replaceWith(buildRow(product));
-      if (editing?.id === product.id) form.elements.active.checked = false;
-      status.textContent = `Produto “${product.name}” excluído da loja.`;
+      products.delete(product.id);
+      if (editing?.id === product.id) leaveEdit();
+      const tbody = tr.parentElement;
+      tr.remove();
+      if (!tbody.children.length) {
+        const empty = Object.assign(document.createElement("td"), { colSpan: 6, className: "px-3 py-8 text-center text-muted", textContent: "Nenhum produto cadastrado." });
+        tbody.append(document.createElement("tr"));
+        tbody.lastElementChild.append(empty);
+      }
+      status.textContent = `Produto “${product.name}” excluído.`;
     } catch {
       button.disabled = false;
       status.textContent = "Não foi possível excluir agora. Recarregue a página e tente de novo.";
@@ -357,7 +363,6 @@ function initProductForm(form) {
   function actions(p) {
     const box = document.getElementById("row-actions-template").content.firstElementChild.cloneNode(true);
     box.querySelectorAll("[data-row-name]").forEach((el) => (el.textContent = ` ${p.name}`));
-    if (!p.active) box.querySelector("[data-product-delete]").remove();
     return box;
   }
 

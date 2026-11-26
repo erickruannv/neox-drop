@@ -253,7 +253,7 @@ test.describe("produtos (admin)", () => {
     await expect(page.getByRole("button", { name: "Cadastrar produto" })).toBeVisible();
   });
 
-  test("Excluir: confirma, envia DELETE e marca o produto como inativo", async ({ page }) => {
+  test("Excluir: confirma, envia DELETE e tira a linha do painel", async ({ page }) => {
     const id = "6740a1b2c3d4e5f601000017";
     let request;
     await page.route(`**/api/admin/products/${id}`, (r) => ((request = r.request()), r.fulfill({ status: 204 })));
@@ -262,15 +262,14 @@ test.describe("produtos (admin)", () => {
     let dialog = "";
     page.once("dialog", (d) => ((dialog = d.message()), d.dismiss()));
     await row.getByRole("button", { name: /Excluir/ }).click();
-    expect(dialog).toContain("Excluir “New Balance 574” da loja?");
+    expect(dialog).toContain("Excluir “New Balance 574” definitivamente?");
     expect(request).toBeUndefined();
     page.once("dialog", (d) => d.accept());
     await row.getByRole("button", { name: /Excluir/ }).click();
-    await expect(page.locator("[data-admin-status]")).toHaveText("Produto “New Balance 574” excluído da loja.");
+    await expect(page.locator("[data-admin-status]")).toHaveText("Produto “New Balance 574” excluído.");
     expect(request.method()).toBe("DELETE");
     expect(request.headers()["x-csrf-token"]).toBe("preview-csrf");
-    await expect(row).toContainText("Inativo");
-    await expect(row.getByRole("button", { name: /Excluir/ })).toHaveCount(0);
+    await expect(row).toHaveCount(0);
   });
 
   test("painel: sem rolagem horizontal da página e sem violações axe sérias", async ({ page }) => {

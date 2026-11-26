@@ -18,7 +18,7 @@ carrinho → total → WhatsApp.
 | 4:10–5:00 | Abrir dois tênis; menu "Recentes" → "Vistos recentemente". Clicar na busca vazia → "Pesquisas recentes" (3 últimas). Upstash Data Browser: chave `recent:visitor:…` e TTL | Lista no Redis: mais recente primeiro, sem repetição, até 5 itens, TTL 7 dias |
 | 5:00–6:10 | Carrinho: tamanho obrigatório, dois produtos, alterar quantidade, remover um, subtotal | Carrinho guarda só id/tamanho/quantidade; preço e estoque são revalidados no backend |
 | 6:10–6:50 | "Pedir pelo WhatsApp": mostrar resumo e o link `wa.me` aberto, sem tocar em Enviar | Número vem do Supabase (`store_settings`); mensagem codificada com itens, tamanhos e total |
-| 6:50–7:30 | Logout; abrir `/admin/produtos` de novo → volta ao login | Sessão invalidada. O painel só cadastra e lista: a desativação do QA é feita depois, fora da câmera, pela API admin (`DELETE`, `active=false`, documento preservado) |
+| 6:50–7:30 | Logout; abrir `/admin/produtos` de novo → volta ao login | Sessão invalidada. O painel cadastra, edita (`PATCH`) e exclui (`DELETE`, remove o documento do MongoDB e libera SKU/slug para recadastro) |
 | 7:30–8:00 | GitHub `erickruannv/neox-drop`: README, `.env.example`, testes | Repositório público, sem segredos; limitações declaradas |
 
 ## Gravação sem expor credenciais

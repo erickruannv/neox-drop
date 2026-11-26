@@ -19,6 +19,7 @@ def catalog_app(examples):
         insert_one=AsyncMock(),
         find_one=AsyncMock(),
         find_one_and_update=AsyncMock(),
+        delete_one=AsyncMock(return_value=MagicMock(deleted_count=1)),
         count_documents=AsyncMock(return_value=1),
     )
     cursor = MagicMock()

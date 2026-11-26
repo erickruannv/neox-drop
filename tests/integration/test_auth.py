@@ -232,7 +232,9 @@ async def test_delete_preserves_rotated_refresh_cookies(auth_app, examples):
         "updatedAt": datetime.now(UTC),
     }
     collection = MagicMock(
-        find_one=AsyncMock(return_value=doc), find_one_and_update=AsyncMock(return_value=doc)
+        find_one=AsyncMock(return_value=doc),
+        find_one_and_update=AsyncMock(return_value=doc),
+        delete_one=AsyncMock(return_value=MagicMock(deleted_count=1)),
     )
 
     async def products():

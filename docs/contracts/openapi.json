@@ -903,9 +903,9 @@
         }
       },
       "delete": {
-        "operationId": "deactivateProduct",
-        "summary": "Soft-delete, sem apagar documento",
-        "description": "Soft-delete, sem apagar documento",
+        "operationId": "deleteProduct",
+        "summary": "Excluir produto definitivamente",
+        "description": "Remove o documento do MongoDB e invalida o cache Redis do produto; SKU e slug ficam livres para novo cadastro. Para só tirar da loja sem apagar, use PATCH active=false.",
         "tags": [
           "Admin"
         ],

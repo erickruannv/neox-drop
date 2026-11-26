@@ -67,8 +67,8 @@ test('admin real cadastra, catálogo sincroniza, recentes e checkout revalidam, 
   } finally {
     try {
       if (id) {
-        const inactive = await page.request.delete(`/api/admin/products/${id}`, { headers: await headers(page, baseURL) });
-        expect(inactive.status()).toBe(204);
+        const removed = await page.request.delete(`/api/admin/products/${id}`, { headers: await headers(page, baseURL) });
+        expect(removed.status()).toBe(204);
         expect((await page.request.get(`/api/products/${slug}`)).status()).toBe(404);
       }
     } finally {
