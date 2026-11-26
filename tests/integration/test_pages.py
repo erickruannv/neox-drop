@@ -10,7 +10,7 @@ from tests.integration.test_auth import auth_app as auth_app
 
 @pytest.fixture
 def page_templates(monkeypatch):
-    # Exercise the loader boundary without taking ownership of Claude's templates.
+    # Exercise the loader boundary without depending on the real templates.
     monkeypatch.setattr(
         templates.env,
         "loader",

@@ -3,7 +3,7 @@
   "info": {
     "title": "NEOX drop — contratos compartilhados",
     "version": "1.1.0",
-    "description": "Derivado da referência V1.1 intacta. Especificação de planejamento, não API implementada. Complementos operacionais rastreados em docs/VALIDACAO-V1.1.md. Exemplos são fictícios."
+    "description": "Contrato da API NEOX drop: público, admin, checkout e recentes. Os testes conferem que as rotas da aplicação correspondem a este arquivo. Exemplos são fictícios."
   },
   "servers": [
     {
@@ -2384,6 +2384,5 @@
       }
     }
   },
-  "x-source": "docs/reference/especificacao-v1.1/docs/04-contratos-api.md",
   "x-status": "ready-for-contract-review-no-implementation"
 }

@@ -1,8 +1,7 @@
 # Assets visuais — origem e licença (T024)
 
 Regra: nenhuma foto, GLB ou poster entra em `app/static/` sem origem, licença e autorização
-registradas aqui. Mockups (`docs/reference/visual/04-*.png`) são referência de layout, não
-fonte de imagens. Licenças conferidas na página de cada arquivo em 2026-11-20/21.
+registradas aqui. Licenças conferidas na página de cada arquivo em 2026-11-20/21.
 
 Atenção: licenças de foto/modelo (CC, CC0, Unsplash, Sketchfab) cobrem o direito autoral da
 foto/modelo, **não** as marcas Nike, adidas e New Balance. Decisão final de uso é do responsável.

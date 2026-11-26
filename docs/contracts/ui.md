@@ -1,21 +1,21 @@
 # Interface de páginas Jinja2, JavaScript e API
 
-Fontes: capítulos 02/04/05 e imagens 01/04 em `docs/reference/`. Schema público e exemplos:
+Schema público e exemplos:
 [openapi.json](openapi.json) e [examples.json](examples.json). Não criar uma API paralela para a UI.
 
 ## Páginas e contexto
 
-| Página | Template planejado | Contexto acordado | Owner |
-|---|---|---|---|
-| `/` | `app/templates/home.html` | `featured: FeaturedList`, `launches: ProductList`, `recent: RecentList` | Claude template; Codex loader |
-| `/tenis` | `app/templates/catalog.html` | `catalog: ProductList`, `filters` com os parâmetros da listagem | Claude template; Codex loader |
-| `/tenis/{slug}` | `app/templates/product.html` | `product: ProductDetail` | Claude template; Codex loader |
-| `/admin/login` | `app/templates/admin/login.html` | contexto global e erro genérico, sem credenciais preenchidas | Claude template; Codex loader |
-| `/admin`, `/admin/produtos` | `app/templates/admin/products.html` | `products: AdminProductList`, `admin: AdminProfile` após autorização | Claude template; Codex loader |
+| Página | Template | Contexto |
+|---|---|---|
+| `/` | `app/templates/home.html` | `featured: FeaturedList`, `launches: ProductList`, `recent: RecentList` |
+| `/tenis` | `app/templates/catalog.html` | `catalog: ProductList`, `filters` com os parâmetros da listagem |
+| `/tenis/{slug}` | `app/templates/product.html` | `product: ProductDetail` |
+| `/admin/login` | `app/templates/admin/login.html` | contexto global e erro genérico, sem credenciais preenchidas |
+| `/admin`, `/admin/produtos` | `app/templates/admin/products.html` | `products: AdminProductList`, `admin: AdminProfile` após autorização |
 
 Contexto global de `base.html`: `request` do Jinja2, `csrfToken` para meta tag, `siteName='NEOX drop'`.
 Tokens CSRF não são access/refresh tokens; auth/segredos nunca entram no HTML. Loaders e registro
-HTML pertencem a `app/api/pages.py` (Codex); Claude não altera `app/main.py` nem routers.
+HTML ficam em `app/api/pages.py`.
 Página de produto inexistente/inativo: resposta HTML 404; página admin sem sessão vai a login
 por redirecionamento same-origin; API continua usando 401/403 JSON, nunca HTML no fetch.
 Admin autenticado sem perfil ativo recebe 403; não renderizar dados do painel antes da verificação.
@@ -55,8 +55,7 @@ Tokens provisórios: ink #151515, paper #F5F3EF, sand #D4D3C7, coral #F23659, li
 deep-teal #192B30, white #FFFFFF. Validar cada par texto/fundo; não inferir acessibilidade da
 imagem estática. Layout de 360 px a desktop, teclado, labels, alt e foco visível são critérios.
 
-## Testes de integração previstos
+## Testes
 
-Fixtures válidas do OpenAPI para desenvolvimento isolado. E2E conecta depois aos mesmos loaders,
-sem manter dois catálogos. `tests/e2e/test_storefront.*` (Claude) cobre interação/visual;
-`tests/contract/` (Codex) cobre wire format; evidências reais só após backend e bancos de teste.
+`tests/e2e/` (Playwright) cobre interação, visual e acessibilidade com fixtures do OpenAPI;
+`tests/contract/` cobre o wire format; `tests/real/` usa os bancos de teste reais.

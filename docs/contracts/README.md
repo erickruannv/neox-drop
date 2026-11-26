@@ -1,18 +1,9 @@
-# Contratos compartilhados — NEOX drop V1.1
+# Contratos da API — NEOX drop
 
-- [OpenAPI 3.1.1, versão de contrato 1.1.0](openapi.json): 14 operações em 11 caminhos, 22 schemas.
+- [OpenAPI 3.1.1](openapi.json): 16 operações em 13 caminhos, 24 schemas.
 - [Exemplos fictícios validados](examples.json): mocks de wire format, não dados persistidos.
 - [Contrato Jinja2/JavaScript e páginas](ui.md).
-- [Decisões de formalização, lacunas e validação](../VALIDACAO-V1.1.md).
-- Origem preservada: [API V1.1](../reference/especificacao-v1.1/docs/04-contratos-api.md),
-  [dicionário](../reference/especificacao-v1.1/docs/16-dicionario-de-dados.md) e
-  [segurança](../reference/especificacao-v1.1/docs/06-seguranca.md).
 
-Estado: contrato documental pronto para revisão e consumo por mocks, não API implementada.
-Nenhuma rota adicional de negócio foi criada. O contrato detalha as rotas existentes;
-complementos operacionais estão identificados por D01–D12 no relatório de validação.
-As amostras `hex24` da referência são explicativas; aqui IDs válidos fictícios usam 24 hexadecimais.
-Não há telefone configurado nem exemplo de waUrl com destinatário inventado.
 
 ## Regras comuns
 
@@ -68,9 +59,3 @@ updatedAt com comparação da versão anterior; colisão/revisão concorrente re
 Isso preserva a correção mesmo se DEL falhar em outro worker; custa uma leitura pequena
 ao MongoDB e deve ser medido, sem alegar melhoria de performance antes da evidência. Não duplicar side effect de visita:
 GET detalhe é leitura; POST recentes registra uma vez.
-
-## Responsabilidade
-
-Codex detém o contrato e fixtures; Claude revisa os campos usados pela UI. Alteração incompatível
-exige revisão conjunta, versionamento e atualização da rastreabilidade antes do merge.
-O contrato de produto não autoriza executar tarefas nesta etapa.

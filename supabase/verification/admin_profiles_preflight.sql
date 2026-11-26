@@ -1,6 +1,6 @@
 -- SOMENTE CONSULTAS: executar manualmente ANTES da migration, no SQL Editor.
 -- Confirmar no Dashboard que o projeto selecionado é neox-drop-test.
--- Nenhuma consulta foi executada pelo agente. Não contém chaves, senhas ou promoção de admin.
+-- Somente leitura. Não contém chaves, senhas ou promoção de admin.
 begin transaction read only;
 
 -- Esperado: execution_role=postgres e correct_execution_role=true.

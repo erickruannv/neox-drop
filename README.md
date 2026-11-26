@@ -139,7 +139,7 @@ app/
   schemas/      modelos Pydantic (validação de entrada e saída)
   templates/    páginas Jinja2
   static/       CSS, JS e imagens
-supabase/       migration SQL (tabelas, RLS e permissões)
+supabase/       migration SQL (tabelas, RLS e permissões) e consultas de verificação
 mongo/          validação e índices da coleção products, catálogo acadêmico
 docs/contracts/ contrato da API (openapi.json)
 tests/          pytest (unit, integration, contract, real) e Playwright (e2e)
@@ -153,4 +153,4 @@ tests/          pytest (unit, integration, contract, real) e Playwright (e2e)
   link do WhatsApp com o pedido e o cliente confirma o envio.
 - Preços e estoques são fictícios, para fins acadêmicos. As fotos têm crédito e licença na página de cada produto.
 
-Histórico detalhado do desenvolvimento e das validações: [docs/historico-desenvolvimento.md](docs/historico-desenvolvimento.md).
+Créditos e licenças das fotos e do modelo 3D: [docs/assets-licenses.md](docs/assets-licenses.md).

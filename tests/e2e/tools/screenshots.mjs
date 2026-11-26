@@ -2,7 +2,7 @@
 import { chromium } from "@playwright/test";
 
 const base = process.env.BASE_URL ?? "http://127.0.0.1:4173";
-const out = process.argv[2] ?? "docs/evidencias/visual";
+const out = process.argv[2] ?? "test-results/screenshots";
 const browser = await chromium.launch();
 for (const [name, width, height] of [["1440", 1440, 900], ["360", 360, 780]]) {
   const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: width === 360 ? 2 : 1 });

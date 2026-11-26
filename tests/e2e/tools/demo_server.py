@@ -1,4 +1,4 @@
-"""Servidor de DEMONSTRAÇÃO local da UI (não é a aplicação FastAPI do Codex).
+"""Servidor de DEMONSTRAÇÃO local da UI (não é a aplicação FastAPI).
 
 Renderiza os templates Jinja2 reais com as fixtures fictícias de render_preview.py e responde
 às rotas /api/* no formato do OpenAPI, em memória. Sem banco, sem sessão real, sem WhatsApp real.

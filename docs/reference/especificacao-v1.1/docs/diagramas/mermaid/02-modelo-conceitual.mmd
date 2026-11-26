@@ -1,8 +1,0 @@
-flowchart LR
-  U[Identidade Auth] -->|1 : 0..1| A[Perfil administrador]
-  A -.->|Gerencia via API| P[Produto]
-  A -.->|Configura via API| L[Configuracoes da loja]
-  P -->|1 : N embutido| S[Tamanhos com estoque]
-  P -->|0..1 embutido| F[Destaque visual]
-  V[Visitante anonimo] -->|1 : 0..1| R[Historico recente no Redis]
-  R -.->|IDs, sem FK| P

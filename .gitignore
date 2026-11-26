@@ -48,3 +48,13 @@ node_modules/
 
 # Fotos enviadas pelo painel admin (conteúdo local, não código)
 /app/static/uploads/
+
+# Ferramentas dos agentes de IA (Claude, Codex, Spec Kit, Taskmaster, Serena): ficam só no Mac
+/.agents/
+/.claude/
+/.specify/
+/specs/
+/.taskmaster/
+/.serena/
+/AGENTS.md
+/CLAUDE.md

@@ -1,5 +1,5 @@
 -- NEOX drop: SQL definitivo para aplicação MANUAL no SQL Editor de neox-drop-test.
--- Arquivo originado pelo CLI 3.2.0 e revisado localmente; NÃO executado pelo agente.
+-- Gerado pelo Supabase CLI 3.2.0. Executar no SQL Editor do projeto.
 -- Executar integralmente, uma vez, como postgres, após as consultas de preflight.
 -- Schema novo: colisões devem falhar e provocar rollback; não usar IF NOT EXISTS para ocultá-las.
 -- Não cria usuários nem perfis administrativos; preserva as contas existentes no Supabase Auth.
