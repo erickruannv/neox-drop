@@ -216,6 +216,63 @@ test.describe("produtos (admin)", () => {
     expect(csrf).toBe("preview-csrf");
   });
 
+  test("Editar: preenche o formulário, envia PATCH com CSRF e atualiza a linha", async ({ page }) => {
+    const id = "6740a1b2c3d4e5f601000017"; // New Balance 574 do preview
+    let request;
+    await page.route(`**/api/admin/products/${id}`, (r) => {
+      request = r.request();
+      const body = request.postDataJSON();
+      r.fulfill({ status: 200, json: { ...body, id, sku: "NEOX-DEMO-207", slug: "new-balance-574-cinza", brand: "New Balance", category: "Classics", mainImageUrl: "/static/images/products/new-balance-574-cinza/main.webp", active: true, sizes: body.sizes, createdAt: "2026-11-19T00:00:00Z", updatedAt: "2026-11-26T00:00:00Z" } });
+    });
+    await page.goto("/admin/produtos/");
+    const row = page.locator(`tr[data-product-id="${id}"]`);
+    await row.getByRole("button", { name: /Editar/ }).click();
+    await expect(page.locator("[data-form-title]")).toHaveText("Editar: New Balance 574");
+    await expect(page.getByLabel("Preço (R$) *")).toHaveValue("699,90");
+    await expect(page.getByLabel("SKU *")).toHaveValue("NEOX-DEMO-207");
+    await expect(page.getByLabel("Numeração (BR)")).toHaveCount(6);
+    await page.getByLabel("Nome *").fill("New Balance 574 Editado");
+    await page.getByLabel("Preço (R$) *").fill("649,90");
+    await page.getByRole("button", { name: "Salvar alterações" }).click();
+    await expect(page.locator("[data-admin-status]")).toHaveText("Produto “New Balance 574 Editado” atualizado.");
+    expect(request.method()).toBe("PATCH");
+    expect(request.headers()["x-csrf-token"]).toBe("preview-csrf");
+    expect(request.postDataJSON()).toMatchObject({ name: "New Balance 574 Editado", priceCents: 64990, active: true });
+    expect(request.postDataJSON().attributes.imageCredit).toContain("LeDroider");
+    await expect(row).toContainText("New Balance 574 Editado");
+    await expect(row).toContainText("R$ 649,90");
+    await expect(page.locator("[data-form-title]")).toHaveText("Cadastrar produto");
+    await expect(page.getByRole("button", { name: "Cancelar edição" })).toBeHidden();
+  });
+
+  test("Cancelar edição volta ao cadastro vazio", async ({ page }) => {
+    await page.goto("/admin/produtos/");
+    await page.locator("[data-admin-rows] tr").first().getByRole("button", { name: /Editar/ }).click();
+    await page.getByRole("button", { name: "Cancelar edição" }).click();
+    await expect(page.getByLabel("Nome *")).toHaveValue("");
+    await expect(page.getByRole("button", { name: "Cadastrar produto" })).toBeVisible();
+  });
+
+  test("Excluir: confirma, envia DELETE e marca o produto como inativo", async ({ page }) => {
+    const id = "6740a1b2c3d4e5f601000017";
+    let request;
+    await page.route(`**/api/admin/products/${id}`, (r) => ((request = r.request()), r.fulfill({ status: 204 })));
+    await page.goto("/admin/produtos/");
+    const row = page.locator(`tr[data-product-id="${id}"]`);
+    let dialog = "";
+    page.once("dialog", (d) => ((dialog = d.message()), d.dismiss()));
+    await row.getByRole("button", { name: /Excluir/ }).click();
+    expect(dialog).toContain("Excluir “New Balance 574” da loja?");
+    expect(request).toBeUndefined();
+    page.once("dialog", (d) => d.accept());
+    await row.getByRole("button", { name: /Excluir/ }).click();
+    await expect(page.locator("[data-admin-status]")).toHaveText("Produto “New Balance 574” excluído da loja.");
+    expect(request.method()).toBe("DELETE");
+    expect(request.headers()["x-csrf-token"]).toBe("preview-csrf");
+    await expect(row).toContainText("Inativo");
+    await expect(row.getByRole("button", { name: /Excluir/ })).toHaveCount(0);
+  });
+
   test("painel: sem rolagem horizontal da página e sem violações axe sérias", async ({ page }) => {
     await page.goto("/admin/produtos/");
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);

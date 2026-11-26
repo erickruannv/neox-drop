@@ -67,9 +67,9 @@ function initPhotoUpload(form) {
   });
 }
 
-async function api(path, body) {
+async function api(path, body, method = "POST") {
   const res = await fetch(path, {
-    method: "POST",
+    method,
     credentials: "same-origin",
     headers: { "Content-Type": "application/json", Accept: "application/json", "X-CSRF-Token": csrf() },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -142,6 +142,82 @@ function initProductForm(form) {
   const addRow = () => rows.append(rowTemplate.content.firstElementChild.cloneNode(true));
   addRow();
   initPhotoUpload(form);
+
+  // Edição/exclusão: dados vêm do JSON da página; PATCH/DELETE já existentes na API admin.
+  const products = new Map(JSON.parse(document.getElementById("admin-products-data")?.textContent || "[]").map((p) => [p.id, p]));
+  const title = document.querySelector("[data-form-title]");
+  const cancel = document.querySelector("[data-edit-cancel]");
+  let editing = null;
+
+  function setMode(product) {
+    editing = product;
+    title.textContent = product ? `Editar: ${product.name}` : "Cadastrar produto";
+    submit.textContent = product ? "Salvar alterações" : "Cadastrar produto";
+    cancel.hidden = !product;
+  }
+
+  function fill(p) {
+    form.reset();
+    const set = (name, value) => (form.elements[name].value = value ?? "");
+    for (const key of ["name", "brand", "sku", "slug", "category", "colorName", "mainImageUrl", "description", "model3dUrl"]) set(key, p[key]);
+    set("price", (p.priceCents / 100).toFixed(2).replace(".", ","));
+    set("galleryUrls", (p.galleryUrls ?? []).join("\n"));
+    for (const [key] of CREDITS) set(key, p.attributes?.[key]);
+    rows.replaceChildren();
+    for (const size of p.sizes) {
+      addRow();
+      const [sizeInput, stockInput] = rows.lastElementChild.querySelectorAll("input");
+      sizeInput.value = size.sizeBR;
+      stockInput.value = size.stock;
+    }
+    form.elements.featuredEnabled.checked = Boolean(p.featured?.enabled);
+    if (p.featured) {
+      set("featuredOrder", p.featured.order);
+      set("backgroundHex", p.featured.backgroundHex.toLowerCase());
+      set("accentHex", p.featured.accentHex.toLowerCase());
+    }
+    form.elements.active.checked = p.active;
+  }
+
+  function leaveEdit() {
+    form.reset();
+    rows.replaceChildren();
+    addRow();
+    setMode(null);
+  }
+  cancel.addEventListener("click", leaveEdit);
+
+  document.querySelector("[data-admin-rows]").addEventListener("click", async (e) => {
+    const button = e.target.closest("[data-product-edit], [data-product-delete]");
+    if (!button) return;
+    const tr = button.closest("tr");
+    const product = products.get(tr.dataset.productId);
+    if (!product) return;
+    status.hidden = true;
+    if (button.matches("[data-product-edit]")) {
+      errors.hidden = true;
+      fill(product);
+      setMode(product);
+      document.getElementById("cadastro").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      form.elements.name.focus({ preventScroll: true });
+      return;
+    }
+    if (!confirm(`Excluir “${product.name}” da loja?\n\nEle some do catálogo e do carrinho. O registro fica guardado no MongoDB como inativo e pode voltar pelo Editar (marcando "Produto ativo").`)) return;
+    button.disabled = true;
+    try {
+      const res = await api(`/api/admin/products/${encodeURIComponent(product.id)}`, undefined, "DELETE");
+      if (res.status === 401) return location.assign("/admin/login");
+      if (res.status !== 204) throw new Error(String(res.status));
+      product.active = false;
+      tr.replaceWith(buildRow(product));
+      if (editing?.id === product.id) form.elements.active.checked = false;
+      status.textContent = `Produto “${product.name}” excluído da loja.`;
+    } catch {
+      button.disabled = false;
+      status.textContent = "Não foi possível excluir agora. Recarregue a página e tente de novo.";
+    }
+    status.hidden = false;
+  });
   form.querySelector("[data-size-add]").addEventListener("click", () => {
     addRow();
     rows.lastElementChild.querySelector("input").focus();
@@ -244,7 +320,12 @@ function initProductForm(form) {
   function addRowToTable(p) {
     const tbody = document.querySelector("[data-admin-rows]");
     tbody.querySelector("td[colspan]")?.closest("tr").remove();
+    tbody.prepend(buildRow(p));
+  }
+
+  function buildRow(p) {
     const tr = document.createElement("tr");
+    tr.dataset.productId = p.id;
     const td = (cls, ...children) => {
       const cell = document.createElement("td");
       cell.className = `px-3 py-3 ${cls}`;
@@ -268,8 +349,16 @@ function initProductForm(form) {
       td("text-right font-bold tabular-nums", brl.format(p.priceCents / 100)),
       td("text-right tabular-nums", String(p.sizes.reduce((n, s) => n + s.stock, 0))),
       td("", badge),
+      td("", actions(p)),
     );
-    tbody.prepend(tr);
+    return tr;
+  }
+
+  function actions(p) {
+    const box = document.getElementById("row-actions-template").content.firstElementChild.cloneNode(true);
+    box.querySelectorAll("[data-row-name]").forEach((el) => (el.textContent = ` ${p.name}`));
+    if (!p.active) box.querySelector("[data-product-delete]").remove();
+    return box;
   }
 
   form.addEventListener("submit", async (e) => {
@@ -281,8 +370,28 @@ function initProductForm(form) {
     form.querySelectorAll("[aria-invalid]").forEach((el) => el.removeAttribute("aria-invalid"));
     submit.disabled = true;
     try {
-      const res = await api("/api/admin/products", payload);
+      if (editing) {
+        // Campos que o formulário esvaziou precisam ser removidos explicitamente no PATCH.
+        if (!payload.model3dUrl && editing.model3dUrl) payload.model3dUrl = null;
+        if (!payload.featured && editing.featured?.enabled) payload.featured = { enabled: false };
+        const attributes = { ...editing.attributes };
+        for (const [key] of CREDITS) delete attributes[key];
+        payload.attributes = { ...attributes, ...payload.attributes };
+      }
+      const res = editing
+        ? await api(`/api/admin/products/${encodeURIComponent(editing.id)}`, payload, "PATCH")
+        : await api("/api/admin/products", payload);
+      if (res.status === 200 && editing && res.data) {
+        products.set(res.data.id, res.data);
+        document.querySelector(`[data-admin-rows] tr[data-product-id="${CSS.escape(res.data.id)}"]`)?.replaceWith(buildRow(res.data));
+        leaveEdit();
+        status.textContent = `Produto “${res.data.name}” atualizado.`;
+        status.hidden = false;
+        status.scrollIntoView({ block: "center" });
+        return;
+      }
       if (res.status === 201 && res.data) {
+        products.set(res.data.id, res.data);
         addRowToTable(res.data);
         form.reset();
         rows.replaceChildren();
