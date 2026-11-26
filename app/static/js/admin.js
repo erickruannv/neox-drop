@@ -6,6 +6,66 @@ const SKETCHFAB_RE = /^https:\/\/sketchfab\.com\/models\/[0-9a-f]{32}\/embed$/; 
 // Créditos vão em ProductCreate.attributes (chaves lidas pela página do produto e pelo palco 3D).
 const CREDITS = [["imageCredit", "Crédito das imagens"], ["imageCreditUrl", "Fonte das imagens"], ["model3dCredit", "Crédito do modelo 3D"], ["model3dCreditUrl", "Fonte do modelo 3D"]];
 const csrf = () => document.querySelector('meta[name="csrf-token"]')?.content ?? "";
+const UPLOAD_LIMIT = 60000; // abaixo do MAX_REQUEST_BYTES padrão (64 KiB) do servidor
+
+// Reduz a foto no navegador até caber no limite: WebP quando o navegador codifica, senão JPEG com fundo branco.
+async function shrinkPhoto(file) {
+  const bitmap = await createImageBitmap(file);
+  for (let w = Math.min(1400, bitmap.width); w >= 240; w = Math.round(w * 0.8)) {
+    const canvas = Object.assign(document.createElement("canvas"), { width: w, height: Math.round((bitmap.height * w) / bitmap.width) });
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    for (const quality of [0.85, 0.7, 0.55, 0.4]) {
+      let blob = await new Promise((r) => canvas.toBlob(r, "image/webp", quality));
+      if (blob?.type !== "image/webp") {
+        ctx.globalCompositeOperation = "destination-over";
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        blob = await new Promise((r) => canvas.toBlob(r, "image/jpeg", quality));
+      }
+      if (blob && blob.size <= UPLOAD_LIMIT) return blob;
+    }
+  }
+  throw new Error("foto grande demais");
+}
+
+function initPhotoUpload(form) {
+  const input = form.querySelector("#pf-photo");
+  if (!input) return;
+  const preview = form.querySelector("[data-image-preview]");
+  const note = form.querySelector("[data-image-status]");
+  const hint = note.textContent;
+  input.addEventListener("change", async () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    note.textContent = "Enviando foto…";
+    try {
+      const blob = await shrinkPhoto(file);
+      const res = await fetch("/api/admin/products/images", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": blob.type, Accept: "application/json", "X-CSRF-Token": csrf() },
+        body: blob,
+      });
+      if (res.status === 401) return location.assign("/admin/login");
+      if (!res.ok) throw new Error(String(res.status));
+      const { url } = await res.json();
+      form.elements.mainImageUrl.value = url;
+      form.elements.mainImageUrl.removeAttribute("aria-invalid");
+      preview.src = url;
+      preview.hidden = false;
+      note.textContent = "Foto enviada. O caminho já está em Imagem principal.";
+    } catch {
+      input.value = "";
+      note.textContent = "Não foi possível enviar a foto. Use JPG, PNG ou WebP e tente de novo.";
+    }
+  });
+  form.addEventListener("reset", () => {
+    preview.hidden = true;
+    preview.removeAttribute("src");
+    note.textContent = hint;
+  });
+}
 
 async function api(path, body) {
   const res = await fetch(path, {
@@ -81,6 +141,7 @@ function initProductForm(form) {
 
   const addRow = () => rows.append(rowTemplate.content.firstElementChild.cloneNode(true));
   addRow();
+  initPhotoUpload(form);
   form.querySelector("[data-size-add]").addEventListener("click", () => {
     addRow();
     rows.lastElementChild.querySelector("input").focus();

@@ -156,6 +156,10 @@ class RecentList(WireModel):
     items: Annotated[list[ProductSummary], Field(max_length=5)]
 
 
+class ImageUpload(WireModel):
+    url: Annotated[str, Field(pattern=r"^/static/uploads/[0-9a-f]{32}\.(webp|jpg|png)$")]
+
+
 class RecentSearchList(WireModel):
     items: Annotated[list[Annotated[str, Field(max_length=100)]], Field(max_length=3)]
 

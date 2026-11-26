@@ -1,12 +1,16 @@
+import secrets
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request, Response
 
+from app.core.exceptions import ApiFault
 from app.core.security import require_csrf
 from app.schemas.product import (
     AdminFilters,
     AdminProduct,
     AdminProductList,
+    ImageUpload,
     ProductCreate,
     ProductPatch,
 )
@@ -17,6 +21,13 @@ router = APIRouter(
     prefix="/api/admin/products", tags=["Admin"], dependencies=[Depends(require_admin)]
 )
 Collection = Annotated[object, Depends(products_collection)]
+UPLOAD_DIR = Path(__file__).resolve().parents[1] / "static" / "uploads"
+# Tipo declarado deve bater com a assinatura do arquivo; o painel converte a foto antes.
+IMAGE_TYPES = {
+    "image/webp": (b"RIFF", ".webp"),
+    "image/jpeg": (b"\xff\xd8\xff", ".jpg"),
+    "image/png": (b"\x89PNG\r\n\x1a\n", ".png"),
+}
 
 
 @router.get(
@@ -71,3 +82,22 @@ async def deactivate(id: str, request: Request, response: Response, collection: 
     response.status_code = 204
     response.headers["Cache-Control"] = "no-store"
     return response
+
+
+@router.post(
+    "/images",
+    operation_id="uploadProductImage",
+    status_code=201,
+    response_model=ImageUpload,
+    dependencies=[Depends(require_csrf)],
+)
+async def upload_image(request: Request, response: Response):
+    response.headers["Cache-Control"] = "no-store"
+    kind = IMAGE_TYPES.get(request.headers.get("content-type", "").split(";")[0].strip().lower())
+    body = await request.body()
+    if not kind or not body.startswith(kind[0]) or (kind[1] == ".webp" and body[8:12] != b"WEBP"):
+        raise ApiFault(422, "VALIDATION_ERROR", "Envie uma foto JPG, PNG ou WebP.")
+    UPLOAD_DIR.mkdir(exist_ok=True)
+    name = f"{secrets.token_hex(16)}{kind[1]}"
+    (UPLOAD_DIR / name).write_bytes(body)
+    return {"url": f"/static/uploads/{name}"}

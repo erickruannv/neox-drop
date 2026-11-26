@@ -960,6 +960,92 @@
           }
         }
       }
+    },
+    "/api/admin/products/images": {
+      "post": {
+        "operationId": "uploadProductImage",
+        "summary": "Enviar foto de produto",
+        "description": "Corpo bruto JPG/PNG/WebP (assinatura conferida), até MAX_REQUEST_BYTES; o painel reduz a foto antes. Grava em /static/uploads com nome aleatório e devolve o caminho para mainImageUrl. Não grava no MongoDB.",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "AdminSession": []
+          }
+        ],
+        "x-requirements": [
+          "RF-03"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Csrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "image/webp": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/jpeg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageUpload"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "default": {
+            "description": "Erro inesperado sanitizado, sem stacktrace/segredos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2073,6 +2159,19 @@
             ]
           }
         ]
+      },
+      "ImageUpload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "pattern": "^/static/uploads/[0-9a-f]{32}\\.(webp|jpg|png)$"
+          }
+        }
       }
     },
     "parameters": {

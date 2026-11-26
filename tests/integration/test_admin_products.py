@@ -150,3 +150,46 @@ async def test_admin_listing_and_not_found(catalog_app, contract):
             f"/api/admin/products/{doc['_id']}", headers=headers, json={"active": False}
         )
         assert response.status_code == 404
+
+
+async def test_upload_image_checks_signature_and_saves_random_name(
+    catalog_app, contract, tmp_path, monkeypatch
+):
+    monkeypatch.setattr("app.api.admin_products.UPLOAD_DIR", tmp_path / "uploads")
+    app, collection, _, _ = catalog_app
+    webp = b"RIFF\x10\x00\x00\x00WEBPVP8 " + b"\x00" * 16
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app), base_url="http://test"
+    ) as client:
+        url = "/api/admin/products/images"
+        headers = csrf(client, app)
+        ok = await client.post(url, headers={**headers, "Content-Type": "image/webp"}, content=webp)
+        assert ok.status_code == 201, ok.text
+        validate_response(contract, "ImageUpload", ok)
+        saved = tmp_path / "uploads" / ok.json()["url"].rsplit("/", 1)[1]
+        assert saved.read_bytes() == webp
+        for content_type, body in [
+            ("image/webp", b"<svg onload=alert(1)>"),
+            ("image/jpeg", webp),
+            ("text/html", webp),
+            ("image/png", b""),
+        ]:
+            bad = await client.post(
+                url, headers={**headers, "Content-Type": content_type}, content=body
+            )
+            assert bad.status_code == 422
+        no_csrf = await client.post(url, headers={"Content-Type": "image/webp"}, content=webp)
+        assert no_csrf.status_code == 403
+        assert len(list((tmp_path / "uploads").iterdir())) == 1
+        collection.insert_one.assert_not_called()
+
+
+async def test_upload_image_requires_admin_session():
+    app = create_app(Settings(_env_file=None))
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app), base_url="http://test"
+    ) as client:
+        response = await client.post(
+            "/api/admin/products/images", headers={"Content-Type": "image/webp"}, content=b"RIFF"
+        )
+        assert response.status_code == 401

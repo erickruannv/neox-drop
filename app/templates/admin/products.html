@@ -102,6 +102,15 @@
       {{ field("price", "Preço (R$)", hint="Ex.: 899,90", attrs='inputmode="decimal" autocomplete="off"') }}
       {{ field("colorName", "Cor", hint="Ex.: Preto/Lima") }}
       {{ field("mainImageUrl", "Imagem principal", hint="Ex.: /static/images/produto.webp") }}
+      <div class="md:col-span-2" data-image-upload>
+        <label for="pf-photo" class="mb-1 block font-semibold">Foto do tênis</label>
+        <div class="flex flex-wrap items-center gap-4">
+          <img data-image-preview alt="Prévia da foto enviada" width="128" height="80" hidden class="h-20 w-32 rounded-xl bg-paper object-contain ring-1 ring-ink/10">
+          <input id="pf-photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="pf-photo-hint"
+                 class="text-sm file:mr-3 file:rounded-full file:border-0 file:bg-ink file:px-4 file:py-2 file:font-semibold file:text-paper hover:file:bg-ink/85">
+        </div>
+        <p id="pf-photo-hint" class="mt-1 text-xs text-muted" role="status" data-image-status>Escolha uma foto JPG, PNG ou WebP do computador: ela é enviada e preenche a Imagem principal.</p>
+      </div>
       <div class="md:col-span-2">
         <label for="pf-description" class="mb-1 block font-semibold">Descrição *</label>
         <textarea id="pf-description" name="description" rows="3" required

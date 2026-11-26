@@ -73,6 +73,38 @@ test.describe("produtos (admin)", () => {
     await page.getByLabel("Estoque").fill("3");
   }
 
+  test("foto do computador: reduz, envia com CSRF e preenche Imagem principal", async ({ page }) => {
+    let request;
+    const url = "/static/uploads/0123456789abcdef0123456789abcdef.webp";
+    await page.route("**/api/admin/products/images", (r) => ((request = r.request()), r.fulfill({ status: 201, json: { url } })));
+    await page.goto("/admin/produtos/");
+    // PNG grande e ruidoso (2000×1200) para forçar a redução abaixo do limite do servidor
+    const png = await page.evaluate(async () => {
+      const c = Object.assign(document.createElement("canvas"), { width: 2000, height: 1200 });
+      const ctx = c.getContext("2d");
+      const img = ctx.createImageData(2000, 1200);
+      for (let i = 0; i < img.data.length; i++) img.data[i] = (i * 2654435761) % 251;
+      ctx.putImageData(img, 0, 0);
+      return Array.from(new Uint8Array(await (await new Promise((r) => c.toBlob(r, "image/png"))).arrayBuffer()));
+    });
+    await page.route(`**${url}`, (r) => r.fulfill({ status: 200, contentType: "image/png", body: Buffer.from(png) }));
+    await page.getByLabel("Foto do tênis").setInputFiles({ name: "tenis.png", mimeType: "image/png", buffer: Buffer.from(png) });
+    await expect(page.getByLabel("Imagem principal *")).toHaveValue(url);
+    await expect(page.locator("[data-image-preview]")).toBeVisible();
+    expect(request.headers()["x-csrf-token"]).toBe("preview-csrf");
+    expect(["image/webp", "image/jpeg"]).toContain(request.headers()["content-type"]);
+    expect(request.postDataBuffer().length).toBeLessThanOrEqual(60000);
+  });
+
+  test("foto recusada: aviso e campo de imagem intacto", async ({ page }) => {
+    await page.route("**/api/admin/products/images", (r) => r.fulfill({ status: 422, json: errorBody("VALIDATION_ERROR", "Envie uma foto JPG, PNG ou WebP.") }));
+    await page.goto("/admin/produtos/");
+    const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+    await page.getByLabel("Foto do tênis").setInputFiles({ name: "p.png", mimeType: "image/png", buffer: png });
+    await expect(page.locator("[data-image-status]")).toContainText("Não foi possível enviar a foto");
+    await expect(page.getByLabel("Imagem principal *")).toHaveValue("");
+  });
+
   test("lista produtos com status e estoque somado", async ({ page }) => {
     await page.goto("/admin/produtos/");
     await expect(page.locator("[data-admin-rows] tr")).toHaveCount(mock.details.length + 1);

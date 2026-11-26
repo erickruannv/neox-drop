@@ -45,3 +45,6 @@ node_modules/
 /tests/e2e/.preview/
 /test-results/
 /playwright-report/
+
+# Fotos enviadas pelo painel admin (conteúdo local, não código)
+/app/static/uploads/
