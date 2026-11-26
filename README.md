@@ -1,137 +1,156 @@
-# NEOX drop — 3ª avaliação (6 pontos)
+# NEOX drop — E-commerce de tênis com banco de dados poliglota
 
-Python 3.13 + FastAPI/Jinja2 + Tailwind v4/JavaScript. Demonstração acadêmica, entrega 26/11/2026.
-Obrigatório: login admin, CRUD e catálogo sincronizado, Redis/recentes, carrinho e solicitação
-WhatsApp, repositório com instruções e vídeo 5–10min. [Referência original](docs/reference/especificacao-v1.1/docs/00-contexto.md).
-Sem pagamentos ou frete real. O 3D aprovado usa embed Sketchfab com fallback para imagem.
+Trabalho da **3ª Avaliação — Projeto de Banco de Dados**: e-commerce/catálogo de tênis que usa
+três bancos de dados, cada um no caso de uso em que funciona melhor.
 
-## Abrir a aplicação real
+- **Vídeo de demonstração:** https://youtu.be/koEEcLRoyHg
+- **Repositório:** https://github.com/erickruannv/neox-drop
 
-Pré-requisitos: Python 3.13, uv, Node.js compatível com as dependências e pnpm 10.6.2.
-Em um clone novo, copie `.env.example` para `.env` e configure os projetos de teste conforme
-[o guia existente](docs/CONFIGURAR-BANCOS-TESTE.md). Sem credenciais a aplicação inicia,
-mas catálogo/login/checkout ficam indisponíveis; não há fallback para dados fictícios.
-Não compartilhe o `.env`; o professor deve usar credenciais próprias/autorizadas.
+## Arquitetura dos dados
 
-Na pasta principal `/Users/dg/Documents/NeoxDrop`, branch `main` (em outro computador,
-substitua o caminho pela pasta clonada):
+| Banco | Serviço | O que guarda | Por que esse banco |
+|---|---|---|---|
+| **PostgreSQL** | Supabase (Auth + Database) | Usuários e sessões do admin (`auth.users`), perfil do administrador (`admin_profiles`) e configurações da loja, como o WhatsApp de pedidos (`store_settings`) | Dados relacionais e sensíveis: autenticação pronta, chaves estrangeiras e Row Level Security |
+| **MongoDB** | MongoDB Atlas | Produtos (coleção `products`): nome, marca, descrição, preço em centavos, imagens, cor, numerações com estoque, destaque e créditos | Documento flexível: cada tênis tem lista de tamanhos, galeria e atributos opcionais sem tabelas extras |
+| **Redis** | Upstash | Últimos 5 tênis vistos e últimas 3 pesquisas de cada visitante (TTL de 7 dias); cache dos produtos (TTL de 5 min) | Dados temporários e de leitura rápida, com expiração automática |
+
+```
+Navegador ──► FastAPI (Python 3.13, Jinja2, Tailwind, JS)
+                ├─► Supabase/PostgreSQL ─ login do admin, perfil, WhatsApp da loja
+                ├─► MongoDB Atlas ─────── cadastro e consulta de produtos
+                └─► Upstash Redis ─────── vistos recentemente, pesquisas recentes, cache
+```
+
+Se o Redis cair, a loja continua funcionando: só o histórico recente e o cache param. Preço e
+estoque sempre vêm do MongoDB.
+
+## Funcionalidades exigidas
+
+| Exigência | Onde está |
+|---|---|
+| Login seguro do administrador (Supabase) | `/admin/login`. Sessão em cookie HttpOnly, proteção CSRF, limite de tentativas e logout. `/admin/produtos` exige admin ativo em `admin_profiles` |
+| Cadastro de produtos no MongoDB (nome, descrição, preço, imagem…) | Painel `/admin/produtos`. Inclui envio da foto do tênis, numerações com estoque e opções para **editar** e **excluir** |
+| Catálogo com os produtos do MongoDB | Home `/` e catálogo `/tenis`, com busca e filtros por marca, categoria, tamanho e ordem. Produto novo aparece na hora |
+| Redis: itens vistos recentemente | Seção "Vistos recentemente" na home (link **Recentes** no menu) e "Pesquisas recentes" ao clicar na busca |
+| Carrinho (adicionar, remover, total) | Botão do carrinho no cabeçalho: escolha de tamanho, quantidade, remoção e subtotal |
+| Botão Comprar → WhatsApp | "Pedir pelo WhatsApp" revalida preço e estoque no MongoDB e abre `wa.me` com a mensagem pronta, por exemplo: `Olá, gostaria de pedir: 2x Nike Dunk Low — tamanho BR 41 — R$ 1.599,80` … `Total: R$ 1.599,80` |
+
+Extras: página de produto com galeria e visualização 3D (Sketchfab) do Air Max 95, layout
+responsivo e testes automatizados.
+
+## Tecnologias
+
+- **Backend:** Python 3.13, FastAPI, Uvicorn, Pydantic, PyMongo (async), cliente REST do Upstash
+- **Frontend:** templates Jinja2, Tailwind CSS v4, JavaScript sem framework
+- **Bancos:** Supabase (PostgreSQL + Auth), MongoDB Atlas, Upstash Redis
+- **Testes:** pytest (backend e contrato OpenAPI) e Playwright (interface e acessibilidade)
+
+## Como executar
+
+### 1. Pré-requisitos
+
+- Python 3.13 e [uv](https://docs.astral.sh/uv/)
+- Node.js 20+ e pnpm 10, usados só para compilar o CSS e rodar os testes de interface
+- Contas gratuitas no Supabase, no MongoDB Atlas e no Upstash
+
+### 2. Configurar os bancos
+
+**Supabase (PostgreSQL + Auth)**
+1. Crie um projeto e execute no SQL Editor a migration
+   [`supabase/migrations/20261119105020_admin_profiles_rls.sql`](supabase/migrations/20261119105020_admin_profiles_rls.sql).
+   Ela cria `admin_profiles` e `store_settings`, com RLS e permissões mínimas.
+2. Em **Authentication → Users**, crie o usuário administrador.
+3. Promova esse usuário (troque pelo UUID dele):
+   ```sql
+   insert into public.admin_profiles (user_id, display_name, role, is_active)
+   values ('UUID-DO-USUARIO', 'Administrador', 'admin', true);
+   ```
+4. Configure o WhatsApp que recebe os pedidos (DDI + DDD + número, só dígitos):
+   ```sql
+   update public.store_settings set whatsapp_e164_digits = '5589999999999' where id = 1;
+   ```
+5. Em **Settings → API Keys**, copie a URL do projeto, a chave *publishable* e a chave *secret*.
+   A secret é usada só no backend.
+
+**MongoDB Atlas**
+1. Crie um cluster gratuito (M0), um banco cujo nome termine em `_test` (ex.: `neox_drop_test`)
+   e um usuário com acesso só a esse banco.
+2. Em **Network Access**, libere apenas o IP da sua máquina.
+3. Crie a coleção `products` com validação e os 6 índices definidos em
+   [`mongo/products_schema.json`](mongo/products_schema.json):
+   ```sh
+   APP_ENV=test TEST_CONNECTIONS_ENABLED=true uv run --locked python -m scripts.seed_products --initialize --verify
+   ```
+   Também é possível criar pelo mongosh com [`mongo/products_schema.mongodb.js`](mongo/products_schema.mongodb.js).
+4. Cadastre os produtos pelo painel admin. Os 9 tênis do catálogo apresentado estão em
+   [`mongo/catalogo-academico.json`](mongo/catalogo-academico.json).
+
+**Upstash Redis**
+1. Crie um banco Redis gratuito e copie a **REST URL** e o **token de leitura e escrita**.
+   Não há migration: as chaves são criadas pela aplicação.
+
+### 3. Variáveis de ambiente
+
+Copie [`.env.example`](.env.example) para `.env` e preencha:
+
+```dotenv
+APP_ENV=test
+TEST_CONNECTIONS_ENABLED=true
+ALLOWED_ORIGIN=http://127.0.0.1:8000
+COOKIE_SECRET=            # gere com: python -c "import secrets; print(secrets.token_urlsafe(48))"
+SUPABASE_URL=
+SUPABASE_KEY=             # chave publishable
+SUPABASE_SECRET_KEY=      # chave secret, só backend (lê o WhatsApp da loja)
+MONGODB_URI=              # mongodb+srv://… (com TLS)
+MONGODB_DATABASE=neox_drop_test
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+```
+
+O `.env` está no `.gitignore` e nunca deve ser enviado ao Git.
+
+### 4. Instalar e rodar
 
 ```sh
-cd /Users/dg/Documents/NeoxDrop
 uv sync --locked
 pnpm install --frozen-lockfile
 pnpm build
-uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 --no-proxy-headers
+uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1
 ```
 
-Abra **http://127.0.0.1:8000/**. Catálogo: `/tenis`; login: `/admin/login`;
-painel protegido: `/admin/produtos`. O carrinho é aberto pelo botão do cabeçalho.
-O .env local foi configurado com APP_ENV=test e TEST_CONNECTIONS_ENABLED=true;
-o .env.example e os padrões do código continuam com conexões desabilitadas.
-Só usar os projetos de TESTE já conferidos. Um worker até existir rate limit compartilhado.
-A main reúne backend validado e frontend corrigido `88b29c0`, preservando os históricos. Worktrees
-anteriores foram mantidas; a demonstração antiga :8001 foi encerrada. Não executar duas lojas.
+Abra http://127.0.0.1:8000. Painel admin: http://127.0.0.1:8000/admin/login.
+Para conferir as conexões sem alterar dados: `uv run --locked python -m scripts.check_connections`.
 
-## Estado real
-
-| Serviço | Papel | Situação |
-|---|---|---|
-| Supabase PostgreSQL/Auth | Identidade, perfil admin/RLS e contato WhatsApp privado | URL/Publishable configurados; admin real validado: login, painel, renovação, logout e RLS/revogação; segunda conta pendente |
-| MongoDB Atlas | Produtos, preço em centavos e estoque autoritativos | Cluster0, papel neox_drop_test@admin restrito ao banco neox_drop_test; products strict/error, seis índices adicionais; nove produtos acadêmicos ativos, cinco em destaque; QA inativo |
-| Upstash Redis | Até 5 recentes e 3 últimas pesquisas por visitante, TTL 7 dias; cache 300s, sem governar preço | Upstash real validado: gravação/leitura, ordem, cinco únicos, TTL e expiração; home/recentes comprovados com os três produtos cadastrados no Atlas |
-
-FastAPI principal :8000 utiliza Supabase, Atlas e Upstash reais no mesmo processo.
-Catálogo acadêmico cadastrado e ativo (preços e estoques fictícios):
-
-| Produto | Preço | Categoria | Estoque |
-|---|---:|---|---:|
-| Nike Air Max 95 Dark Army/Orange Blaze | R$ 899,90 | Street | 9 |
-| Nike Air Max 90 Infrared (fora dos destaques) | R$ 749,90 | Performance | 10 |
-| Adidas Samba OG Branco/Preto | R$ 599,90 | Classics | 10 |
-| New Balance 2002R Lilás/Cinza | R$ 849,90 | Street | 23 |
-| Nike Dunk Low Vermelho/Cinza | R$ 799,90 | Street | 23 |
-| New Balance 574 Cinza | R$ 699,90 | Classics | 23 |
-| adidas Gazelle Indoor Azul | R$ 649,90 | Classics | 23 |
-| Nike Cortez Branco/Vermelho/Azul | R$ 549,90 | Classics | 23 |
-| ASICS GEL-1130 Branco/Dourado/Prata | R$ 749,90 | Performance | 23 |
-
-[mongo/catalogo-academico.json](mongo/catalogo-academico.json) é a fonte aprovada do cadastro;
-O manifesto `docs/catalogo-definitivo.json.aprovados` corresponde aos nove cadastros reais.
-Todos foram cadastrados com autorização; não repetir INSERTs desses SKUs.
-`mongo/catalogo-adicional.pending.json` conserva os payloads históricos de Gazelle/Cortez/GEL-1130:
-apesar do nome do arquivo, os três já foram inseridos. Não executar seed/upsert para repeti-los.
-O registro `NEOX-QA-20261122-A01` permanece inativo e intocado. Não executar seed/upsert para
-repetir o cadastro. Home, três Coleções, filtros, detalhes, imagens/créditos, 3D do AM95, carrinho,
-WhatsApp e recentes foram validados no navegador contra os serviços reais. Após reiniciar,
-os três produtos mantiveram os mesmos IDs/dados e continuaram ativos/em destaque.
-
-O pedido de exemplo (AM95x1 + AM90x2 + Sambax1) totalizou R$ 2.999,60, revalidado no Atlas;
-link e mensagem WhatsApp conferidos sem abrir o link/enviar mensagem. Redis preservou ordem,
-deduplicação e TTL7dias dos recentes. Estoque não foi reservado/decrementado pelo checkout.
-O painel agora aceita créditos e fontes das imagens/modelo3D nos campos de attributes.
-
-Revisão final da interface: 185 testes backend aprovados/7 ignorados; 141 testes UI
-aprovados/5 ignorados (fixtures/dublês, separados da integração real). O percurso real está
-em `tests/e2e/live/delivery.spec.js`: navegação, foto/3D, produtos do Atlas, carrinho,
-checkout sem envio, recentes e login/logout administrativo. Executar somente com credenciais
-no ambiente privado e saída protegida; não habilita escrita de produtos. Celular foi emulado,
-não houve teste em aparelho físico. O arquivo de evidências registra os resultados e falhas.
-
-Pendência secundária: segunda conta ainda recebe invalid_credentials no Auth; a negação após
-login válido dessa conta não foi comprovada. Resta o vídeo 5–10min; o repositório público está em
-https://github.com/erickruannv/neox-drop. Health retorna ok com os três serviços disponíveis.
-Não recriar bancos nem reaplicar migrations já aprovadas.
-
-Ordem final autorizada: Dunk Low → AM95 Dark Army → Samba OG → Gazelle Indoor → Cortez.
-São cinco slides e nove produtos ativos no catálogo. O AM90 permanece ativo, disponível no
-catálogo/detalhe/carrinho, mas o loader da home o exclui de destaques e lançamentos. Se o
-visitante abrir o AM90, ele aparece em "Vistos recentemente": curadoria não filtra o histórico Redis.
-O banner Performance mostra o GEL-1130, agora cadastrado. New Balance e ASICS funcionam
-nos filtros. Campos comerciais dos seis produtos anteriores foram preservados; somente
-featured do Dunk foi adicionado conforme a autorização e o schema existente.
-Sketchfab fica identificado no bloco separado Demonstração3D do detalhe do AM95; não é
-um GLB nativo aprovado nem comprova conclusão do diferencial3D solicitado.
-
-O servidor lê `/Users/dg/Documents/NeoxDrop/.env` (main). A chave privada de contato foi
-transferida localmente do .env da worktree backend após conferir o mesmo projeto Supabase;
-nenhum valor foi registrado no Git. Edite o .env da pasta principal para configurar o servidor.
-A origem pública `https://sketchfab.com` foi incluída em MEDIA_ALLOWED_ORIGINS para o embed aprovado.
-REDIS_KEY_PREFIX="NEOX QA:" isola as chaves locais; vazio mantém as chaves padrão.
-Credenciais ficam apenas no .env privado, conforme [.env.example](.env.example). Não enviar
-senhas/chaves/URIs no chat, vídeo ou Git. Upstash Free/REST URL/token já configurados localmente.
-Checkout requer contato autorizado em store_settings e SUPABASE_SECRET_KEY só no backend;
-não há número inventado, pagamento, reserva ou envio automático de mensagem.
-
-## Testar
+## Testes
 
 ```sh
-uv run --locked pytest -q
-uv run --locked ruff check app scripts tests/{unit,contract,integration,real}
-pnpm test:ui --workers=2
+uv run --locked pytest -q --ignore=tests/real   # backend, regras de negócio e contrato OpenAPI
+pnpm test:ui                                     # interface (Playwright), sem acessar os bancos reais
 ```
 
-A suíte padrão e UI usam testes locais/dublês; não comprovam bancos. Testes de escrita externa
-exigem autorização ESPECÍFICA e RUN_REAL_INTEGRATION=1 no processo. Não executar enquanto
-perfil, contas e serviços estiverem incompletos. Com todos preparados/autorizados, o runner
-protegido `python -m scripts.run_real_e2e` inicia seu próprio servidor e omite erros brutos que
-possam conter credenciais. Não rodar Playwright real direto com senhas no ambiente.
-Testes negativos `NEOX_FASTAPI_URL=... pnpm exec playwright test` exigem instância separada
-com TEST_CONNECTIONS_ENABLED=false; não usar esses testes 503 contra o servidor real habilitado.
+Os testes em `tests/real` usam os bancos de verdade e só rodam com `RUN_REAL_INTEGRATION=1`.
 
-[Configuração detalhada existente](docs/CONFIGURAR-BANCOS-TESTE.md) ·
-[Evidências](docs/evidencias/backend-fase3.md) ·
-[Roteiro de vídeo 8min](docs/evidencias/roteiro-video.md) ·
-[Contratos](docs/contracts/openapi.json).
+## Estrutura
 
-Git: .env/configurações privadas/build ignorados; preservar frontend e laboratório 3D nas suas
-branches. Revisar segredos, acesso do professor ao repositório e link do vídeo antes da entrega.
-Repositório público: https://github.com/erickruannv/neox-drop (origin/main). O `.env` nunca é
-enviado. Não há deploy: a aplicação roda localmente. Pendências: gravar o vídeo e, opcionalmente,
-concluir o teste da segunda conta.
+```
+app/
+  api/          rotas (páginas, catálogo, admin, checkout, recentes)
+  services/     regras: catálogo/MongoDB, admin/Supabase, recentes/Redis, carrinho/WhatsApp
+  schemas/      modelos Pydantic (validação de entrada e saída)
+  templates/    páginas Jinja2
+  static/       CSS, JS e imagens
+supabase/       migration SQL (tabelas, RLS e permissões)
+mongo/          validação e índices da coleção products, catálogo acadêmico
+docs/contracts/ contrato da API (openapi.json)
+tests/          pytest (unit, integration, contract, real) e Playwright (e2e)
+```
 
-Para o vídeo, o roteiro existente cobre 8 minutos. Uma nova demonstração de escrita CRUD exige
-autorização de um único registro QA antes de gravar; não editar os três produtos da vitrine.
-O 503 isolado de Performance não teve causa conclusiva; 40 consultas posteriores à página/API
-e oito consultas diretas ao Atlas passaram sem recorrência observada. Não é garantia de
-disponibilidade futura. Celular físico e segunda conta permanecem pendências
-de validação, sem impedir a publicação do código com essas limitações declaradas.
+## Segurança e limites
+
+- Não existe cadastro público de administrador: o acesso depende de uma linha ativa em `admin_profiles`.
+- Senhas e tokens ficam só no Supabase e em cookies HttpOnly. Chaves ficam só no `.env` do servidor.
+- O checkout não processa pagamento, não reserva estoque e não envia mensagem sozinho: ele gera o
+  link do WhatsApp com o pedido e o cliente confirma o envio.
+- Preços e estoques são fictícios, para fins acadêmicos. As fotos têm crédito e licença na página de cada produto.
+
+Histórico detalhado do desenvolvimento e das validações: [docs/historico-desenvolvimento.md](docs/historico-desenvolvimento.md).
